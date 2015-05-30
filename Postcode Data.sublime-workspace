@@ -1,0 +1,688 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"padd",
+				"padding-left"
+			],
+			[
+				"s",
+				"save"
+			],
+			[
+				"fu",
+				"function"
+			],
+			[
+				"font",
+				"font-size"
+			],
+			[
+				"text",
+				"text-decoration"
+			],
+			[
+				"parse",
+				"parseFloat"
+			],
+			[
+				"back",
+				"background-color"
+			],
+			[
+				"de",
+				"deepRuleId"
+			],
+			[
+				"tru",
+				"truthTable"
+			],
+			[
+				"bac",
+				"background-color"
+			],
+			[
+				"re",
+				"remove"
+			],
+			[
+				"chan",
+				"changeList"
+			],
+			[
+				"cha",
+				"changeList"
+			],
+			[
+				"pr",
+				"privateMethod"
+			],
+			[
+				"pro",
+				"prototype"
+			],
+			[
+				"get",
+				"getPositionByIndex"
+			],
+			[
+				"rul",
+				"rulestable"
+			],
+			[
+				"seelcted",
+				"selectedvalue"
+			],
+			[
+				"compo",
+				"componentTemplate"
+			],
+			[
+				"ta",
+				"target	Attr"
+			],
+			[
+				"margin",
+				"margin-top"
+			],
+			[
+				"fon",
+				"font-size"
+			],
+			[
+				"min-",
+				"min-height"
+			],
+			[
+				"calc",
+				"calcData"
+			],
+			[
+				"message",
+				"messageBody"
+			],
+			[
+				"data-col",
+				"data-coldata"
+			],
+			[
+				"tar",
+				"targetControl"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "database/migrations/2015_05_30_132629_add_fks_to_postcodes.php",
+			"settings":
+			{
+				"buffer_size": 722,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "app/Http/routes.php",
+			"settings":
+			{
+				"buffer_size": 585,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"selected_items":
+		[
+			[
+				"in",
+				"Package Control: Install Package"
+			],
+			[
+				"jscs",
+				"JSCS Formatter: Format this file"
+			],
+			[
+				"Package Control: ins",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"packa",
+				"Package Control: Install Package"
+			],
+			[
+				"package",
+				"Package Control: Install Package"
+			],
+			[
+				"pack",
+				"Package Control: List Packages"
+			],
+			[
+				"hex",
+				"Hex Viewer: Toggle Hex View"
+			],
+			[
+				"h",
+				"Hex Viewer: Toggle Hex View"
+			],
+			[
+				"",
+				"Hex Viewer: Toggle Hex View"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 528.0
+	},
+	"console":
+	{
+		"height": 146.0,
+		"history":
+		[
+			"php artisan tinker",
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/F/xampp/la/database/migrations/2015_05_30_110557_create_postcodes_table.php",
+		"/F/xampp/la/config/app.php",
+		"/F/xampp/la/composer.json",
+		"/F/Data/Mark/Dropbox/Laravel/testApp/config/app.php",
+		"/F/xampp/la/.gitignore",
+		"/F/Data/Mark/Dropbox/Laravel/testApp/composer.json",
+		"/F/Data/Mark/Dropbox/Laravel/testApp/.gitignore",
+		"/F/xampp/la/package.json",
+		"/F/xampp/la/database/migrations/2015_05_30_124655_create_wards_table.php",
+		"/F/Postcode Data/Data/postcodes.csv",
+		"/F/xampp/la/database/migrations/2015_05_30_124647_create_districts_table.php",
+		"/F/xampp/la/app/Postcode.php",
+		"/F/Data/Mark/Dropbox/Software/Navicat_11.1.9/Navicat 11.1.9 EN Portable/%Personal%/Navicat/MySQL/servers/localhost/postcode/Import Postcodes From CSV.npi",
+		"/F/Postcode Data/combineCSVFiles.bat",
+		"/F/Data/Mark/Dropbox/Laravel/testApp/database/migrations/2015_04_07_151931_create_contacts_table.php",
+		"/F/xampp/la/.env",
+		"/F/Data/Mark/Dropbox/formbuilder/examples/ReFRS/ReFRS.htm",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Customers/Birmingham/Adoption Site/Copy/LIVE/Forms/contact-form.htm",
+		"/F/Data/Mark/Dropbox/formbuilder/js/modes/bootstrap3.js",
+		"/F/Data/Mark/Dropbox/formbuilder/js/runtime.visibility.js",
+		"/F/Data/Mark/Dropbox/formbuilder/js/modes/mylife.js",
+		"/F/Data/Mark/Dropbox/formbuilder/js/app.js",
+		"/F/Data/Mark/Dropbox/formbuilder/js/init.js",
+		"/F/Data/Mark/Dropbox/formbuilder/js/libs/parsley.js",
+		"/F/Data/Mark/Dropbox/formbuilder/js/runtime.init.js",
+		"/F/Data/Mark/Dropbox/formbuilder/.jscsrc",
+		"/F/xampp/htdocs/Calc2/index.php",
+		"/F/Data/Mark/Dropbox/Documents/Websites/Scouts website/custom.css",
+		"/F/Data/Mark/Dropbox/formbuilder/dist/Care-Cap.htm",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Customers/Birmingham/Adoption Site/Copy/LIVE/Forms/contact-form-NEW.htm",
+		"/F/Data/Mark/Dropbox/Documents/Websites/scouts website/content-page.php",
+		"/G/pst/copypst.au3",
+		"/G/pst/test.txt",
+		"/C/Users/Mark/Desktop/fairhurs_2013-04-07.sql",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Customers/Birmingham/Adoption Site/Copy/LIVE/Forms/contact-form-copy-from-ektron-2014-03-28.htm",
+		"/F/Data/Mark/Dropbox/formbuilder/js/integration/EmailAPI.js",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Customers/Birmingham/Adoption Site/Copy/LIVE/Forms/thankyou-for-enquiry.htm",
+		"/C/Users/Mark/Desktop/videos-responsive.htm",
+		"/F/Data/Mark/Dropbox/Documents/Websites/Scouts website/functions.php",
+		"/C/Users/Mark/Desktop/functions.php",
+		"/F/Data/Mark/Dropbox/Documents/Cubs/cubs-current.htm",
+		"/F/Data/Mark/Dropbox/Documents/Websites/scouts website/custom.css",
+		"/C/Users/Mark/Desktop/php-fpm.conf",
+		"/C/Users/Mark/Desktop/wordpress",
+		"/C/Users/Mark/.ssh/id_rsa",
+		"/C/Users/Mark/Desktop/nginx.conf",
+		"/C/Users/Mark/.ssh/id_rsa.pub",
+		"/F/Data/Mark/Dropbox/formbuilder/js/Shelter.Custom.js",
+		"/C/Users/Mark/Desktop/wp-config.php",
+		"/F/xampp/apache/conf/httpd.conf",
+		"/C/Users/Mark/Downloads/startbootstrap-grayscale-1.0.4/index.html",
+		"/C/Users/Mark/Desktop/getbrma.php",
+		"/F/Data/Mark/Dropbox/formbuilder/js/preview.js",
+		"/F/Data/Mark/Dropbox/formbuilder/js/runtime.dates.js",
+		"/F/Data/Mark/Dropbox/formbuilder/Form Builder.sublime-project",
+		"/F/Data/Mark/Dropbox/formbuilder/js/runtime.js",
+		"/C/Users/Mark/AppData/Roaming/Sublime Text 3/Packages/User/SublimeLinter.sublime-settings",
+		"/C/Users/Mark/AppData/Roaming/Sublime Text 3/Packages/SublimeLinter/SublimeLinter.sublime-settings",
+		"/G/pst/sync.ps1",
+		"/G/pst/sync-pst.bat",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Customers/Birmingham/Adoption Site/Copy/LIVE/Home content/home-contact-us.htm",
+		"/F/Data/Mark/Dropbox/formbuilder/examples/BCC/PROJ2/UAT/General-Enquiry-PROJ2.htm",
+		"/F/Data/Mark/Dropbox/formbuilder/templates/handlebars/bootstrap3/multipleradios.html",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Techincal/Site CSS and JS/Sales/MASCT-Team Enquiry Form.htm",
+		"/C/Users/Mark/Downloads/MASCT-Team Enquiry Form.htm",
+		"/C/Users/Mark/Desktop/questions.html",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Releases/3.2/Sprints/Interim Integration/Code/getCodes.xsl",
+		"/C/Users/Mark/Desktop/New folder/cf_questionnaires.xsd",
+		"/C/Users/Mark/Desktop/New folder/cf_common_types.xsd",
+		"/C/Users/Mark/Desktop/New folder/cf_message_types.xsd",
+		"/C/Users/Mark/Desktop/New folder/cf_message_header_response.xsd",
+		"/C/Users/Mark/Desktop/cf_message_questionnaires.xsd",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/server-tesp.php",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Customers/Birmingham/Adoption Site/Copy/LIVE/Home content/home-intro.htm",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Customers/Birmingham/Adoption Site/Copy/TEST/Home content/home-intro.htm",
+		"/F/Data/Mark/Dropbox/OLM/Products/MyLife/Techincal/Site CSS and JS/sales.js.txt",
+		"/F/Data/Mark/Dropbox/formbuilder/examples/BCC/PROJ2/UAT/BCC-AF-Enquiry-PROJ2.htm",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/partials/new-contact-layout.html",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/css/styles.css",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/partials/contact-layout.html",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/partials/contacts-layout.html",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/app/Http/Requests/ContactRequest.php",
+		"/C/Users/Mark/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/Users/Mark/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/app/filters.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/app/Contact.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/phpunit/phpunit/tests/TextUI/filter-dataprovider-by-string.phpt",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/phpunit/phpunit/tests/TextUI/filter-class.phpt",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/phpunit/php-code-coverage/src/CodeCoverage/Filter.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/symfony/http-foundation/Symfony/Component/HttpFoundation/Tests/File/FileTest.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/config/filesystems.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/phpunit/phpunit/tests/TextUI/failure-isolation.phpt",
+		"/C/Users/Mark/Downloads/google125a14d5c3966ecf.html",
+		"/F/Data/Mark/Dropbox/formbuilder/js/integration/Calculon2.js",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/app/Http/routes.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/templates/contact-layout.html",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/templates/contacts-layout.html",
+		"/F/public/desktop_run.bat",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/test.html",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/index.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/resources/views/index.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/js/directives/contacts-layout.js",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/js/services/contactService.js",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/resources/views/app.blade.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/resources/views/home.blade.php",
+		"/F/Data/Mark/Dropbox/Documents/Cubs/Website/Programme.htm",
+		"/C/Users/Mark/Desktop/Neston Cubs Spring Programme 2015.htm",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/js/directives/header.js",
+		"/F/Data/Mark/Dropbox/Projects/angular-os/index.htm",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/app/Http/Controllers/HomeController.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/index.htm",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/resources/views/welcome.blade.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/css/app.css",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/gulpfile.js",
+		"/C/Users/Mark/Desktop/address.sql",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/app/Http/Requests/CreateContactRequest.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/database/migrations/2015_04_07_151931_create_contacts_table.php",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/database/migrations/2015_04_05_164005_create_table_contacts.php",
+		"/F/mongo/start_mongo.bat",
+		"/F/mongo/shutdown_mongo.bat",
+		"/F/mongo/shutdown.js",
+		"/C/Users/Mark/Desktop/shutdown_mongo.bat",
+		"/F/mongo/bin/mongo.cfg",
+		"/F/mongo/mongod.cfg",
+		"/C/Users/Mark/mongo.bat",
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/phpinfo.php",
+		"/F/xampp/php/php.ini",
+		"//"
+	],
+	"find":
+	{
+		"height": 28.0
+	},
+	"find_in_files":
+	{
+		"height": 90.0,
+		"where_history":
+		[
+			"",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\js",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\js",
+			"C:\\Users\\Mark\\Desktop\\formbuilder-0.5.5-full-source\\formbuilder\\js",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\templates",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\js",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\templates",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\js",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\templates",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\js",
+			"FB.d(",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\js",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\templates",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder\\js",
+			"F:\\Data\\Mark\\Dropbox\\formbuilder"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"10",
+			"12",
+			"F:/xampp/htdocs",
+			"xampp/htdocs",
+			"\"",
+			"parsley(",
+			"span",
+			"...",
+			"ng-include src=\"",
+			"client_max_body_size",
+			"80",
+			"'",
+			"<br/>",
+			"\"",
+			"span",
+			"required/>",
+			"name",
+			"data",
+			"contactData",
+			": ",
+			",",
+			"fillable",
+			"' =>",
+			"),",
+			"Input::get",
+			"todo",
+			"ng-click=\"init()\" ",
+			"postcode",
+			"Postcode",
+			"postcode",
+			"save",
+			"surname",
+			"text",
+			"author",
+			"saving",
+			"$locationProvider",
+			"$routeParams",
+			"phoneId",
+			"contactsControllers",
+			"phonecat",
+			"</p>\n      ",
+			"\n        <p>",
+			"</strong></p>\n      ",
+			"\n        <p><strong>",
+			" width=56 nowrap style='width:42.3pt;border:solid windowtext 1.0pt;\n   padding:0cm 5.4pt 0cm 5.4pt;height:15.0pt'",
+			"osApp",
+			"ContactsController",
+			"bower_components/angular",
+			"'n', ",
+			"address",
+			"CreateContactRequest",
+			")->nullable();",
+			")->nullable(,",
+			");",
+			"$table->string(",
+			"Extensions",
+			"extensions",
+			"exten",
+			"F:/xampp/mysql/data",
+			"443",
+			"\\",
+			"F:/xampp/htdocs",
+			"move",
+			"$('#' + id)",
+			"_data",
+			"50",
+			"header#masthead .hgroup .support-text",
+			".headline, .widget_headline-widget h1",
+			"body",
+			"span",
+			"Birmingham",
+			"-2",
+			"col-sm-12",
+			"151,187,205",
+			"55,153,0",
+			"255,153,0",
+			"form",
+			"div",
+			"DateHelper",
+			"angular-touch",
+			"$scope.defaultPropertyValue",
+			"defaultPropertyValue",
+			"110000",
+			"0,0,0,0",
+			"0,0,0",
+			"multipleradiosinline1",
+			"myBar",
+			"Years Spinner",
+			"income",
+			"Income",
+			"income",
+			"Income",
+			"property-value",
+			"Property Value",
+			"asset",
+			"exampleInputEmail1",
+			"220",
+			"data2",
+			"data1",
+			": ",
+			"Date.prototype.",
+			"data",
+			"\").",
+			"list",
+			"    <",
+			"capClient",
+			"self.options",
+			":",
+			",",
+			"var ",
+			"\"apply\":",
+			"\"type\":",
+			"\"value\":",
+			"\"price\":",
+			"\"location\":",
+			"\"Residential",
+			"\"careType\":",
+			"\"homeType\":",
+			"osApp",
+			"osController",
+			"os",
+			"osController",
+			"gridProjection",
+			"lng",
+			"/uploadedImages/BirminghamAdoptionAndFostering/Birmingham/Content/Homepage/home-truly-rewarding.jpg",
+			"BirminghamAdoptionAndFostering",
+			"/uploadedImages/AFDemo/Birmingham/Content/Homepage/home-intro.jpg",
+			"/uploadedImages/BirminghamAdoptionAndFostering/Birmingham/Content/Homepage/home-its-not-easy.jpg"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"app",
+			"careApp",
+			"careController",
+			"elevation-chart",
+			"margin-top-15",
+			"FB.d(",
+			")",
+			"(",
+			"\"",
+			"{{#if fields.data-vis.selectedvalue}}",
+			"{{#if fields.data-vis.selectedvalue}} data-vis=\"{{fields.data-vis.selectedvalue}}\"{{/if}}",
+			"{{fields.data-vis.selectedvalue}}",
+			"\\\"",
+			"\"",
+			"\\\"",
+			"\""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "database/migrations/2015_05_30_132629_add_fks_to_postcodes.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 722,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								326,
+								326
+							]
+						],
+						"settings":
+						{
+							"auto_complete": false,
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "app/Http/routes.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 585,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 28.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.hex_viewer_inspector":
+	{
+		"height": 130.0
+	},
+	"project": "Postcode Data.sublime-project",
+	"replace":
+	{
+		"height": 52.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"test",
+				"tests\\TestCase.php"
+			],
+			[
+				"inde",
+				"public\\index.php"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+			[
+				"",
+				"F:\\Data\\Mark\\Dropbox\\xampp-content\\web-content\\testApp\\Laravel Test App.sublime-project"
+			]
+		],
+		"width": 498.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 438.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
