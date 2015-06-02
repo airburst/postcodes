@@ -11,11 +11,11 @@
 |
 */
 
-Route::get('/', 'WelcomeController@index');
+Route::get('/', function () {
+    return view('index');
+});
 
-Route::get('home', 'HomeController@index');
+// Search API
+Route::get('search', 'PostcodeController@index');
+Route::get('search/{postcode}', 'PostcodeController@show');
 
-Route::controllers([
-	'auth' => 'Auth\AuthController',
-	'password' => 'Auth\PasswordController',
-]);
