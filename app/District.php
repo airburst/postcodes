@@ -4,9 +4,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class District extends Model {
 
-	public function postcode()
+	public function postcodes()
     {
-        return $this->belongsTo('App\Postcode');
+        return $this->hasMany('App\Postcode', 'dc', 'code');
     }
 
 }

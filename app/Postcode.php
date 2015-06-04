@@ -6,12 +6,12 @@ class Postcode extends Model {
 
 	public function district()
     {
-        return $this->hasOne('App\District', 'code');
+        return $this->belongsTo('App\District');
     }
 
-    public function ward()
-    {
-        return $this->hasOne('App\Ward', 'code');
-    }
+    // public function ward()
+    // {
+    //     return $this->belongsTo('App\Ward');
+    // }
 
 }

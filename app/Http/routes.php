@@ -18,4 +18,9 @@ Route::get('/', function () {
 // Search API
 Route::get('search', 'PostcodeController@index');
 Route::get('search/{postcode}', 'PostcodeController@show');
+Route::get('search/{postcode}/district', 'PostcodeController@district');
+Route::get('search/{postcode}/ward', 'PostcodeController@ward');
+Route::get('search/district/{districtname}', 'PostcodeController@postcodesInDistrict');
 
+// Map API
+Route::get('map/{postcode}', 'PostcodeController@map');

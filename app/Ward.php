@@ -4,9 +4,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ward extends Model {
 
-	public function postcode()
-    {
-        return $this->belongsTo('App\Postcode');
-    }
+	// public function postcodes()
+ //    {
+ //        return $this->hasMany('App\Postcode', 'wc', 'code');
+ //    }
 
 }

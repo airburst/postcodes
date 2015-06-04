@@ -7,7 +7,7 @@ use Input;
 
 use Illuminate\Http\Request;
 
-//use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PostcodeController extends Controller {
 
@@ -56,8 +56,54 @@ class PostcodeController extends Controller {
 		// Fetch the record with matching postcode
 		$result = Postcode::where('pc', '=', $postcode)->get();
 		return $result;
-		///TODO: merge with district and ward name data
 	}
 
+	public function district($postcode)
+	{
+		// Fetch the district for the matching postcode	
+		$district = \DB::table('districts')->
+			leftJoin('postcodes', 'districts.code', '=', 'postcodes.dc')->
+			where('postcodes.pc', '=', $postcode)->
+			get(['districts.name']);
+
+		return $district;
+	}
+
+	public function ward($postcode)
+	{
+		// Fetch the ward for the matching postcode	
+		$ward = \DB::table('wards')->
+			leftJoin('postcodes', 'wards.code', '=', 'postcodes.wc')->
+			where('postcodes.pc', '=', $postcode)->
+			get(['wards.name']);
+
+		return $ward;
+	}
+
+
+	public function postcodesInDistrict($districtname)
+	{
+		// Fetch the postcodes within the matching district	
+		$postcodes = \DB::table('districts')->
+			leftJoin('postcodes', 'districts.code', '=', 'postcodes.dc')->
+			where('districts.name', 'LIKE', '%'.$districtname.'%')->
+			get(['postcodes.pc']);
+
+		return $postcodes;
+	}
+
+	/**
+	 * Display the specified resource.
+	 *
+	 * @param  int  $id
+	 * @return Response
+	 */
+	public function map($postcode)
+	{
+		// Fetch the record with matching postcode
+		$result = Postcode::where('pc', '=', $postcode)->get();
+		return $result;
+		///TODO: return a view with a map that can use the northing and easting
+	}
 }
 
