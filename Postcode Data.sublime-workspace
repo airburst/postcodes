@@ -130,6 +130,30 @@
 				"buffer_size": 2593,
 				"line_ending": "Unix"
 			}
+		},
+		{
+			"file": "resources/views/app.blade.php",
+			"settings":
+			{
+				"buffer_size": 1107,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "resources/assets/js/app.js",
+			"settings":
+			{
+				"buffer_size": 1325,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "gulpfile.js",
+			"settings":
+			{
+				"buffer_size": 658,
+				"line_ending": "Unix"
+			}
 		}
 	],
 	"build_system": "",
@@ -205,12 +229,36 @@
 	},
 	"file_history":
 	[
+		"/F/xampp/la/gulpfile.js",
+		"/F/xampp/la/public/css/all.css",
+		"/F/xampp/la/public/css/styles.css",
+		"/F/xampp/la/resources/assets/less/app.less",
+		"/F/xampp/la/public/css/app.css.bak",
+		"/F/xampp/la/public/css/app.css",
+		"/F/xampp/la/resources/js/app.js",
+		"/F/xampp/la/resources/js/lib/vue-resource.min.js",
+		"/F/Data/Mark/Dropbox/Code/nginx/laravel",
+		"/C/Users/Mark/Desktop/districts.sql",
+		"/C/Users/Mark/Desktop/wards.sql",
+		"/C/Users/Mark/Desktop/postcodes-split/SQLDumpSplitterResult/all_1.sql",
+		"/C/Users/Mark/Desktop/postcodes-split/all.sql",
+		"/C/Users/Mark/Desktop/postcodes-split/SQLDumpSplitterResult/postcodes_10.sql",
+		"/C/Users/Mark/Desktop/postcodes-split/SQLDumpSplitterResult/postcodes_2.sql",
+		"/C/Users/Mark/Desktop/postcodes-split/SQLDumpSplitterResult/postcodes_1.sql",
+		"/C/Users/Mark/Desktop/postcodes-split/SQLDumpSplitterResult/postcodes_79.sql",
+		"/C/Users/Mark/Desktop/postcodes-split/SQLDumpSplitterResult/postcodes_DataStructure.sql",
+		"/C/Users/Mark/Desktop/postcodes.sql",
+		"/C/Users/Mark/Desktop/wordpress",
+		"/C/Users/Mark/Desktop/laravel",
+		"/C/Users/Mark/Desktop/.env",
+		"/C/Users/Mark/Desktop/postcode.sql",
+		"/C/Users/Mark/Desktop/wordpress.save",
+		"/C/Users/Mark/Desktop/default",
 		"/F/xampp/la/app/Http/routes.php",
 		"/F/xampp/la/app/Postcode.php",
 		"/F/xampp/la/app/District.php",
 		"/F/xampp/la/app/Ward.php",
 		"/F/xampp/la/resources/views/index.blade.php",
-		"/F/xampp/la/public/css/styles.css",
 		"/F/xampp/la/app/Http/Controllers/PostcodeController.php",
 		"/F/xampp/la/database/migrations/2015_05_30_132629_add_fks_to_postcodes.php",
 		"/F/xampp/la/resources/views/app.blade.php",
@@ -262,7 +310,6 @@
 		"/F/Data/Mark/Dropbox/Documents/Cubs/cubs-current.htm",
 		"/F/Data/Mark/Dropbox/Documents/Websites/scouts website/custom.css",
 		"/C/Users/Mark/Desktop/php-fpm.conf",
-		"/C/Users/Mark/Desktop/wordpress",
 		"/C/Users/Mark/.ssh/id_rsa",
 		"/C/Users/Mark/Desktop/nginx.conf",
 		"/C/Users/Mark/.ssh/id_rsa.pub",
@@ -309,30 +356,7 @@
 		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/phpunit/phpunit/tests/TextUI/filter-class.phpt",
 		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/phpunit/php-code-coverage/src/CodeCoverage/Filter.php",
 		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/symfony/http-foundation/Symfony/Component/HttpFoundation/Tests/File/FileTest.php",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/config/filesystems.php",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/vendor/phpunit/phpunit/tests/TextUI/failure-isolation.phpt",
-		"/C/Users/Mark/Downloads/google125a14d5c3966ecf.html",
-		"/F/Data/Mark/Dropbox/formbuilder/js/integration/Calculon2.js",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/app/Http/routes.php",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/templates/contact-layout.html",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/templates/contacts-layout.html",
-		"/F/public/desktop_run.bat",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/test.html",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/index.php",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/resources/views/index.php",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/js/directives/contacts-layout.js",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/js/services/contactService.js",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/resources/views/app.blade.php",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/resources/views/home.blade.php",
-		"/F/Data/Mark/Dropbox/Documents/Cubs/Website/Programme.htm",
-		"/C/Users/Mark/Desktop/Neston Cubs Spring Programme 2015.htm",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/js/directives/header.js",
-		"/F/Data/Mark/Dropbox/Projects/angular-os/index.htm",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/app/Http/Controllers/HomeController.php",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/index.htm",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/resources/views/welcome.blade.php",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/public/css/app.css",
-		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/gulpfile.js"
+		"/F/Data/Mark/Dropbox/xampp-content/web-content/testApp/config/filesystems.php"
 	],
 	"find":
 	{
@@ -367,6 +391,13 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"postcode.length",
+			"            \n",
+			"443",
+			"80",
+			"wordpress",
+			"laravel",
+			"example.com",
 			"ward",
 			"wards",
 			"leftJoin",
@@ -487,14 +518,7 @@
 			":",
 			",",
 			"var ",
-			"\"apply\":",
-			"\"type\":",
-			"\"value\":",
-			"\"price\":",
-			"\"location\":",
-			"\"Residential",
-			"\"careType\":",
-			"\"homeType\":"
+			"\"apply\":"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -528,7 +552,7 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -544,8 +568,8 @@
 						"selection":
 						[
 							[
-								2586,
-								2586
+								718,
+								718
 							]
 						],
 						"settings":
@@ -558,7 +582,95 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "resources/views/app.blade.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1107,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								828,
+								828
+							]
+						],
+						"settings":
+						{
+							"auto_complete": false,
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "resources/assets/js/app.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1325,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1303,
+								1303
+							]
+						],
+						"settings":
+						{
+							"auto_complete": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 83.0,
+						"zoom_level": 1.0
+					},
 					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "gulpfile.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 658,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								623,
+								623
+							]
+						],
+						"settings":
+						{
+							"auto_complete": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				}
 			]
@@ -652,7 +764,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 438.0,
+	"side_bar_width": 304.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{

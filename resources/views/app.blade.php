@@ -5,25 +5,25 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Local Government Searches</title>
-
-    <link href="{{ asset('/css/app.css') }}" rel="stylesheet">
-    <link href="{{ asset('/css/styles.css') }}" rel="stylesheet">
-
-	<!-- Fonts -->
-	<link href='//fonts.googleapis.com/css?family=Roboto:400,300' rel='stylesheet' type='text/css'>
-
-	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-	<!--[if lt IE 9]>
-		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	<![endif]-->
+    <link href="{{ elixir("css/all.css") }}" rel="stylesheet">
 </head>
 <body>
-	@yield('content')
+	<div class="container large-margin-top" id="postcodeSearch">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <form class="form" role="form">
+                    <div class="input-group">
+                        <input v-model="postcode" class="form-control" id="postcode" name="postcode" type="text" placeholder="Enter a postcode"/>
+                        <span class="input-group-btn">
+                            <button v-on="click: getPostcode" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 	<!-- Scripts -->
-	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	<script src="js/bundle.js"></script>
 </body>
 </html>
