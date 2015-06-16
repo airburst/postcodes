@@ -15,7 +15,6 @@ class AddFksToPostcodes extends Migration {
 		//  Add Foreign Keys to Postcodes table
 		Schema::table('postcodes', function(Blueprint $table)
 		{
-			
 			$table->foreign('dc')->references('code')->on('districts');
 			$table->foreign('wc')->references('code')->on('wards');
 		});

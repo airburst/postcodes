@@ -92,6 +92,24 @@ class PostcodeController extends Controller {
 		return $postcodes;
 	}
 
+	public function brma($postcode)
+	{
+		// Fetch the postcodes within the matching district	
+		$brmas = \DB::table('lha_rates')->
+			leftJoin('brmas', 'lha_rates.code', '=', 'brmas.code')->
+			where('brmas.postcode', '=', $postcode)->
+			get([
+				'brmas.name',
+				'lha_rates.room',
+				'lha_rates.1bed',
+				'lha_rates.2bed',
+				'lha_rates.3bed',
+				'lha_rates.4bed'
+			]);
+
+		return $brmas;
+	}
+
 	/**
 	 * Display the specified resource.
 	 *

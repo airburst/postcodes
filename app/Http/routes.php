@@ -22,5 +22,8 @@ Route::get('search/{postcode}/district', 'PostcodeController@district');
 Route::get('search/{postcode}/ward', 'PostcodeController@ward');
 Route::get('search/district/{districtname}', 'PostcodeController@postcodesInDistrict');
 
+// BRMA
+Route::get('brma/{postcode}', 'PostcodeController@brma');
+
 // Map API
 Route::get('map/{postcode}', 'PostcodeController@map');
