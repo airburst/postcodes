@@ -5,3 +5,7 @@ body {
 .large-margin-top {
   margin-top: 10em;
 }
+
+.debug {
+    margin-top: 2em;
+}

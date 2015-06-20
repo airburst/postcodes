@@ -9,6 +9,8 @@
 </head>
 <body>
 	<div class="container large-margin-top" id="postcodeSearch">
+
+        <!-- Search Box -->
         <div class="row">
             <div class="col-md-4 col-md-offset-4">
                 <form class="form" role="form">
@@ -20,10 +22,48 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </div><!-- End Search Box -->
+
+        <!-- Results Box -->
+        <div v-show="postcodeDetails" class="debug">
+            <h2>Coordinates</h2>
+            <div v-repeat="postcodeDetails">
+                <p>Postcode: @{{ pc }}</p>
+                <p>Northing: @{{ no }}</p>
+                <p>Easting:  @{{ ea }}</p>
+            </div>
+        </div><!-- Results Box -->
+
+        <!-- Results Box -->
+        <div v-show="brmaDetails" class="debug">
+            <h2>LHA Rates for @{{ postcode | uppercase}}</h2>
+
+            <table class="table table-bordered table-striped">
+                <tr>
+                    <th>BRMA Name</th>
+                    <th>Room</th>
+                    <th>1 Bed</th>
+                    <th>2 Beds</th>
+                    <th>3 Beds</th>
+                    <th>4 Beds</th>
+                </tr>
+                <tr v-repeat="brmaDetails">
+                    <td>@{{ name }}</td>
+                    <td>&pound; @{{ room }}</td>
+                    <td>&pound; @{{ one }}</td>
+                    <td>&pound; @{{ two }}</td>
+                    <td>&pound; @{{ three }}</td>
+                    <td>&pound; @{{ four }}</td>
+                </tr>
+            </table>
+        </div><!-- Results Box -->
+
+        <!-- <pre class="debug">
+            @{{ $data | json }}
+        </pre> -->
     </div>
 
 	<!-- Scripts -->
-	<script src="js/bundle.js"></script>
+	<script src="/js/bundle.js"></script>
 </body>
 </html>

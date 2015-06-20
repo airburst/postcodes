@@ -16,11 +16,11 @@ Route::get('/', function () {
 });
 
 // Search API
-Route::get('search', 'PostcodeController@index');
-Route::get('search/{postcode}', 'PostcodeController@show');
-Route::get('search/{postcode}/district', 'PostcodeController@district');
-Route::get('search/{postcode}/ward', 'PostcodeController@ward');
-Route::get('search/district/{districtname}', 'PostcodeController@postcodesInDistrict');
+Route::get('postcode', 'PostcodeController@index');
+Route::get('postcode/{postcode}', 'PostcodeController@show');
+Route::get('postcode/{postcode}/district', 'PostcodeController@district');
+Route::get('postcode/{postcode}/ward', 'PostcodeController@ward');
+Route::get('postcode/district/{districtname}', 'PostcodeController@postcodesInDistrict');
 
 // BRMA
 Route::get('brma/{postcode}', 'PostcodeController@brma');

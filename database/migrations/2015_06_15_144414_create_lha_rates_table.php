@@ -17,11 +17,13 @@ class CreateLhaRatesTable extends Migration {
 			$table->increments('id');
 			$table->integer('code')->unsigned();
 			$table->string('name');
+			$table->integer('northing')->unsigned();
+		    $table->integer('easting')->unsigned();
 			$table->decimal('room', 10, 2);
-			$table->decimal('1bed', 10, 2);
-			$table->decimal('2bed', 10, 2);
-			$table->decimal('3bed', 10, 2);
-			$table->decimal('4bed', 10, 2);
+			$table->decimal('one', 10, 2);
+			$table->decimal('two', 10, 2);
+			$table->decimal('three', 10, 2);
+			$table->decimal('four', 10, 2);
 			$table->timestamps();
 		});
 	}

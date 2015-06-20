@@ -1,7 +1,10 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var Vue = require('vue');
+var Vue = require('vue'),
+    vueResource = require('vue-resource');
+
+Vue.use(vueResource);
 
 new Vue({
 
@@ -76,15 +79,707 @@ new Vue({
             // Set the correct number of spaces in postcode for database
             this.postcode = this.parsePostcode(this.postcode);
 
-            console.log(this.brmaPostcode(this.postcode));
-
             // Make the API call
+            this.$http.get('/postcode/' + this.postcode, function (postcode) {
+                this.$set('postcodeDetails', postcode);
+            }).error(function (data, status, request) {
+                // handle error
+                console.log(data);
+            });
+
+            // BRMA API call
+            this.$http.get('/brma/' + this.postcode, function (brma) {
+                this.$set('brmaDetails', brma);
+            }).error(function (data, status, request) {
+                // handle error
+                console.log(data);
+            });
         }
 
     }
 });
 
-},{"vue":62}],2:[function(require,module,exports){
+},{"vue":68,"vue-resource":3}],2:[function(require,module,exports){
+module.exports = function (Vue) {
+
+    var _ = require('./util')(Vue);
+    var Promise = require('./promise');
+    var jsonType = { 'Content-Type': 'application/json;charset=utf-8' };
+
+    /**
+     * Http provides a service for sending XMLHttpRequests.
+     */
+
+    function Http (url, options) {
+
+        var self = this, headers, promise;
+
+        options = options || {};
+
+        if (_.isPlainObject(url)) {
+            options = url;
+            url = '';
+        }
+
+        headers = _.extend({},
+            Http.headers.common,
+            Http.headers[options.method.toLowerCase()]
+        );
+
+        options = _.extend(true, {url: url, headers: headers},
+            Http.options, _.options('http', this, options)
+        );
+
+        promise = (options.method.toLowerCase() == 'jsonp' ? jsonp : xhr).call(this, this.$url || Vue.url, options);
+
+        _.extend(promise, {
+
+            success: function (onSuccess) {
+
+                this.then(function (request) {
+                    onSuccess.apply(self, parseReq(request));
+                }, function () {});
+
+                return this;
+            },
+
+            error: function (onError) {
+
+                this.catch(function (request) {
+                    onError.apply(self, parseReq(request));
+                });
+
+                return this;
+            },
+
+            always: function (onAlways) {
+
+                var cb = function (request) {
+                    onAlways.apply(self, parseReq(request));
+                };
+
+                this.then(cb, cb);
+
+                return this;
+            }
+
+        });
+
+        if (options.success) {
+            promise.success(options.success);
+        }
+
+        if (options.error) {
+            promise.error(options.error);
+        }
+
+        return promise;
+    }
+
+    function xhr(url, options) {
+
+        var request = new XMLHttpRequest();
+
+        if (_.isFunction(options.beforeSend)) {
+            options.beforeSend(request, options);
+        }
+
+        if (options.emulateHTTP && /^(PUT|PATCH|DELETE)$/i.test(options.method)) {
+            options.headers['X-HTTP-Method-Override'] = options.method;
+            options.method = 'POST';
+        }
+
+        if (options.emulateJSON && _.isPlainObject(options.data)) {
+            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            options.data = url.params(options.data);
+        }
+
+        if (_.isObject(options.data) && /FormData/i.test(options.data.toString())) {
+            delete options.headers['Content-Type'];
+        }
+
+        if (_.isPlainObject(options.data)) {
+            options.data = JSON.stringify(options.data);
+        }
+
+        var promise = new Promise(function (resolve, reject) {
+
+            request.open(options.method, url(options), true);
+
+            _.each(options.headers, function (value, header) {
+                request.setRequestHeader(header, value);
+            });
+
+            request.onreadystatechange = function () {
+
+                if (this.readyState === 4) {
+
+                    if (this.status >= 200 && this.status < 300) {
+                        resolve(this);
+                    } else {
+                        reject(this);
+                    }
+                }
+            };
+
+            request.send(options.data);
+        });
+
+        _.extend(promise, {
+
+            abort: function () {
+                request.abort();
+            }
+
+        });
+
+        return promise;
+    }
+
+    function jsonp(url, options) {
+
+        var callback = '_jsonp' + Math.random().toString(36).substr(2), script, result;
+
+        _.extend(options.params, options.data);
+        options.params[options.jsonp] = callback;
+
+        if (_.isFunction(options.beforeSend)) {
+            options.beforeSend({}, options);
+        }
+
+        var promise = new Promise(function (resolve, reject) {
+
+            script = document.createElement('script');
+            script.src = url(options.url, options.params);
+            script.type = 'text/javascript';
+            script.async = true;
+
+            window[callback] = function (data) {
+                result = data;
+            };
+
+            var handler = function (event) {
+
+                delete window[callback];
+                document.body.removeChild(script);
+
+                if (event.type === 'load' && !result) {
+                    event.type = 'error';
+                }
+
+                var text = result ? result : event.type, status = event.type === 'error' ? 404 : 200;
+
+                (status === 200 ? resolve : reject)({ responseText: text, status: status });
+            };
+
+            script.onload = handler;
+            script.onerror = handler;
+
+            document.body.appendChild(script);
+        });
+
+        return promise;
+    }
+
+    function parseReq(request) {
+
+        var result;
+
+        try {
+            result = JSON.parse(request.responseText);
+        } catch (e) {
+            result = request.responseText;
+        }
+
+        return [result, request.status, request];
+    }
+
+    Http.options = {
+        method: 'GET',
+        params: {},
+        data: '',
+        jsonp: 'callback',
+        beforeSend: null,
+        emulateHTTP: false,
+        emulateJSON: false,
+    };
+
+    Http.headers = {
+        put: jsonType,
+        post: jsonType,
+        patch: jsonType,
+        delete: jsonType,
+        common: {
+            'Accept': 'application/json, text/plain, */*',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    };
+
+    ['get', 'put', 'post', 'patch', 'delete', 'jsonp'].forEach(function (method) {
+
+        Http[method] = function (url, data, success, options) {
+
+            if (_.isFunction(data)) {
+                options = success;
+                success = data;
+                data = undefined;
+            }
+
+            return this(url, _.extend({method: method, data: data, success: success}, options));
+        };
+    });
+
+    Object.defineProperty(Vue.prototype, '$http', {
+
+        get: function () {
+            return _.extend(Http.bind(this), Http);
+        }
+
+    });
+
+    return Http;
+};
+
+},{"./promise":4,"./util":7}],3:[function(require,module,exports){
+/**
+ * Install plugin.
+ */
+
+function install (Vue) {
+    Vue.url = require('./url')(Vue);
+    Vue.http = require('./http')(Vue);
+    Vue.resource = require('./resource')(Vue);
+}
+
+if (window.Vue) {
+    Vue.use(install);
+}
+
+module.exports = install;
+
+},{"./http":2,"./resource":5,"./url":6}],4:[function(require,module,exports){
+/**
+ * Promise polyfill (https://gist.github.com/briancavalier/814313)
+ */
+
+function Promise (executor) {
+    executor(this.resolve.bind(this), this.reject.bind(this));
+    this._thens = [];
+}
+
+Promise.prototype = {
+
+    then: function (onResolve, onReject, onProgress) {
+        this._thens.push({resolve: onResolve, reject: onReject, progress: onProgress});
+    },
+
+    'catch': function (onReject) {
+        this._thens.push({reject: onReject});
+    },
+
+    resolve: function (value) {
+        this._complete('resolve', value);
+    },
+
+    reject: function (reason) {
+        this._complete('reject', reason);
+    },
+
+    progress: function (status) {
+
+        var i = 0, aThen;
+
+        while (aThen = this._thens[i++]) {
+            aThen.progress && aThen.progress(status);
+        }
+    },
+
+    _complete: function (which, arg) {
+
+        this.then = which === 'resolve' ?
+            function (resolve, reject) { resolve && resolve(arg); } :
+            function (resolve, reject) { reject && reject(arg); };
+
+        this.resolve = this.reject = this.progress =
+            function () { throw new Error('Promise already completed.'); };
+
+        var aThen, i = 0;
+
+        while (aThen = this._thens[i++]) {
+            aThen[which] && aThen[which](arg);
+        }
+
+        delete this._thens;
+    }
+};
+
+module.exports = window.Promise ? window.Promise : Promise;
+
+},{}],5:[function(require,module,exports){
+module.exports = function (Vue) {
+
+    var _ = require('./util')(Vue);
+
+    /**
+     * Resource provides interaction support with RESTful services.
+     */
+
+    function Resource (url, params, actions) {
+
+        var self = this, resource = {};
+
+        actions = _.extend({},
+            Resource.actions,
+            actions
+        );
+
+        _.each(actions, function (action, name) {
+
+            action = _.extend(true, {url: url, params: params || {}}, action);
+
+            resource[name] = function () {
+                return (self.$http || Vue.http)(opts(action, arguments));
+            };
+        });
+
+        return resource;
+    }
+
+    function opts (action, args) {
+
+        var options = _.extend({}, action), params = {}, data, success, error;
+
+        switch (args.length) {
+
+            case 4:
+
+                error = args[3];
+                success = args[2];
+
+            case 3:
+            case 2:
+
+                if (_.isFunction (args[1])) {
+
+                    if (_.isFunction (args[0])) {
+
+                        success = args[0];
+                        error = args[1];
+
+                        break;
+                    }
+
+                    success = args[1];
+                    error = args[2];
+
+                } else {
+
+                    params = args[0];
+                    data = args[1];
+                    success = args[2];
+
+                    break;
+                }
+
+            case 1:
+
+                if (_.isFunction (args[0])) {
+                    success = args[0];
+                } else if (/^(POST|PUT|PATCH)$/i.test(options.method)) {
+                    data = args[0];
+                } else {
+                    params = args[0];
+                }
+
+                break;
+
+            case 0:
+
+                break;
+
+            default:
+
+                throw 'Expected up to 4 arguments [params, data, success, error], got ' + args.length + ' arguments';
+        }
+
+        options.url = action.url;
+        options.data = data;
+        options.params = _.extend({}, action.params, params);
+
+        if (success) {
+            options.success = success;
+        }
+
+        if (error) {
+            options.error = error;
+        }
+
+        return options;
+    }
+
+    Resource.actions = {
+
+        get: {method: 'GET'},
+        save: {method: 'POST'},
+        query: {method: 'GET'},
+        remove: {method: 'DELETE'},
+        delete: {method: 'DELETE'}
+
+    };
+
+    Object.defineProperty(Vue.prototype, '$resource', {
+
+        get: function () {
+            return Resource.bind(this);
+        }
+
+    });
+
+    return Resource;
+};
+
+},{"./util":7}],6:[function(require,module,exports){
+module.exports = function (Vue) {
+
+    var _ = require('./util')(Vue);
+
+    /**
+     * Url provides URL templating.
+     *
+     * @param {String} url
+     * @param {Object} params
+     */
+
+    function Url (url, params) {
+
+        var urlParams = {}, queryParams = {}, options = url, query;
+
+        if (!_.isPlainObject(options)) {
+            options = {url: url, params: params};
+        }
+
+        options = _.extend({}, Url.options, _.options('url', this, options));
+
+        url = options.url.replace(/:([a-z]\w*)/gi, function (match, name) {
+
+            if (options.params[name]) {
+                urlParams[name] = true;
+                return encodeUriSegment(options.params[name]);
+            }
+
+            return '';
+        });
+
+        if (!url.match(/^(https?:)?\//) && options.root) {
+            url = options.root + '/' + url;
+        }
+
+        url = url.replace(/([^:])[\/]{2,}/g, '$1/');
+        url = url.replace(/(\w+)\/+$/, '$1');
+
+        _.each(options.params, function (value, key) {
+            if (!urlParams[key]) {
+                queryParams[key] = value;
+            }
+        });
+
+        query = Url.params(queryParams);
+
+        if (query) {
+            url += (url.indexOf('?') == -1 ? '?' : '&') + query;
+        }
+
+        return url;
+    }
+
+    /**
+     * Url options.
+     */
+
+    Url.options = {
+        url: '',
+        root: '',
+        params: {}
+    };
+
+    /**
+     * Encodes a Url parameter string.
+     *
+     * @param {Object} obj
+     */
+
+    Url.params = function (obj) {
+
+        var params = [];
+
+        params.add = function (key, value) {
+
+            if (_.isFunction (value)) {
+                value = value();
+            }
+
+            if (value === null) {
+                value = '';
+            }
+
+            this.push(encodeUriSegment(key) + '=' + encodeUriSegment(value));
+        };
+
+        serialize(params, obj);
+
+        return params.join('&');
+    };
+
+    /**
+     * Parse a URL and return its components.
+     *
+     * @param {String} url
+     */
+
+    Url.parse = function (url) {
+
+        var pattern = new RegExp("^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\\?([^#]*))?(?:#(.*))?"),
+            matches = url.match(pattern);
+
+        return {
+            url: url,
+            scheme: matches[1] || '',
+            host: matches[2] || '',
+            path: matches[3] || '',
+            query: matches[4] || '',
+            fragment: matches[5] || ''
+        };
+    };
+
+    function serialize (params, obj, scope) {
+
+        var array = _.isArray(obj), plain = _.isPlainObject(obj), hash;
+
+        _.each(obj, function (value, key) {
+
+            hash = _.isObject(value) || _.isArray(value);
+
+            if (scope) {
+                key = scope + '[' + (plain || hash ? key : '') + ']';
+            }
+
+            if (!scope && array) {
+                params.add(value.name, value.value);
+            } else if (hash) {
+                serialize(params, value, key);
+            } else {
+                params.add(key, value);
+            }
+        });
+    }
+
+    function encodeUriSegment (value) {
+
+        return encodeUriQuery(value, true).
+            replace(/%26/gi, '&').
+            replace(/%3D/gi, '=').
+            replace(/%2B/gi, '+');
+    }
+
+    function encodeUriQuery (value, spaces) {
+
+        return encodeURIComponent(value).
+            replace(/%40/gi, '@').
+            replace(/%3A/gi, ':').
+            replace(/%24/g, '$').
+            replace(/%2C/gi, ',').
+            replace(/%20/g, (spaces ? '%20' : '+'));
+    }
+
+    Object.defineProperty(Vue.prototype, '$url', {
+
+        get: function () {
+            return _.extend(Url.bind(this), Url);
+        }
+
+    });
+
+    return Url;
+};
+
+},{"./util":7}],7:[function(require,module,exports){
+/**
+ * Utility functions.
+ */
+
+module.exports = function (Vue) {
+
+    var _ = Vue.util.extend({}, Vue.util);
+
+    _.options = function (key, obj, options) {
+
+        var opts = obj.$options || {};
+
+        return _.extend({},
+            opts[key],
+            options
+        );
+    };
+
+    _.each = function (obj, iterator) {
+
+        var i, key;
+
+        if (typeof obj.length == 'number') {
+            for (i = 0; i < obj.length; i++) {
+                iterator.call(obj[i], obj[i], i);
+            }
+        } else if (_.isObject(obj)) {
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    iterator.call(obj[key], obj[key], key);
+                }
+            }
+        }
+
+        return obj;
+    };
+
+    _.extend = function (target) {
+
+        var array = [], args = array.slice.call(arguments, 1), deep;
+
+        if (typeof target == 'boolean') {
+            deep = target;
+            target = args.shift();
+        }
+
+        args.forEach(function (arg) {
+            extend(target, arg, deep);
+        });
+
+        return target;
+    };
+
+    function extend (target, source, deep) {
+        for (var key in source) {
+            if (deep && (_.isPlainObject(source[key]) || _.isArray(source[key]))) {
+                if (_.isPlainObject(source[key]) && !_.isPlainObject(target[key])) {
+                    target[key] = {};
+                }
+                if (_.isArray(source[key]) && !_.isArray(target[key])) {
+                    target[key] = [];
+                }
+                extend(target[key], source[key], deep);
+            } else if (source[key] !== undefined) {
+                target[key] = source[key];
+            }
+        }
+    }
+
+    _.isFunction = function (obj) {
+        return obj && typeof obj === 'function';
+    };
+
+    return _;
+};
+
+},{}],8:[function(require,module,exports){
 var _ = require('../util')
 
 /**
@@ -131,7 +826,7 @@ exports.$addChild = function (opts, BaseCtor) {
   var child = new ChildVue(opts)
   return child
 }
-},{"../util":59}],3:[function(require,module,exports){
+},{"../util":65}],9:[function(require,module,exports){
 var _ = require('../util')
 var Watcher = require('../watcher')
 var Path = require('../parsers/path')
@@ -298,7 +993,7 @@ exports.$log = function (path) {
   }
   console.log(data)
 }
-},{"../parsers/directive":47,"../parsers/expression":48,"../parsers/path":49,"../parsers/text":51,"../util":59,"../watcher":63}],4:[function(require,module,exports){
+},{"../parsers/directive":53,"../parsers/expression":54,"../parsers/path":55,"../parsers/text":57,"../util":65,"../watcher":69}],10:[function(require,module,exports){
 var _ = require('../util')
 var transition = require('../transition')
 
@@ -510,7 +1205,7 @@ function remove (el, vm, cb) {
   _.remove(el)
   if (cb) cb()
 }
-},{"../transition":53,"../util":59}],5:[function(require,module,exports){
+},{"../transition":59,"../util":65}],11:[function(require,module,exports){
 var _ = require('../util')
 
 /**
@@ -685,7 +1380,7 @@ function modifyListenerCount (vm, event, count) {
     parent = parent.$parent
   }
 }
-},{"../util":59}],6:[function(require,module,exports){
+},{"../util":65}],12:[function(require,module,exports){
 var _ = require('../util')
 var mergeOptions = require('../util/merge-option')
 
@@ -836,7 +1531,7 @@ function createAssetRegisters (Constructor) {
 }
 
 createAssetRegisters(exports)
-},{"../compiler/compile":10,"../compiler/transclude":11,"../config":12,"../parsers/directive":47,"../parsers/expression":48,"../parsers/path":49,"../parsers/template":50,"../parsers/text":51,"../util":59,"../util/merge-option":61}],7:[function(require,module,exports){
+},{"../compiler/compile":16,"../compiler/transclude":17,"../config":18,"../parsers/directive":53,"../parsers/expression":54,"../parsers/path":55,"../parsers/template":56,"../parsers/text":57,"../util":65,"../util/merge-option":67}],13:[function(require,module,exports){
 var _ = require('../util')
 var compile = require('../compiler/compile')
 
@@ -909,7 +1604,7 @@ exports.$destroy = function (remove, deferCleanup) {
 exports.$compile = function (el) {
   return compile(el, this.$options, true)(this, el)
 }
-},{"../compiler/compile":10,"../util":59}],8:[function(require,module,exports){
+},{"../compiler/compile":16,"../util":65}],14:[function(require,module,exports){
 var _ = require('./util')
 var MAX_UPDATE_COUNT = 10
 
@@ -1004,7 +1699,7 @@ exports.push = function (job) {
     }
   }
 }
-},{"./util":59}],9:[function(require,module,exports){
+},{"./util":65}],15:[function(require,module,exports){
 /**
  * A doubly linked list-based Least Recently Used (LRU)
  * cache. Will keep most recently used items while
@@ -1117,7 +1812,7 @@ p.get = function (key, returnEntry) {
 }
 
 module.exports = Cache
-},{}],10:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var _ = require('../util')
 var config = require('../config')
 var textParser = require('../parsers/text')
@@ -1770,7 +2465,7 @@ function checkTransclusion (el) {
     return true
   }
 }
-},{"../config":12,"../parsers/directive":47,"../parsers/template":50,"../parsers/text":51,"../util":59}],11:[function(require,module,exports){
+},{"../config":18,"../parsers/directive":53,"../parsers/template":56,"../parsers/text":57,"../util":65}],17:[function(require,module,exports){
 var _ = require('../util')
 var config = require('../config')
 var templateParser = require('../parsers/template')
@@ -1985,7 +2680,7 @@ function extractAttrs (attrs) {
   }
   return res
 }
-},{"../config":12,"../parsers/template":50,"../util":59}],12:[function(require,module,exports){
+},{"../config":18,"../parsers/template":56,"../util":65}],18:[function(require,module,exports){
 module.exports = {
 
   /**
@@ -2072,7 +2767,7 @@ Object.defineProperty(module.exports, 'delimiters', {
     this._delimitersChanged = true
   }
 })
-},{}],13:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 var _ = require('./util')
 var config = require('./config')
 var Watcher = require('./watcher')
@@ -2297,7 +2992,7 @@ p.set = function (value, lock) {
 }
 
 module.exports = Directive
-},{"./config":12,"./parsers/expression":48,"./parsers/text":51,"./util":59,"./watcher":63}],14:[function(require,module,exports){
+},{"./config":18,"./parsers/expression":54,"./parsers/text":57,"./util":65,"./watcher":69}],20:[function(require,module,exports){
 // xlink
 var xlinkNS = 'http://www.w3.org/1999/xlink'
 var xlinkRE = /^xlink:/
@@ -2330,7 +3025,7 @@ function xlinkHandler (value) {
     this.el.removeAttributeNS(xlinkNS, 'href')
   }
 }
-},{}],15:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var _ = require('../util')
 var addClass = _.addClass
 var removeClass = _.removeClass
@@ -2349,7 +3044,7 @@ module.exports = function (value) {
     }
   }
 }
-},{"../util":59}],16:[function(require,module,exports){
+},{"../util":65}],22:[function(require,module,exports){
 var config = require('../config')
 
 module.exports = {
@@ -2362,7 +3057,7 @@ module.exports = {
   }
 
 }
-},{"../config":12}],17:[function(require,module,exports){
+},{"../config":18}],23:[function(require,module,exports){
 var _ = require('../util')
 var templateParser = require('../parsers/template')
 
@@ -2593,7 +3288,7 @@ module.exports = {
   }
 
 }
-},{"../parsers/template":50,"../util":59}],18:[function(require,module,exports){
+},{"../parsers/template":56,"../util":65}],24:[function(require,module,exports){
 module.exports = {
 
   isLiteral: true,
@@ -2607,7 +3302,7 @@ module.exports = {
   }
   
 }
-},{}],19:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var _ = require('../util')
 
 module.exports = {
@@ -2644,7 +3339,7 @@ module.exports = {
   // so no need for unbind here.
 
 }
-},{"../util":59}],20:[function(require,module,exports){
+},{"../util":65}],26:[function(require,module,exports){
 var _ = require('../util')
 var templateParser = require('../parsers/template')
 
@@ -2683,7 +3378,7 @@ module.exports = {
   }
 
 }
-},{"../parsers/template":50,"../util":59}],21:[function(require,module,exports){
+},{"../parsers/template":56,"../util":65}],27:[function(require,module,exports){
 var _ = require('../util')
 var compile = require('../compiler/compile')
 var templateParser = require('../parsers/template')
@@ -2814,7 +3509,7 @@ function callDetach (child) {
     child._callHook('detached')
   }
 }
-},{"../compiler/compile":10,"../parsers/template":50,"../transition":53,"../util":59}],22:[function(require,module,exports){
+},{"../compiler/compile":16,"../parsers/template":56,"../transition":59,"../util":65}],28:[function(require,module,exports){
 // manipulation directives
 exports.text       = require('./text')
 exports.html       = require('./html')
@@ -2840,7 +3535,7 @@ exports['if']      = require('./if')
 // child vm communication directives
 exports['with']    = require('./with')
 exports.events     = require('./events')
-},{"./attr":14,"./class":15,"./cloak":16,"./component":17,"./el":18,"./events":19,"./html":20,"./if":21,"./model":25,"./on":28,"./partial":29,"./ref":30,"./repeat":31,"./show":32,"./style":33,"./text":34,"./transition":35,"./with":36}],23:[function(require,module,exports){
+},{"./attr":20,"./class":21,"./cloak":22,"./component":23,"./el":24,"./events":25,"./html":26,"./if":27,"./model":31,"./on":34,"./partial":35,"./ref":36,"./repeat":37,"./show":38,"./style":39,"./text":40,"./transition":41,"./with":42}],29:[function(require,module,exports){
 var _ = require('../../util')
 
 module.exports = {
@@ -2866,7 +3561,7 @@ module.exports = {
   }
 
 }
-},{"../../util":59}],24:[function(require,module,exports){
+},{"../../util":65}],30:[function(require,module,exports){
 var _ = require('../../util')
 
 module.exports = {
@@ -3015,7 +3710,7 @@ module.exports = {
   }
 
 }
-},{"../../util":59}],25:[function(require,module,exports){
+},{"../../util":65}],31:[function(require,module,exports){
 var _ = require('../../util')
 
 var handlers = {
@@ -3072,7 +3767,7 @@ module.exports = {
   }
 
 }
-},{"../../util":59,"./checkbox":23,"./default":24,"./radio":26,"./select":27}],26:[function(require,module,exports){
+},{"../../util":65,"./checkbox":29,"./default":30,"./radio":32,"./select":33}],32:[function(require,module,exports){
 var _ = require('../../util')
 
 module.exports = {
@@ -3099,7 +3794,7 @@ module.exports = {
   }
 
 }
-},{"../../util":59}],27:[function(require,module,exports){
+},{"../../util":65}],33:[function(require,module,exports){
 var _ = require('../../util')
 var Watcher = require('../../watcher')
 var dirParser = require('../../parsers/directive')
@@ -3280,7 +3975,7 @@ function indexOf (arr, val) {
   }
   return -1
 }
-},{"../../parsers/directive":47,"../../util":59,"../../watcher":63}],28:[function(require,module,exports){
+},{"../../parsers/directive":53,"../../util":65,"../../watcher":69}],34:[function(require,module,exports){
 var _ = require('../util')
 
 module.exports = {
@@ -3340,7 +4035,7 @@ module.exports = {
     _.off(this.el, 'load', this.iframeBind)
   }
 }
-},{"../util":59}],29:[function(require,module,exports){
+},{"../util":65}],35:[function(require,module,exports){
 var _ = require('../util')
 var templateParser = require('../parsers/template')
 var vIf = require('./if')
@@ -3391,7 +4086,7 @@ module.exports = {
   }
 
 }
-},{"../parsers/template":50,"../util":59,"./if":21}],30:[function(require,module,exports){
+},{"../parsers/template":56,"../util":65,"./if":27}],36:[function(require,module,exports){
 var _ = require('../util')
 
 module.exports = {
@@ -3415,7 +4110,7 @@ module.exports = {
   }
   
 }
-},{"../util":59}],31:[function(require,module,exports){
+},{"../util":65}],37:[function(require,module,exports){
 var _ = require('../util')
 var isObject = _.isObject
 var isPlainObject = _.isPlainObject
@@ -3953,7 +4648,7 @@ function range (n) {
   }
   return ret
 }
-},{"../compiler/compile":10,"../compiler/transclude":11,"../parsers/expression":48,"../parsers/template":50,"../parsers/text":51,"../util":59,"../util/merge-option":61}],32:[function(require,module,exports){
+},{"../compiler/compile":16,"../compiler/transclude":17,"../parsers/expression":54,"../parsers/template":56,"../parsers/text":57,"../util":65,"../util/merge-option":67}],38:[function(require,module,exports){
 var transition = require('../transition')
 
 module.exports = function (value) {
@@ -3962,7 +4657,7 @@ module.exports = function (value) {
     el.style.display = value ? '' : 'none'
   }, this.vm)
 }
-},{"../transition":53}],33:[function(require,module,exports){
+},{"../transition":59}],39:[function(require,module,exports){
 var _ = require('../util')
 var prefixes = ['-webkit-', '-moz-', '-ms-']
 var camelPrefixes = ['Webkit', 'Moz', 'ms']
@@ -4063,7 +4758,7 @@ function prefix (prop) {
     }
   }
 }
-},{"../util":59}],34:[function(require,module,exports){
+},{"../util":65}],40:[function(require,module,exports){
 var _ = require('../util')
 
 module.exports = {
@@ -4079,7 +4774,7 @@ module.exports = {
   }
   
 }
-},{"../util":59}],35:[function(require,module,exports){
+},{"../util":65}],41:[function(require,module,exports){
 module.exports = {
 
   priority: 1000,
@@ -4104,7 +4799,7 @@ module.exports = {
   }
 
 }
-},{}],36:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var _ = require('../util')
 var Watcher = require('../watcher')
 var expParser = require('../parsers/expression')
@@ -4191,7 +4886,7 @@ module.exports = {
   }
 
 }
-},{"../parsers/expression":48,"../util":59,"../watcher":63}],37:[function(require,module,exports){
+},{"../parsers/expression":54,"../util":65,"../watcher":69}],43:[function(require,module,exports){
 var _ = require('../util')
 var Path = require('../parsers/path')
 
@@ -4279,7 +4974,7 @@ function contains (val, search) {
     return val.toString().toLowerCase().indexOf(search) > -1
   }
 }
-},{"../parsers/path":49,"../util":59}],38:[function(require,module,exports){
+},{"../parsers/path":55,"../util":65}],44:[function(require,module,exports){
 var _ = require('../util')
 
 /**
@@ -4417,7 +5112,7 @@ exports.key.keyCodes = keyCodes
 
 _.extend(exports, require('./array-filters'))
 
-},{"../util":59,"./array-filters":37}],39:[function(require,module,exports){
+},{"../util":65,"./array-filters":43}],45:[function(require,module,exports){
 var _ = require('../util')
 var Directive = require('../directive')
 var compile = require('../compiler/compile')
@@ -4584,7 +5279,7 @@ exports._cleanup = function () {
   // turn off all instance listeners.
   this.$off()
 }
-},{"../compiler/compile":10,"../compiler/transclude":11,"../directive":13,"../util":59}],40:[function(require,module,exports){
+},{"../compiler/compile":16,"../compiler/transclude":17,"../directive":19,"../util":65}],46:[function(require,module,exports){
 var _ = require('../util')
 var inDoc = _.inDoc
 
@@ -4723,7 +5418,7 @@ exports._callHook = function (hook) {
   }
   this.$emit('hook:' + hook)
 }
-},{"../util":59}],41:[function(require,module,exports){
+},{"../util":65}],47:[function(require,module,exports){
 var mergeOptions = require('../util/merge-option')
 
 /**
@@ -4821,7 +5516,7 @@ exports._init = function (options) {
     this.$mount(options.el)
   }
 }
-},{"../util/merge-option":61}],42:[function(require,module,exports){
+},{"../util/merge-option":67}],48:[function(require,module,exports){
 var _ = require('../util')
 var Observer = require('../observer')
 var Dep = require('../observer/dep')
@@ -5036,7 +5731,7 @@ exports._defineMeta = function (key, value) {
     }
   })
 }
-},{"../observer":45,"../observer/dep":44,"../util":59}],43:[function(require,module,exports){
+},{"../observer":51,"../observer/dep":50,"../util":65}],49:[function(require,module,exports){
 var _ = require('../util')
 var arrayProto = Array.prototype
 var arrayMethods = Object.create(arrayProto)
@@ -5127,7 +5822,7 @@ _.define(
 )
 
 module.exports = arrayMethods
-},{"../util":59}],44:[function(require,module,exports){
+},{"../util":65}],50:[function(require,module,exports){
 var uid = 0
 var _ = require('../util')
 
@@ -5181,7 +5876,7 @@ p.notify = function () {
 }
 
 module.exports = Dep
-},{"../util":59}],45:[function(require,module,exports){
+},{"../util":65}],51:[function(require,module,exports){
 var _ = require('../util')
 var config = require('../config')
 var Dep = require('./dep')
@@ -5418,7 +6113,7 @@ p.removeVm = function (vm) {
 
 module.exports = Observer
 
-},{"../config":12,"../util":59,"./array":43,"./dep":44,"./object":46}],46:[function(require,module,exports){
+},{"../config":18,"../util":65,"./array":49,"./dep":50,"./object":52}],52:[function(require,module,exports){
 var _ = require('../util')
 var objProto = Object.prototype
 
@@ -5503,7 +6198,7 @@ _.define(
     }
   }
 )
-},{"../util":59}],47:[function(require,module,exports){
+},{"../util":65}],53:[function(require,module,exports){
 var _ = require('../util')
 var Cache = require('../cache')
 var cache = new Cache(1000)
@@ -5663,7 +6358,7 @@ exports.parse = function (s) {
   cache.put(s, dirs)
   return dirs
 }
-},{"../cache":9,"../util":59}],48:[function(require,module,exports){
+},{"../cache":15,"../util":65}],54:[function(require,module,exports){
 var _ = require('../util')
 var Path = require('./path')
 var Cache = require('../cache')
@@ -5919,7 +6614,7 @@ exports.parse = function (exp, needSet) {
 
 // Export the pathRegex for external use
 exports.pathTestRE = pathTestRE
-},{"../cache":9,"../util":59,"./path":49}],49:[function(require,module,exports){
+},{"../cache":15,"../util":65,"./path":55}],55:[function(require,module,exports){
 var _ = require('../util')
 var Cache = require('../cache')
 var pathCache = new Cache(1000)
@@ -6217,7 +6912,7 @@ exports.set = function (obj, path, val) {
   }
   return true
 }
-},{"../cache":9,"../util":59}],50:[function(require,module,exports){
+},{"../cache":15,"../util":65}],56:[function(require,module,exports){
 var _ = require('../util')
 var Cache = require('../cache')
 var templateCache = new Cache(1000)
@@ -6478,7 +7173,7 @@ exports.parse = function (template, clone, noSelector) {
     ? exports.clone(frag)
     : frag
 }
-},{"../cache":9,"../util":59}],51:[function(require,module,exports){
+},{"../cache":15,"../util":65}],57:[function(require,module,exports){
 var Cache = require('../cache')
 var config = require('../config')
 var dirParser = require('./directive')
@@ -6658,7 +7353,7 @@ function inlineFilters (exp) {
     }
   }
 }
-},{"../cache":9,"../config":12,"./directive":47}],52:[function(require,module,exports){
+},{"../cache":15,"../config":18,"./directive":53}],58:[function(require,module,exports){
 var _ = require('../util')
 var addClass = _.addClass
 var removeClass = _.removeClass
@@ -6848,7 +7543,7 @@ module.exports = function (el, direction, op, data, cb) {
     push(el, direction, op, leaveClass, cb)
   }
 }
-},{"../util":59}],53:[function(require,module,exports){
+},{"../util":65}],59:[function(require,module,exports){
 var _ = require('../util')
 var applyCSSTransition = require('./css')
 var applyJSTransition = require('./js')
@@ -7009,7 +7704,7 @@ var apply = exports.apply = function (el, direction, op, vm, cb) {
     if (cb) cb()
   }
 }
-},{"../util":59,"./css":52,"./js":54}],54:[function(require,module,exports){
+},{"../util":65,"./css":58,"./js":60}],60:[function(require,module,exports){
 /**
  * Apply JavaScript enter/leave functions.
  *
@@ -7056,7 +7751,7 @@ module.exports = function (el, direction, op, data, def, vm, cb) {
     }
   }
 }
-},{}],55:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 var config = require('../config')
 
 /**
@@ -7110,7 +7805,7 @@ function enableDebug () {
     }
   }
 }
-},{"../config":12}],56:[function(require,module,exports){
+},{"../config":18}],62:[function(require,module,exports){
 var config = require('../config')
 
 /**
@@ -7320,7 +8015,7 @@ exports.extractContent = function (el, asFragment) {
   return rawContent
 }
 
-},{"../config":12}],57:[function(require,module,exports){
+},{"../config":18}],63:[function(require,module,exports){
 /**
  * Can we use __proto__?
  *
@@ -7422,7 +8117,7 @@ if (inBrowser && !exports.isIE9) {
     ? 'webkitAnimationEnd'
     : 'animationend'
 }
-},{}],58:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var _ = require('./debug')
 
 /**
@@ -7495,7 +8190,7 @@ exports.applyFilters = function (value, filters, vm, oldVal) {
   }
   return value
 }
-},{"./debug":55}],59:[function(require,module,exports){
+},{"./debug":61}],65:[function(require,module,exports){
 var lang   = require('./lang')
 var extend = lang.extend
 
@@ -7504,7 +8199,7 @@ extend(exports, require('./env'))
 extend(exports, require('./dom'))
 extend(exports, require('./filter'))
 extend(exports, require('./debug'))
-},{"./debug":55,"./dom":56,"./env":57,"./filter":58,"./lang":60}],60:[function(require,module,exports){
+},{"./debug":61,"./dom":62,"./env":63,"./filter":64,"./lang":66}],66:[function(require,module,exports){
 /**
  * Check is a string starts with $ or _
  *
@@ -7735,7 +8430,7 @@ exports.debounce = function(func, wait) {
     return result
   }
 }
-},{}],61:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 var _ = require('./index')
 var extend = _.extend
 
@@ -7994,7 +8689,7 @@ module.exports = function mergeOptions (parent, child, vm) {
   }
   return options
 }
-},{"./index":59}],62:[function(require,module,exports){
+},{"./index":65}],68:[function(require,module,exports){
 var _ = require('./util')
 var extend = _.extend
 
@@ -8079,7 +8774,7 @@ extend(p, require('./api/child'))
 extend(p, require('./api/lifecycle'))
 
 module.exports = _.Vue = Vue
-},{"./api/child":2,"./api/data":3,"./api/dom":4,"./api/events":5,"./api/global":6,"./api/lifecycle":7,"./directives":22,"./filters":38,"./instance/compile":39,"./instance/events":40,"./instance/init":41,"./instance/scope":42,"./util":59}],63:[function(require,module,exports){
+},{"./api/child":8,"./api/data":9,"./api/dom":10,"./api/events":11,"./api/global":12,"./api/lifecycle":13,"./directives":28,"./filters":44,"./instance/compile":45,"./instance/events":46,"./instance/init":47,"./instance/scope":48,"./util":65}],69:[function(require,module,exports){
 var _ = require('./util')
 var config = require('./config')
 var Observer = require('./observer')
@@ -8340,4 +9035,4 @@ function traverse (obj) {
 }
 
 module.exports = Watcher
-},{"./batcher":8,"./config":12,"./observer":45,"./parsers/expression":48,"./util":59}]},{},[1]);
+},{"./batcher":14,"./config":18,"./observer":51,"./parsers/expression":54,"./util":65}]},{},[1]);

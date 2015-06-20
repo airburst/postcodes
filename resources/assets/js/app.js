@@ -1,4 +1,7 @@
-var Vue = require('vue');
+var Vue = require('vue'),
+    vueResource = require('vue-resource');
+
+Vue.use(vueResource);
 
 new Vue({
 
@@ -63,9 +66,21 @@ new Vue({
             // Set the correct number of spaces in postcode for database
             this.postcode = this.parsePostcode(this.postcode);
 
-            console.log(this.brmaPostcode(this.postcode));
-
             // Make the API call
+            this.$http.get('/postcode/' + this.postcode, function(postcode) {
+                this.$set('postcodeDetails', postcode);
+            }).error(function(data, status, request) {
+                // handle error
+                console.log(data);
+            });
+
+            // BRMA API call
+            this.$http.get('/brma/' + this.postcode, function(brma) {
+                this.$set('brmaDetails', brma);
+            }).error(function(data, status, request) {
+                // handle error
+                console.log(data);
+            });
         }
 
     }

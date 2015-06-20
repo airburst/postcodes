@@ -97,18 +97,59 @@ class PostcodeController extends Controller {
 		// Fetch the postcodes within the matching district	
 		$brmas = \DB::table('lha_rates')->
 			leftJoin('brmas', 'lha_rates.code', '=', 'brmas.code')->
-			where('brmas.postcode', '=', $postcode)->
+			where('brmas.postcode', '=', $this->shortenForBrma($postcode))->
 			get([
 				'brmas.name',
+				'lha_rates.northing',
+				'lha_rates.easting',
 				'lha_rates.room',
-				'lha_rates.1bed',
-				'lha_rates.2bed',
-				'lha_rates.3bed',
-				'lha_rates.4bed'
+				'lha_rates.one',
+				'lha_rates.two',
+				'lha_rates.three',
+				'lha_rates.four'
 			]);
 
 		return $brmas;
 	}
+
+
+	private function cleanPostcode($postcode)
+	{
+		// Remove any typed spaces 
+        $postcode = preg_replace('/\s+/', '', $postcode);	///TODO: replace any non alphanumerics
+        $l = strlen($postcode);
+
+        // Error checks
+        if ($l == 0) { return ''; }
+        if ($l < 5)  { return ''; }
+        if ($l > 7)  { return ''; }
+
+        // Add any necessary padding spaces (length 5 or 6)
+        if ($l == 5) { return substr($postcode, 0, 2) . '  ' . substr($postcode, 2, 5); }
+        if ($l == 6) { return substr($postcode, 0, 3) . ' ' . substr($postcode, 3, 6); }
+        return $postcode;
+	}
+
+
+	private function shortenForBrma($postcode)
+	{
+		// Parse postcode first
+        $p = $this->cleanPostcode($postcode);
+
+        // Replace any double spaces with a single
+        $p = preg_replace('/  +/', ' ', $p);
+        $l = strlen($p);
+
+        // Remove last two characters
+        if ($l > 0) { $p = substr($p, 0, $l - 2); }
+        $l = strlen($p);
+
+        // If the postcode doesn't contain a space (e.g. SN139XE) then add one after the major
+        if (strrpos($p, ' ') === false) { $p = substr($p, 0, $l - 1) . ' ' . substr($p, $l - 1, $l); }
+
+        return $p;
+	}
+
 
 	/**
 	 * Display the specified resource.
