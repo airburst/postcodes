@@ -8,7 +8,9 @@ new Vue({
     el: '#postcodeSearch',
 
     data: {
-        postcode: ''
+        postcode: '',
+        postcodeDetails: {},
+        brmaDetails: {}
     },
 
     methods: {
@@ -38,27 +40,6 @@ new Vue({
             return postcode;
         },
 
-        brmaPostcode: function(postcode) {
-            var p,
-                l = 0;
-
-            // Parse as postcode first
-            p = this.parsePostcode(postcode);
-
-            // Replace any double spaces with a single
-            p = p.replace(/  +/g, ' ');
-            l = p.length;
-
-            // Remove last two characters
-            if (l > 0) { p = p.substring(0, l - 2); }
-            l = p.length;
-
-            // If the postcode doesn't contain a space (e.g. SN139XE) then add one after the major
-            if (p.indexOf(' ') === -1) { p = p.substring(0, l - 1) + ' ' + p.substring(l - 1, l); }
-
-            return p;
-        },
-
         getPostcode: function(e) {
             // Prevent submission and re-initialisation of form
             e.preventDefault();
@@ -68,7 +49,7 @@ new Vue({
 
             // Make the API call
             this.$http.get('/postcode/' + this.postcode, function(postcode) {
-                this.$set('postcodeDetails', postcode);
+                this.postcodeDetails = postcode;
             }).error(function(data, status, request) {
                 // handle error
                 console.log(data);
@@ -76,7 +57,7 @@ new Vue({
 
             // BRMA API call
             this.$http.get('/brma/' + this.postcode, function(brma) {
-                this.$set('brmaDetails', brma);
+                this.brmaDetails = brma;
             }).error(function(data, status, request) {
                 // handle error
                 console.log(data);

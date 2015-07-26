@@ -143,7 +143,7 @@
 			"file": "resources/assets/js/app.js",
 			"settings":
 			{
-				"buffer_size": 2600,
+				"buffer_size": 1989,
 				"line_ending": "Windows"
 			}
 		}
@@ -225,12 +225,22 @@
 	},
 	"file_history":
 	[
+		"/F/Data/Mark/Dropbox/Projects/angular-os/index.htm",
+		"/F/xampp/osmaps/gulpfile.js",
+		"/F/xampp/osmaps/package.json",
+		"/F/Data/Mark/Dropbox/Projects/angular-os/js/map-functions.js",
+		"/F/Data/Mark/Dropbox/Projects/angular-os/.jscsrc",
+		"/F/Data/Mark/Dropbox/Projects/angular-os/js/app.js",
+		"/F/Data/Mark/Dropbox/Projects/angular-os/js/directives/searchresults.js",
+		"/C/Users/Mark/Desktop/main",
+		"/C/Users/Mark/Desktop/wordpress",
+		"/C/Users/Mark/Desktop/laravel",
+		"/C/Users/Mark/AppData/Roaming/Sublime Text 3/Packages/User/Default (Windows).sublime-keymap",
 		"/F/xampp/la/composer.json",
 		"/F/xampp/la/database/migrations/2015_06_15_144414_create_lha_rates_table.php",
 		"/F/xampp/la/database/migrations/2015_06_19_194904_add_coords_to_lhaRates.php",
 		"/F/xampp/la/gulpfile.js",
 		"/F/xampp/la/database/migrations/2015_06_20_103127_change_lha_rates_column_titles.php",
-		"/C/Users/Mark/AppData/Roaming/Sublime Text 3/Packages/User/Default (Windows).sublime-keymap",
 		"/F/xampp/la/public/index.php",
 		"/F/xampp/la/node_modules/gulp/node_modules/gulp-util/lib/isNull.js",
 		"/F/xampp/la/vendor/phpunit/php-token-stream/tests/_fixture/classInScopedNamespace.php",
@@ -289,8 +299,6 @@
 		"/C/Users/Mark/Desktop/postcodes-split/SQLDumpSplitterResult/postcodes_79.sql",
 		"/C/Users/Mark/Desktop/postcodes-split/SQLDumpSplitterResult/postcodes_DataStructure.sql",
 		"/C/Users/Mark/Desktop/postcodes.sql",
-		"/C/Users/Mark/Desktop/wordpress",
-		"/C/Users/Mark/Desktop/laravel",
 		"/C/Users/Mark/Desktop/.env",
 		"/C/Users/Mark/Desktop/postcode.sql",
 		"/C/Users/Mark/Desktop/wordpress.save",
@@ -344,15 +352,7 @@
 		"/C/Users/Mark/Desktop/functions.php",
 		"/F/Data/Mark/Dropbox/Documents/Cubs/cubs-current.htm",
 		"/F/Data/Mark/Dropbox/Documents/Websites/scouts website/custom.css",
-		"/C/Users/Mark/Desktop/php-fpm.conf",
-		"/C/Users/Mark/.ssh/id_rsa",
-		"/C/Users/Mark/Desktop/nginx.conf",
-		"/C/Users/Mark/.ssh/id_rsa.pub",
-		"/F/Data/Mark/Dropbox/formbuilder/js/Shelter.Custom.js",
-		"/C/Users/Mark/Desktop/wp-config.php",
-		"/F/xampp/apache/conf/httpd.conf",
-		"/C/Users/Mark/Downloads/startbootstrap-grayscale-1.0.4/index.html",
-		"/C/Users/Mark/Desktop/getbrma.php"
+		"/C/Users/Mark/Desktop/php-fpm.conf"
 	],
 	"find":
 	{
@@ -387,6 +387,9 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"       ",
+			"\"",
+			"wordpress",
 			"p",
 			"results",
 			"postcode",
@@ -511,10 +514,7 @@
 			"Income",
 			"income",
 			"Income",
-			"property-value",
-			"Property Value",
-			"asset",
-			"exampleInputEmail1"
+			"property-value"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -548,7 +548,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -564,8 +564,8 @@
 						"selection":
 						[
 							[
-								2755,
-								2768
+								2685,
+								2685
 							]
 						],
 						"settings":
@@ -575,7 +575,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 2010.0,
+						"translation.y": 426.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 2,
@@ -594,8 +594,8 @@
 						"selection":
 						[
 							[
-								2370,
-								2304
+								2211,
+								2211
 							]
 						],
 						"settings":
@@ -606,10 +606,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 623.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -618,15 +618,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2600,
+						"buffer_size": 1989,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2440,
-								2440
+								0,
+								1989
 							]
 						],
 						"settings":
@@ -637,10 +637,10 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1103.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -718,7 +718,7 @@
 		[
 			[
 				"",
-				"F:\\Data\\Mark\\Dropbox\\formbuilder\\Form Builder.sublime-project"
+				"F:\\xampp\\osmaps\\OS Maps.sublime-project"
 			]
 		],
 		"width": 498.0
@@ -737,7 +737,7 @@
 	"show_minimap": true,
 	"show_open_files": false,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 304.0,
 	"status_bar_visible": true,
 	"template_settings":
