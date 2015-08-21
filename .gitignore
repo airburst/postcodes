@@ -4,5 +4,9 @@
 /public/js
 /public/css
 .env
+<<<<<<< HEAD
 *.sublime-project
 *.sublime-workspace
+=======
+*.sublime*
+>>>>>>> 9e4ce406a19a653df9cb8fd2f5a42e6b5aae690c
