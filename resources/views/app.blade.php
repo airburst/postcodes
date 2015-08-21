@@ -5,7 +5,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Local Government Searches</title>
-    <link href="{{ elixir("css/all.css") }}" rel="stylesheet">
+    <link href="{{ elixir('css/all.css') }}" rel="stylesheet">
 </head>
 <body>
 	<div class="container large-margin-top" id="postcodeSearch">

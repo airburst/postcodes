@@ -1,3 +1,9038 @@
-!function t(e,n,i){function r(o,a){if(!n[o]){if(!e[o]){var c="function"==typeof require&&require;if(!a&&c)return c(o,!0);if(s)return s(o,!0);var u=new Error("Cannot find module '"+o+"'");throw u.code="MODULE_NOT_FOUND",u}var l=n[o]={exports:{}};e[o][0].call(l.exports,function(t){var n=e[o][1][t];return r(n?n:t)},l,l.exports,t,e,n,i)}return n[o].exports}for(var s="function"==typeof require&&require,o=0;o<i.length;o++)r(i[o]);return r}({1:[function(t,e,n){"use strict";var i=t("vue"),r=t("vue-resource");i.use(r),new i({el:"#postcodeSearch",data:{postcode:""},methods:{parsePostcode:function(t){var e;return t=t.replace(/\s/g,""),e=t.length,0===e?"":5>e?(console.log("Error: postcode is too short"),""):e>7?(console.log("Error: postcode is too long"),""):5===e?t.substring(0,2)+"  "+t.substring(2,5):6===e?t.substring(0,3)+" "+t.substring(3,6):t},brmaPostcode:function(t){var e,n=0;return e=this.parsePostcode(t),e=e.replace(/  +/g," "),n=e.length,n>0&&(e=e.substring(0,n-2)),n=e.length,-1===e.indexOf(" ")&&(e=e.substring(0,n-1)+" "+e.substring(n-1,n)),e},getPostcode:function(t){t.preventDefault(),this.postcode=this.parsePostcode(this.postcode),this.$http.get("/postcode/"+this.postcode,function(t){this.$set("postcodeDetails",t)}).error(function(t,e,n){console.log(t)}),this.$http.get("/brma/"+this.postcode,function(t){this.$set("brmaDetails",t)}).error(function(t,e,n){console.log(t)})}}})},{vue:70,"vue-resource":3}],2:[function(t,e,n){var i=t("./lib/util"),r=t("./lib/xhr"),s=t("./lib/jsonp"),o=t("./lib/promise");e.exports=function(t){function e(t,o){var u,l=this;return o=o||{},i.isPlainObject(t)&&(o=t,t=""),o=i.extend(!0,{url:t},e.options,i.options("http",l,o)),null===o.crossOrigin&&(o.crossOrigin=a(o.url)),o.headers=i.extend({},e.headers.common,o.crossOrigin?{}:e.headers.custom,e.headers[o.method.toLowerCase()],o.headers),i.isPlainObject(o.data)&&/^(get|jsonp)$/i.test(o.method)&&(i.extend(o.params,o.data),delete o.data),o.emulateHTTP&&!o.crossOrigin&&/^(put|patch|delete)$/i.test(o.method)&&(o.headers["X-HTTP-Method-Override"]=o.method,o.method="post"),o.emulateJSON&&i.isPlainObject(o.data)&&(o.headers["Content-Type"]="application/x-www-form-urlencoded",o.data=c.params(o.data)),i.isObject(o.data)&&/FormData/i.test(o.data.toString())&&delete o.headers["Content-Type"],i.isPlainObject(o.data)&&(o.data=JSON.stringify(o.data)),u=("jsonp"==o.method.toLowerCase()?s:r).call(l,l.$url||c,o).then(n,n),u.success=function(t){return u.then(function(e){t.call(l,e.data,e.status,e)}),u},u.error=function(t){return u.then(void 0,function(e){t.call(l,e.data,e.status,e)}),u},u.always=function(t){var e=function(e){t.call(l,e.data,e.status,e)};return u.then(e,e),u},o.success&&u.success(o.success),o.error&&u.error(o.error),u}function n(t){try{t.data=JSON.parse(t.responseText)}catch(e){t.data=t.responseText}return t.ok?t:o.reject(t)}function a(t){var e=c.parse(t);return e.protocol!==u.protocol||e.host!==u.host}var c=t.url,u=c.parse(location.href),l={"Content-Type":"application/json;charset=utf-8"};return e.options={method:"get",params:{},data:"",jsonp:"callback",beforeSend:null,crossOrigin:null,emulateHTTP:!1,emulateJSON:!1},e.headers={put:l,post:l,patch:l,"delete":l,common:{Accept:"application/json, text/plain, */*"},custom:{"X-Requested-With":"XMLHttpRequest"}},["get","put","post","patch","delete","jsonp"].forEach(function(t){e[t]=function(e,n,r,s){return i.isFunction(n)&&(s=r,r=n,n=void 0),this(e,i.extend({method:t,data:n,success:r},s))}}),Object.defineProperty(t.prototype,"$http",{get:function(){return i.extend(e.bind(this),e)}}),e}},{"./lib/jsonp":4,"./lib/promise":5,"./lib/util":6,"./lib/xhr":7}],3:[function(t,e,n){function i(e){e.url=t("./url")(e),e.http=t("./http")(e),e.resource=t("./resource")(e)}window.Vue&&Vue.use(i),e.exports=i},{"./http":2,"./resource":8,"./url":9}],4:[function(t,e,n){var i=t("./util"),r=t("./promise");e.exports=function(t,e){var n,s,o="_jsonp"+Math.random().toString(36).substr(2),a={};return e.params[e.jsonp]=o,i.isFunction(e.beforeSend)&&e.beforeSend.call(this,{},e),new r(function(i,r){n=document.createElement("script"),n.src=t(e.url,e.params),n.type="text/javascript",n.async=!0,window[o]=function(t){s=t};var c=function(t){delete window[o],document.body.removeChild(n),"load"!==t.type||s||(t.type="error"),a.ok="error"!==t.type,a.status=a.ok?200:404,a.responseText=s?s:t.type,(a.ok?i:r)(a)};n.onload=c,n.onerror=c,document.body.appendChild(n)})}},{"./promise":5,"./util":6}],5:[function(t,e,n){function i(t){this.state=o,this.value=void 0,this.deferred=[];var e=this;try{t(function(t){e.resolve(t)},function(t){e.reject(t)})}catch(n){e.reject(n)}}var r=0,s=1,o=2;i.reject=function(t){return new i(function(e,n){n(t)})},i.resolve=function(t){return new i(function(e,n){e(t)})},i.all=function(t){return new i(function(e,n){function i(n){return function(i){s[n]=i,r+=1,r===t.length&&e(s)}}var r=0,s=[];0===t.length&&e(s);for(var o=0;o<t.length;o+=1)t[o].then(i(o),n)})},i.race=function(t){return new i(function(e,n){for(var i=0;i<t.length;i+=1)t[i].then(e,n)})};var a=i.prototype;a.resolve=function(t){var e=this;if(e.state===o){if(t===e)throw new TypeError("Promise settled with itself.");var n=!1;try{var i=t&&t.then;if(null!==t&&"object"==typeof t&&"function"==typeof i)return void i.call(t,function(t){n||e.resolve(t),n=!0},function(t){n||e.reject(t),n=!0})}catch(s){return void(n||e.reject(s))}e.state=r,e.value=t,e.notify()}},a.reject=function(t){var e=this;if(e.state===o){if(t===e)throw new TypeError("Promise settled with itself.");e.state=s,e.value=t,e.notify()}},a.notify=function(){var t=this;u(function(){if(t.state!==o)for(;t.deferred.length;){var e=t.deferred.shift(),n=e[0],i=e[1],a=e[2],c=e[3];try{t.state===r?a("function"==typeof n?n.call(void 0,t.value):t.value):t.state===s&&("function"==typeof i?a(i.call(void 0,t.value)):c(t.value))}catch(u){c(u)}}})},a["catch"]=function(t){return this.then(void 0,t)},a.then=function(t,e){var n=this;return new i(function(i,r){n.deferred.push([t,e,i,r]),n.notify()})};var c=[],u=function(t){c.push(t),1===c.length&&u.async()};if(u.run=function(){for(;c.length;)c[0](),c.shift()},window.MutationObserver){var l=document.createElement("div"),h=new MutationObserver(u.run);h.observe(l,{attributes:!0}),u.async=function(){l.setAttribute("x",0)}}else u.async=function(){setTimeout(u.run)};e.exports=window.Promise||i},{}],6:[function(t,e,n){function i(t,e,n){for(var s in e)n&&(r.isPlainObject(e[s])||r.isArray(e[s]))?(r.isPlainObject(e[s])&&!r.isPlainObject(t[s])&&(t[s]={}),r.isArray(e[s])&&!r.isArray(t[s])&&(t[s]=[]),i(t[s],e[s],n)):void 0!==e[s]&&(t[s]=e[s])}var r=n;r.isArray=Array.isArray,r.isFunction=function(t){return t&&"function"==typeof t},r.isObject=function(t){return null!==t&&"object"==typeof t},r.isPlainObject=function(t){return"[object Object]"===Object.prototype.toString.call(t)},r.options=function(t,e,n){var i=e.$options||{};return r.extend({},i[t],n)},r.each=function(t,e){var n,i;if("number"==typeof t.length)for(n=0;n<t.length;n++)e.call(t[n],t[n],n);else if(r.isObject(t))for(i in t)t.hasOwnProperty(i)&&e.call(t[i],t[i],i);return t},r.extend=function(t){var e,n=[],r=n.slice.call(arguments,1);return"boolean"==typeof t&&(e=t,t=r.shift()),r.forEach(function(n){i(t,n,e)}),t}},{}],7:[function(t,e,n){var i=t("./util"),r=t("./promise");e.exports=function(t,e){var n,s=new XMLHttpRequest;return i.isFunction(e.beforeSend)&&e.beforeSend.call(this,s,e),n=new r(function(n,r){s.open(e.method,t(e),!0),i.each(e.headers,function(t,e){s.setRequestHeader(e,t)}),s.onreadystatechange=function(){4===s.readyState&&(s.ok=s.status>=200&&s.status<300,(s.ok?n:r)(s))},s.send(e.data)})}},{"./promise":5,"./util":6}],8:[function(t,e,n){var i=t("./lib/util");e.exports=function(t){function e(r,s,o){var a=this,c={};return o=i.extend({},e.actions,o),i.each(o,function(e,o){e=i.extend(!0,{url:r,params:s||{}},e),c[o]=function(){return(a.$http||t.http)(n(e,arguments))}}),c}function n(t,e){var n,r,s,o=i.extend({},t),a={};switch(e.length){case 4:s=e[3],r=e[2];case 3:case 2:if(!i.isFunction(e[1])){a=e[0],n=e[1],r=e[2];break}if(i.isFunction(e[0])){r=e[0],s=e[1];break}r=e[1],s=e[2];case 1:i.isFunction(e[0])?r=e[0]:/^(post|put|patch)$/i.test(o.method)?n=e[0]:a=e[0];break;case 0:break;default:throw"Expected up to 4 arguments [params, data, success, error], got "+e.length+" arguments"}return o.url=t.url,o.data=n,o.params=i.extend({},t.params,a),r&&(o.success=r),s&&(o.error=s),o}return e.actions={get:{method:"get"},save:{method:"post"},query:{method:"get"},update:{method:"put"},remove:{method:"delete"},"delete":{method:"delete"}},Object.defineProperty(t.prototype,"$resource",{get:function(){return e.bind(this)}}),e}},{"./lib/util":6}],9:[function(t,e,n){var i=t("./lib/util"),r=document.createElement("a");e.exports=function(t){function e(t,n){var r,o={},a={},c=t;return i.isPlainObject(c)||(c={url:t,params:n}),c=i.extend({},e.options,i.options("url",this,c)),t=c.url.replace(/:([a-z]\w*)/gi,function(t,e){return c.params[e]?(o[e]=!0,s(c.params[e])):""}),"string"!=typeof c.root||t.match(/^(https?:)?\//)||(t=c.root+"/"+t),t=t.replace(/([^:])[\/]{2,}/g,"$1/"),t=t.replace(/(\w+)\/+$/,"$1"),i.each(c.params,function(t,e){o[e]||(a[e]=t)}),r=e.params(a),r&&(t+=(-1==t.indexOf("?")?"?":"&")+r),t}function n(t,e,r){var s,o=i.isArray(e),a=i.isPlainObject(e);i.each(e,function(e,c){s=i.isObject(e)||i.isArray(e),r&&(c=r+"["+(a||s?c:"")+"]"),!r&&o?t.add(e.name,e.value):s?n(t,e,c):t.add(c,e)})}function s(t){return o(t,!0).replace(/%26/gi,"&").replace(/%3D/gi,"=").replace(/%2B/gi,"+")}function o(t,e){return encodeURIComponent(t).replace(/%40/gi,"@").replace(/%3A/gi,":").replace(/%24/g,"$").replace(/%2C/gi,",").replace(/%20/g,e?"%20":"+")}return e.options={url:"",params:{}},e.params=function(t){var e=[];return e.add=function(t,e){i.isFunction(e)&&(e=e()),null===e&&(e=""),this.push(s(t)+"="+s(e))},n(e,t),e.join("&")},e.parse=function(t){return r.href=t,{href:r.href,protocol:r.protocol?r.protocol.replace(/:$/,""):"",port:r.port,host:r.host,hostname:r.hostname,pathname:"/"===r.pathname.charAt(0)?r.pathname:"/"+r.pathname,search:r.search?r.search.replace(/^\?/,""):"",hash:r.hash?r.hash.replace(/^#/,""):""}},Object.defineProperty(t.prototype,"$url",{get:function(){return i.extend(e.bind(this),e)}}),e}},{"./lib/util":6}],10:[function(t,e,n){var i=t("../util");n.$addChild=function(t,e){e=e||i.Vue,t=t||{};var n,r=this,s=void 0!==t.inherit?t.inherit:e.options.inherit;if(s){var o=r._childCtors;if(n=o[e.cid],!n){var a=e.options.name,c=a?i.classify(a):"VueComponent";n=new Function("return function "+c+" (options) {this.constructor = "+c+";this._init(options) }")(),n.options=e.options,n.prototype=this,o[e.cid]=n}}else n=e;t._parent=r,t._root=r.$root;var u=new n(t);return u}},{"../util":67}],11:[function(t,e,n){var i=t("../util"),r=t("../watcher"),s=t("../parsers/path"),o=t("../parsers/text"),a=t("../parsers/directive"),c=t("../parsers/expression"),u=/[^|]\|[^|]/;n.$get=function(t){var e=c.parse(t);if(e)try{return e.get.call(this,this)}catch(n){}},n.$set=function(t,e){var n=c.parse(t,!0);n&&n.set&&n.set.call(this,this,e)},n.$add=function(t,e){this._data.$add(t,e)},n.$delete=function(t){this._data.$delete(t)},n.$watch=function(t,e,n,i){var s=this,o=n?t+"**deep**":t,a=s._userWatchers[o],c=function(t,n){e.call(s,t,n)};return a?a.addCb(c):a=s._userWatchers[o]=new r(s,t,c,{deep:n,user:!0}),i&&c(a.value),function(){a.removeCb(c),a.active||(s._userWatchers[o]=null)}},n.$eval=function(t){if(u.test(t)){var e=a.parse(t)[0];return e.filters?i.applyFilters(this.$get(e.expression),i.resolveFilters(this,e.filters).read,this):this.$get(e.expression)}return this.$get(t)},n.$interpolate=function(t){var e=o.parse(t),n=this;return e?1===e.length?n.$eval(e[0].value):e.map(function(t){return t.tag?n.$eval(t.value):t.value}).join(""):t},n.$log=function(t){var e=t?s.get(this._data,t):this._data;e&&(e=JSON.parse(JSON.stringify(e))),console.log(e)}},{"../parsers/directive":55,"../parsers/expression":56,"../parsers/path":57,"../parsers/text":59,"../util":67,"../watcher":71}],12:[function(t,e,n){function i(t,e,n,i,o,a){e=s(e);var c=!u.inDoc(e),l=i===!1||c?o:a,h=!c&&!t._isAttached&&!u.inDoc(t.$el);return t._isBlock?r(t,e,l,n):l(t.$el,e,t,n),h&&t._callHook("attached"),t}function r(t,e,n,i){for(var r,s=t._blockStart,o=t._blockEnd;r!==o;)r=s.nextSibling,n(s,e,t),s=r;n(o,e,t,i)}function s(t){return"string"==typeof t?document.querySelector(t):t}function o(t,e,n,i){e.appendChild(t),i&&i()}function a(t,e,n,i){u.before(t,e),i&&i()}function c(t,e,n){u.remove(t),n&&n()}var u=t("../util"),l=t("../transition");n.$appendTo=function(t,e,n){return i(this,t,e,n,o,l.append)},n.$prependTo=function(t,e,n){return t=s(t),t.hasChildNodes()?this.$before(t.firstChild,e,n):this.$appendTo(t,e,n),this},n.$before=function(t,e,n){return i(this,t,e,n,a,l.before)},n.$after=function(t,e,n){return t=s(t),t.nextSibling?this.$before(t.nextSibling,e,n):this.$appendTo(t.parentNode,e,n),this},n.$remove=function(t,e){var n=this._isAttached&&u.inDoc(this.$el);n||(e=!1);var i,s=this,a=function(){n&&s._callHook("detached"),t&&t()};return this._isBlock&&!this._blockFragment.hasChildNodes()?(i=e===!1?o:l.removeThenAppend,r(this,this._blockFragment,i,a)):(i=e===!1?c:l.remove)(this.$el,this,a),this}},{"../transition":61,"../util":67}],13:[function(t,e,n){function i(t,e,n){var i=t.$parent;if(i&&n&&!s.test(e))for(;i;)i._eventsCount[e]=(i._eventsCount[e]||0)+n,i=i.$parent}var r=t("../util");n.$on=function(t,e){return(this._events[t]||(this._events[t]=[])).push(e),i(this,t,1),this},n.$once=function(t,e){function n(){i.$off(t,n),e.apply(this,arguments)}var i=this;return n.fn=e,this.$on(t,n),this},n.$off=function(t,e){var n;if(!arguments.length){if(this.$parent)for(t in this._events)n=this._events[t],n&&i(this,t,-n.length);return this._events={},this}if(n=this._events[t],!n)return this;if(1===arguments.length)return i(this,t,-n.length),this._events[t]=null,this;for(var r,s=n.length;s--;)if(r=n[s],r===e||r.fn===e){i(this,t,-1),n.splice(s,1);break}return this},n.$emit=function(t){this._eventCancelled=!1;var e=this._events[t];if(e){for(var n=arguments.length-1,i=new Array(n);n--;)i[n]=arguments[n+1];n=0,e=e.length>1?r.toArray(e):e;for(var s=e.length;s>n;n++)e[n].apply(this,i)===!1&&(this._eventCancelled=!0)}return this},n.$broadcast=function(t){if(this._eventsCount[t]){for(var e=this._children,n=0,i=e.length;i>n;n++){var r=e[n];r.$emit.apply(r,arguments),r._eventCancelled||r.$broadcast.apply(r,arguments)}return this}},n.$dispatch=function(){for(var t=this.$parent;t;)t.$emit.apply(t,arguments),t=t._eventCancelled?null:t.$parent;return this};var s=/^hook:/},{"../util":67}],14:[function(t,e,n){function i(t){return new Function("return function "+s.classify(t)+" (options) { this._init(options) }")()}function r(t){c.forEach(function(e){t[e]=function(t,n){return n?void(this.options[e+"s"][t]=n):this.options[e+"s"][t]}}),t.component=function(t,e){return e?(s.isPlainObject(e)&&(e.name=t,e=s.Vue.extend(e)),void(this.options.components[t]=e)):this.options.components[t]}}var s=t("../util"),o=t("../util/merge-option");n.util=s,n.nextTick=s.nextTick,n.config=t("../config"),n.compiler={compile:t("../compiler/compile"),transclude:t("../compiler/transclude")},n.parsers={path:t("../parsers/path"),text:t("../parsers/text"),template:t("../parsers/template"),directive:t("../parsers/directive"),expression:t("../parsers/expression")},n.cid=0;var a=1;n.extend=function(t){t=t||{};var e=this,n=i(t.name||e.options.name||"VueComponent");return n.prototype=Object.create(e.prototype),n.prototype.constructor=n,n.cid=a++,n.options=o(e.options,t),n["super"]=e,n.extend=e.extend,r(n),n},n.use=function(t){var e=s.toArray(arguments,1);return e.unshift(this),"function"==typeof t.install?t.install.apply(t,e):t.apply(null,e),this};var c=["directive","filter","partial","transition"];r(n)},{"../compiler/compile":18,"../compiler/transclude":19,"../config":20,"../parsers/directive":55,"../parsers/expression":56,"../parsers/path":57,"../parsers/template":58,"../parsers/text":59,"../util":67,"../util/merge-option":69}],15:[function(t,e,n){function i(){this._isAttached=!0,this._isReady=!0,this._callHook("ready")}var r=t("../util"),s=t("../compiler/compile");n.$mount=function(t){if(this._isCompiled)return void r.warn("$mount() should be called only once.");if(t){if("string"==typeof t){var e=t;if(t=document.querySelector(t),!t)return void r.warn("Cannot find element: "+e)}}else t=document.createElement("div");return this._compile(t),this._isCompiled=!0,this._callHook("compiled"),r.inDoc(this.$el)?(this._callHook("attached"),this._initDOMHooks(),i.call(this)):(this._initDOMHooks(),this.$once("hook:attached",i)),this},n.$destroy=function(t,e){this._destroy(t,e)},n.$compile=function(t){return s(t,this.$options,!0)(this,t)}},{"../compiler/compile":18,"../util":67}],16:[function(t,e,n){function i(){c=[],u=[],l={},h=!1,f=!1}function r(){f=!0,s(c),s(u),i()}function s(t){for(var e=0;e<t.length;e++)t[e].run()}var o=t("./util"),a=10,c=[],u=[],l={},h=!1,f=!1;n.push=function(t){var e=t.id;if(!e||!l[e]||f){if(l[e]){if(l[e]++,l[e]>a)return void o.warn('You may have an infinite update loop for the watcher with expression: "'+t.expression+'".')}else l[e]=1;if(f&&!t.user)return void t.run();(t.user?u:c).push(t),h||(h=!0,o.nextTick(r))}}},{"./util":67}],17:[function(t,e,n){function i(t){this.size=0,this.limit=t,this.head=this.tail=void 0,this._keymap={}}var r=i.prototype;r.put=function(t,e){var n={key:t,value:e};return this._keymap[t]=n,this.tail?(this.tail.newer=n,n.older=this.tail):this.head=n,this.tail=n,this.size===this.limit?this.shift():void this.size++},r.shift=function(){var t=this.head;return t&&(this.head=this.head.newer,this.head.older=void 0,t.newer=t.older=void 0,this._keymap[t.key]=void 0),t},r.get=function(t,e){var n=this._keymap[t];if(void 0!==n)return n===this.tail?e?n:n.value:(n.newer&&(n===this.head&&(this.head=n.newer),n.newer.older=n.older),n.older&&(n.older.newer=n.newer),n.newer=void 0,n.older=this.tail,this.tail&&(this.tail.newer=n),this.tail=n,e?n:n.value)},e.exports=i},{}],18:[function(t,e,n){function i(t,e,n,i){function o(t,e){var r=t._directives.length,s=t.$parent&&t.$parent._directives.length;u&&u(t,e);var o=x.toArray(e.childNodes),a=i?t.$parent:t,c=i?t:void 0;if(l&&l(a,e,c),f&&f(a,o,c),n&&!i){var h=t._directives.slice(r),p=t.$parent&&t.$parent._directives.slice(s),d=function(t,e){for(var n=e.length;n--;)e[n]._teardown();n=t._directives.indexOf(e[0]),t._directives.splice(n,e.length)};return function(){d(t,h),p&&d(t.$parent,p)}}}var a=11===t.nodeType,c=e.paramAttributes,u=!c||n||i||a?null:p(t,c,e),l=a?r(e._containerAttrs,c,e):s(t,e),f=l&&l.terminal||"SCRIPT"===t.tagName||!t.hasChildNodes()?null:h(t.childNodes,e);return i&&(o.terminal=!0),o}function r(t,e,n){if(!t)return null;var i=e?p(t,e,n):null,r=t[$.prefix+"with"],s=null;if(r){var o=C.parse(r)[0],a=n.directives["with"];s=function(t,e){t._bindDir("with",e,o,a)}}return function(t){i&&i(t,null),s&&s(t,null)}}function s(t,e){var n=t.nodeType;return 1===n&&"SCRIPT"!==t.tagName?o(t,e):3===n&&$.interpolate&&t.data.trim()?c(t,e):null}function o(t,e){if(w(t))return t.hasAttribute("__vue__wrap")&&(t=t.firstChild),i(t,e._parent.$options,!0,!0);var n,r,s;if(t.__vue__||(r=t.tagName.toLowerCase(),s=r.indexOf("-")>0&&e.components[r],s&&t.setAttribute($.prefix+"component",r)),(s||t.hasAttributes())&&(n=m(t,e),!n)){var o=b(t,e);n=o.length?a(o):null}if("TEXTAREA"===t.tagName){var c=n;n=function(t,e){e.value=t.$interpolate(e.value),c&&c(t,e)},n.terminal=!0}return n}function a(t){return function(e,n,i){for(var r,s,o,a,c=t.length;c--;)if(r=t[c],a=r.transcluded?e.$parent:e,r._link)r._link(a,n);else for(o=r.descriptors.length,s=0;o>s;s++)a._bindDir(r.name,n,r.descriptors[s],r.def,i)}}function c(t,e){var n=k.parse(t.data);if(!n)return null;for(var i,r,s=document.createDocumentFragment(),o=0,a=n.length;a>o;o++)r=n[o],i=r.tag?u(r,e):document.createTextNode(r.value),s.appendChild(i);return l(n,s,e)}function u(t,e){function n(n){t.type=n,t.def=e.directives[n],t.descriptor=C.parse(t.value)[0]}var i;return t.oneTime?i=document.createTextNode(t.value):t.html?(i=document.createComment("v-html"),n("html")):t.partial?(i=document.createComment("v-partial"),n("partial")):(i=document.createTextNode(" "),n("text")),i}function l(t,e){return function(n,i){for(var r,s,o,a=e.cloneNode(!0),c=x.toArray(a.childNodes),u=0,l=t.length;l>u;u++)r=t[u],s=r.value,r.tag&&(o=c[u],r.oneTime?(s=n.$eval(s),r.html?x.replace(o,A.parse(s,!0)):o.data=s):n._bindDir(r.type,o,r.descriptor,r.def));x.replace(i,a)}}function h(t,e){for(var n,i,r,o=[],a=0,c=t.length;c>a;a++)r=t[a],n=s(r,e),i=n&&n.terminal||"SCRIPT"===r.tagName||!r.hasChildNodes()?null:h(r.childNodes,e),o.push(n,i);return o.length?f(o):null}function f(t){return function(e,n,i){for(var r,s,o,a=0,c=0,u=t.length;u>a;c++){r=n[c],s=t[a++],o=t[a++];var l=x.toArray(r.childNodes);s&&s(e,r,i),o&&o(e,l,i)}}}function p(t,e,n){for(var i,r,s,o=[],a=t.nodeType,c=e.length;c--;)if(i=e[c],/[A-Z]/.test(i)&&x.warn("You seem to be using camelCase for a paramAttribute, but HTML doesn't differentiate between upper and lower case. You should use hyphen-delimited attribute names. For more info see http://vuejs.org/api/options.html#paramAttributes"),r=a?t.getAttribute(i):t[i],null!==r){s={name:i,value:r};var u=k.parse(r);if(u){if(a&&t.removeAttribute(i),u.length>1){x.warn('Invalid param attribute binding: "'+i+'="'+r+"\"\nDon't mix binding tags with plain text in param attribute bindings.");continue}s.dynamic=!0,s.value=u[0].value}o.push(s)}return d(o,n)}function d(t,e){var n=e.directives["with"];return function(e,i){for(var r,s,o=t.length;o--;)r=t[o],s=x.camelize(r.name.replace(E,"")),r.dynamic?e._bindDir("with",i,{arg:s,expression:r.value},n):e.$set(s,r.value)}}function v(){}function m(t,e){if(null!==x.attr(t,"pre"))return v;for(var n,i,r=0;3>r;r++)if(i=O[r],n=x.attr(t,i))return g(t,i,n,e)}function g(t,e,n,i){var r=C.parse(n)[0],s=i.directives[e],o=function(t,n,i){t._bindDir(e,n,r,s,i)};return o.terminal=!0,o}function b(t,e){for(var n,i,r,s,o,a,c=x.toArray(t.attributes),u=c.length,l=[];u--;)n=c[u],i=n.name,a=e._transcludedAttrs&&e._transcludedAttrs[i],0===i.indexOf($.prefix)?(s=i.slice($.prefix.length),o=e.directives[s],x.assertAsset(o,"directive",s),o&&l.push({name:s,descriptors:C.parse(n.value),def:o,transcluded:a})):$.interpolate&&(r=_(t,i,n.value,e),r&&(r.transcluded=a,l.push(r)));return l.sort(y),l}function _(t,e,n,i){var r=k.parse(n);if(r){for(var s=i.directives.attr,o=r.length,a=!0;o--;){var c=r[o];c.tag&&!c.oneTime&&(a=!1)}return{def:s,_link:a?function(t,i){i.setAttribute(e,t.$interpolate(n))}:function(t,n){var i=k.tokensToExp(r,t),o=C.parse(e+":"+i)[0];t._bindDir("attr",n,o,s)}}}}function y(t,e){return t=t.def.priority||0,e=e.def.priority||0,t>e?1:-1}function w(t){return 1===t.nodeType&&t.hasAttribute(j)?(t.removeAttribute(j),!0):void 0}var x=t("../util"),$=t("../config"),k=t("../parsers/text"),C=t("../parsers/directive"),A=t("../parsers/template");e.exports=i;var E=/^data-/,O=["repeat","if","component"];v.terminal=!0;var j="__vue__transcluded"},{"../config":20,"../parsers/directive":55,"../parsers/template":58,"../parsers/text":59,"../util":67}],19:[function(t,e,n){function i(t,e){var n=e.template,i=l.parse(n,!0);if(i){var s=e._content||c.extractContent(t);if(e.replace){if(i.childNodes.length>1){for(var o=e._containerAttrs={},a=t.attributes.length;a--;){var u=t.attributes[a];o[u.name]=u.value}return r(i,s),i}var h=i.firstChild;return c.copyAttributes(t,h),r(h,s),h}return t.appendChild(i),r(t,s),t}c.warn("Invalid template option: "+n)}function r(t,e){function n(t){return t.parentNode===e}var i=s(t),r=i.length;if(r){for(var a,u,l,h,f;r--;)a=i[r],e?(u=a.getAttribute("select"),u?(l=e.querySelectorAll(u),l.length&&(l=[].filter.call(l,n)),a.content=l.length?l:c.toArray(a.childNodes)):f=a):a.content=c.toArray(a.childNodes);for(r=0,h=i.length;h>r;r++)a=i[r],a!==f&&o(a,a.content);f&&o(f,c.toArray(e.childNodes))}}function s(t){return c.isArray(t)?f.apply([],t.map(s)):t.querySelectorAll?c.toArray(t.querySelectorAll("content")):[]}function o(t,e){for(var n=t.parentNode,i=0,r=e.length;r>i;i++)n.insertBefore(e[i],t);n.removeChild(t)}function a(t){if(!t)return null;for(var e={},n=u.prefix+"with",i=t.length;i--;){var r=t[i].name;r!==n&&(e[r]=!0)}return e}var c=t("../util"),u=t("../config"),l=t("../parsers/template"),h="__vue__transcluded";e.exports=function(t,e){if(e&&e._asComponent){e._transcludedAttrs=a(t.attributes);for(var n=t.childNodes.length;n--;){var r=t.childNodes[n];if(1===r.nodeType)r.setAttribute(h,"");else if(3===r.nodeType&&r.data.trim()){var s=document.createElement("span");s.textContent=r.data,s.setAttribute("__vue__wrap",""),s.setAttribute(h,""),t.replaceChild(s,r)}}}return"TEMPLATE"===t.tagName&&(t=l.parse(t)),e&&e.template&&(t=i(t,e)),t instanceof DocumentFragment&&(c.prepend(document.createComment("v-start"),t),t.appendChild(document.createComment("v-end"))),t};var f=[].concat},{"../config":20,"../parsers/template":58,"../util":67}],20:[function(t,e,n){e.exports={prefix:"v-",debug:!1,silent:!1,proto:!0,interpolate:!0,async:!0,warnExpressionErrors:!0,_delimitersChanged:!0};var i=["{{","}}"];Object.defineProperty(e.exports,"delimiters",{get:function(){return i},set:function(t){i=t,this._delimitersChanged=!0}})},{}],21:[function(t,e,n){function i(t,e,n,i,s,o){this.name=t,this.el=e,this.vm=n,this.raw=i.raw,this.expression=i.expression,this.arg=i.arg,this.filters=r.resolveFilters(n,i.filters),this._host=o,this._locked=!1,this._bound=!1,this._bind(s)}var r=t("./util"),s=t("./config"),o=t("./watcher"),a=t("./parsers/text"),c=t("./parsers/expression"),u=i.prototype;u._bind=function(t){if("cloak"!==this.name&&this.el&&this.el.removeAttribute&&this.el.removeAttribute(s.prefix+this.name),"function"==typeof t?this.update=t:r.extend(this,t),this._watcherExp=this.expression,this._checkDynamicLiteral(),this.bind&&this.bind(),this._watcherExp&&(this.update||this.twoWay)&&(!this.isLiteral||this._isDynamicLiteral)&&!this._checkStatement()){var e=this,n=this._update=this.update?function(t,n){e._locked||e.update(t,n)}:function(){},i=this.vm._watchers[this.raw];i&&"repeat"!==this.name?i.addCb(n):i=this.vm._watchers[this.raw]=new o(this.vm,this._watcherExp,n,{filters:this.filters,twoWay:this.twoWay,deep:this.deep}),this._watcher=i,null!=this._initValue?i.set(this._initValue):this.update&&this.update(i.value)}this._bound=!0},u._checkDynamicLiteral=function(){var t=this.expression;if(t&&this.isLiteral){var e=a.parse(t);if(e){var n=a.tokensToExp(e);this.expression=this.vm.$get(n),this._watcherExp=n,this._isDynamicLiteral=!0}}},u._checkStatement=function(){var t=this.expression;if(t&&this.acceptStatement&&!c.pathTestRE.test(t)){var e=c.parse(t).get,n=this.vm,i=function(){e.call(n,n)};return this.filters&&(i=r.applyFilters(i,this.filters.read,n)),this.update(i),!0}},u._checkParam=function(t){var e=this.el.getAttribute(t);return null!==e&&this.el.removeAttribute(t),e},u._teardown=function(){if(this._bound){this.unbind&&this.unbind();var t=this._watcher;t&&t.active&&(t.removeCb(this._update),t.active||(this.vm._watchers[this.raw]=null)),this._bound=!1,this.vm=this.el=this._watcher=null}},u.set=function(t,e){if(this.twoWay&&(e&&(this._locked=!0),this._watcher.set(t),e)){var n=this;r.nextTick(function(){n._locked=!1})}},e.exports=i},{"./config":20,"./parsers/expression":56,"./parsers/text":59,"./util":67,"./watcher":71}],22:[function(t,e,n){function i(t){t||0===t?this.el.setAttribute(this.arg,t):this.el.removeAttribute(this.arg)}function r(t){null!=t?this.el.setAttributeNS(s,this.arg,t):this.el.removeAttributeNS(s,"href")}var s="http://www.w3.org/1999/xlink",o=/^xlink:/;e.exports={priority:850,bind:function(){var t=this.arg;this.update=o.test(t)?r:i}}},{}],23:[function(t,e,n){var i=t("../util"),r=i.addClass,s=i.removeClass;e.exports=function(t){if(this.arg){var e=t?r:s;e(this.el,this.arg)}else this.lastVal&&s(this.el,this.lastVal),t&&(r(this.el,t),this.lastVal=t)}},{"../util":67}],24:[function(t,e,n){var i=t("../config");e.exports={bind:function(){var t=this.el;this.vm.$once("hook:compiled",function(){t.removeAttribute(i.prefix+"cloak")})}}},{"../config":20}],25:[function(t,e,n){var i=t("../util"),r=t("../parsers/template");e.exports={isLiteral:!0,bind:function(){if(this.el.__vue__)i.warn('v-component="'+this.expression+'" cannot be used on an already mounted instance.');else if(this.ref=document.createComment("v-component"),i.replace(this.el,this.ref),this.keepAlive=null!=this._checkParam("keep-alive"),this.refID=i.attr(this.el,"ref"),this.keepAlive&&(this.cache={}),null!==this._checkParam("inline-template")&&(this.template=i.extractContent(this.el,!0)),this._isDynamicLiteral)this.readyEvent=this._checkParam("wait-for"),this.transMode=this._checkParam("transition-mode");else{this.resolveCtor(this.expression);var t=this.build();t.$before(this.ref),this.setCurrent(t)}},resolveCtor:function(t){this.ctorId=t,this.Ctor=this.vm.$options.components[t],i.assertAsset(this.Ctor,"component",t)},build:function(){if(this.keepAlive){var t=this.cache[this.ctorId];if(t)return t}var e=this.vm,n=r.clone(this.el);if(this.Ctor){var i=e.$addChild({el:n,template:this.template,_asComponent:!0,_host:this._host},this.Ctor);return this.keepAlive&&(this.cache[this.ctorId]=i),i}},unbuild:function(){var t=this.childVM;t&&!this.keepAlive&&t.$destroy(!1,!0)},remove:function(t,e){var n=this.keepAlive;t?t.$remove(function(){n||t._cleanup(),e&&e()}):e&&e()},update:function(t){if(t){this.resolveCtor(t),this.unbuild();var e=this.build(),n=this;this.readyEvent?e.$once(this.readyEvent,function(){n.swapTo(e)}):this.swapTo(e)}else this.unbuild(),this.remove(this.childVM),this.unsetCurrent()},swapTo:function(t){var e=this,n=this.childVM;switch(this.unsetCurrent(),this.setCurrent(t),e.transMode){case"in-out":t.$before(e.ref,function(){e.remove(n)});break;case"out-in":e.remove(n,function(){t.$before(e.ref)});break;default:e.remove(n),t.$before(e.ref)}},setCurrent:function(t){this.childVM=t;var e=t._refID||this.refID;e&&(this.vm.$[e]=t)},unsetCurrent:function(){var t=this.childVM;this.childVM=null;var e=t&&t._refID||this.refID;e&&(this.vm.$[e]=null)},unbind:function(){if(this.unbuild(),this.cache){for(var t in this.cache)this.cache[t].$destroy();this.cache=null}}}},{"../parsers/template":58,"../util":67}],26:[function(t,e,n){e.exports={isLiteral:!0,bind:function(){this.vm.$$[this.expression]=this.el},unbind:function(){delete this.vm.$$[this.expression]}}},{}],27:[function(t,e,n){var i=t("../util");e.exports={acceptStatement:!0,bind:function(){var t=this.el.__vue__;return t&&this.vm===t.$parent?void 0:void i.warn("`v-events` should only be used on a child component from the parent template.")},update:function(t,e){if("function"!=typeof t)return void i.warn('Directive "v-events:'+this.expression+'" expects a function value.');var n=this.el.__vue__;e&&n.$off(this.arg,e),n.$on(this.arg,t)}}},{"../util":67}],28:[function(t,e,n){var i=t("../util"),r=t("../parsers/template");e.exports={bind:function(){8===this.el.nodeType&&(this.nodes=[])},update:function(t){t=i.toString(t),this.nodes?this.swap(t):this.el.innerHTML=t},swap:function(t){for(var e=this.nodes.length;e--;)i.remove(this.nodes[e]);var n=r.parse(t,!0,!0);this.nodes=i.toArray(n.childNodes),i.before(n,this.el)}}},{"../parsers/template":58,"../util":67}],29:[function(t,e,n){function i(t){t._isAttached||t._callHook("attached")}function r(t){t._isAttached&&t._callHook("detached")}var s=t("../util"),o=t("../compiler/compile"),a=t("../parsers/template"),c=t("../transition");e.exports={bind:function(){var t=this.el;t.__vue__?(this.invalid=!0,s.warn('v-if="'+this.expression+'" cannot be used on an already mounted instance.')):(this.start=document.createComment("v-if-start"),this.end=document.createComment("v-if-end"),s.replace(t,this.end),s.before(this.start,this.end),"TEMPLATE"===t.tagName?this.template=a.parse(t,!0):(this.template=document.createDocumentFragment(),this.template.appendChild(a.clone(t))),this.linker=o(this.template,this.vm.$options,!0))},
-update:function(t){if(!this.invalid)if(t){if(!this.unlink){var e=a.clone(this.template);this.compile(e)}}else this.teardown()},compile:function(t){var e=this.vm;if(this.unlink=this.linker?this.linker(e,t):e.$compile(t),c.blockAppend(t,this.end,e),s.inDoc(e.$el)){var n=this.getContainedComponents();n&&n.forEach(i)}},teardown:function(){if(this.unlink){var t;s.inDoc(this.vm.$el)&&(t=this.getContainedComponents()),c.blockRemove(this.start,this.end,this.vm),t&&t.forEach(r),this.unlink(),this.unlink=null}},getContainedComponents:function(){function t(t){for(var e,r=n;e!==i;){if(e=r.nextSibling,r.contains(t.$el))return!0;r=e}return!1}var e=this.vm,n=this.start.nextSibling,i=this.end,r=e._children.length&&e._children.filter(t),s=e._transCpnts&&e._transCpnts.filter(t);return r?s?r.concat(s):r:s},unbind:function(){this.unlink&&this.unlink()}}},{"../compiler/compile":18,"../parsers/template":58,"../transition":61,"../util":67}],30:[function(t,e,n){n.text=t("./text"),n.html=t("./html"),n.attr=t("./attr"),n.show=t("./show"),n["class"]=t("./class"),n.el=t("./el"),n.ref=t("./ref"),n.cloak=t("./cloak"),n.style=t("./style"),n.partial=t("./partial"),n.transition=t("./transition"),n.on=t("./on"),n.model=t("./model"),n.component=t("./component"),n.repeat=t("./repeat"),n["if"]=t("./if"),n["with"]=t("./with"),n.events=t("./events")},{"./attr":22,"./class":23,"./cloak":24,"./component":25,"./el":26,"./events":27,"./html":28,"./if":29,"./model":33,"./on":36,"./partial":37,"./ref":38,"./repeat":39,"./show":40,"./style":41,"./text":42,"./transition":43,"./with":44}],31:[function(t,e,n){var i=t("../../util");e.exports={bind:function(){var t=this,e=this.el;this.listener=function(){t.set(e.checked,!0)},i.on(e,"change",this.listener),e.checked&&(this._initValue=e.checked)},update:function(t){this.el.checked=!!t},unbind:function(){i.off(this.el,"change",this.listener)}}},{"../../util":67}],32:[function(t,e,n){var i=t("../../util");e.exports={bind:function(){function t(){e.set(s?i.toNumber(n.value):n.value,!0)}var e=this,n=this.el,r=null!=this._checkParam("lazy"),s=null!=this._checkParam("number"),o=parseInt(this._checkParam("debounce"),10),a=!1;this.cpLock=function(){a=!0},this.cpUnlock=function(){a=!1,t()},i.on(n,"compositionstart",this.cpLock),i.on(n,"compositionend",this.cpUnlock);var c=this.filters&&this.filters.read;this.listener=c||"range"===n.type?function(){if(!a){var r;try{r=n.value.length-n.selectionStart}catch(s){}0>r||(t(),i.nextTick(function(){var t=e._watcher.value;if(e.update(t),null!=r){var s=i.toString(t).length-r;n.setSelectionRange(s,s)}}))}}:function(){a||t()},o&&(this.listener=i.debounce(this.listener,o)),this.event=r?"change":"input",this.hasjQuery="function"==typeof jQuery,this.hasjQuery?jQuery(n).on(this.event,this.listener):i.on(n,this.event,this.listener),!r&&i.isIE9&&(this.onCut=function(){i.nextTick(e.listener)},this.onDel=function(t){(46===t.keyCode||8===t.keyCode)&&e.listener()},i.on(n,"cut",this.onCut),i.on(n,"keyup",this.onDel)),(n.hasAttribute("value")||"TEXTAREA"===n.tagName&&n.value.trim())&&(this._initValue=s?i.toNumber(n.value):n.value)},update:function(t){this.el.value=i.toString(t)},unbind:function(){var t=this.el;this.hasjQuery?jQuery(t).off(this.event,this.listener):i.off(t,this.event,this.listener),i.off(t,"compositionstart",this.cpLock),i.off(t,"compositionend",this.cpUnlock),this.onCut&&(i.off(t,"cut",this.onCut),i.off(t,"keyup",this.onDel))}}},{"../../util":67}],33:[function(t,e,n){var i=t("../../util"),r={_default:t("./default"),radio:t("./radio"),select:t("./select"),checkbox:t("./checkbox")};e.exports={priority:800,twoWay:!0,handlers:r,bind:function(){var t=this.filters;t&&t.read&&!t.write&&i.warn("It seems you are using a read-only filter with v-model. You might want to use a two-way filter to ensure correct behavior.");var e,n=this.el,s=n.tagName;if("INPUT"===s)e=r[n.type]||r._default;else if("SELECT"===s)e=r.select;else{if("TEXTAREA"!==s)return void i.warn("v-model doesn't support element type: "+s);e=r._default}e.bind.call(this),this.update=e.update,this.unbind=e.unbind}}},{"../../util":67,"./checkbox":31,"./default":32,"./radio":34,"./select":35}],34:[function(t,e,n){var i=t("../../util");e.exports={bind:function(){var t=this,e=this.el;this.listener=function(){t.set(e.value,!0)},i.on(e,"change",this.listener),e.checked&&(this._initValue=e.value)},update:function(t){this.el.checked=t==this.el.value},unbind:function(){i.off(this.el,"change",this.listener)}}},{"../../util":67}],35:[function(t,e,n){function i(t){function e(t){l.isArray(t)?(n.el.innerHTML="",r(n.el,t),n._watcher&&n.update(n._watcher.value)):l.warn("Invalid options value for v-model: "+t)}var n=this,i=f.parse(t)[0];this.optionWatcher=new h(this.vm,i.expression,e,{deep:!0,filters:l.resolveFilters(this.vm,i.filters)}),e(this.optionWatcher.value)}function r(t,e){for(var n,i,s=0,o=e.length;o>s;s++)n=e[s],n.options?(i=document.createElement("optgroup"),i.label=n.label,r(i,n.options)):(i=document.createElement("option"),"string"==typeof n?i.text=i.value=n:(i.text=n.text,i.value=n.value)),t.appendChild(i)}function s(){for(var t,e=this.el.options,n=0,i=e.length;i>n;n++)e[n].hasAttribute("selected")&&(this.multiple?(t||(t=[])).push(e[n].value):t=e[n].value);"undefined"!=typeof t&&(this._initValue=this.number?l.toNumber(t):t)}function o(t){return Array.prototype.filter.call(t.options,a).map(c)}function a(t){return t.selected}function c(t){return t.value||t.text}function u(t,e){for(var n=t.length;n--;)if(t[n]==e)return n;return-1}var l=t("../../util"),h=t("../../watcher"),f=t("../../parsers/directive");e.exports={bind:function(){var t=this,e=this.el,n=this._checkParam("options");n&&i.call(this,n),this.number=null!=this._checkParam("number"),this.multiple=e.hasAttribute("multiple"),this.listener=function(){var n=t.multiple?o(e):e.value;n=t.number?l.isArray(n)?n.map(l.toNumber):l.toNumber(n):n,t.set(n,!0)},l.on(e,"change",this.listener),s.call(this)},update:function(t){var e=this.el;e.selectedIndex=-1;for(var n,i=this.multiple&&l.isArray(t),r=e.options,s=r.length;s--;)n=r[s],n.selected=i?u(t,n.value)>-1:t==n.value},unbind:function(){l.off(this.el,"change",this.listener),this.optionWatcher&&this.optionWatcher.teardown()}}},{"../../parsers/directive":55,"../../util":67,"../../watcher":71}],36:[function(t,e,n){var i=t("../util");e.exports={acceptStatement:!0,priority:700,bind:function(){if("IFRAME"===this.el.tagName&&"load"!==this.arg){var t=this;this.iframeBind=function(){i.on(t.el.contentWindow,t.arg,t.handler)},i.on(this.el,"load",this.iframeBind)}},update:function(t){if("function"!=typeof t)return void i.warn('Directive "v-on:'+this.expression+'" expects a function value.');this.reset();var e=this.vm;this.handler=function(n){n.targetVM=e,e.$event=n;var i=t(n);return e.$event=null,i},this.iframeBind?this.iframeBind():i.on(this.el,this.arg,this.handler)},reset:function(){var t=this.iframeBind?this.el.contentWindow:this.el;this.handler&&i.off(t,this.arg,this.handler)},unbind:function(){this.reset(),i.off(this.el,"load",this.iframeBind)}}},{"../util":67}],37:[function(t,e,n){var i=t("../util"),r=t("../parsers/template"),s=t("./if");e.exports={isLiteral:!0,compile:s.compile,teardown:s.teardown,getContainedComponents:s.getContainedComponents,unbind:s.unbind,bind:function(){var t=this.el;this.start=document.createComment("v-partial-start"),this.end=document.createComment("v-partial-end"),8!==t.nodeType&&(t.innerHTML=""),"TEMPLATE"===t.tagName||8===t.nodeType?i.replace(t,this.end):t.appendChild(this.end),i.before(this.start,this.end),this._isDynamicLiteral||this.insert(this.expression)},update:function(t){this.teardown(),this.insert(t)},insert:function(t){var e=this.vm.$options.partials[t];if(i.assertAsset(e,"partial",t),e){var n=this.filters&&this.filters.read;n&&(e=i.applyFilters(e,n,this.vm)),this.compile(r.parse(e,!0))}}}},{"../parsers/template":58,"../util":67,"./if":29}],38:[function(t,e,n){var i=t("../util");e.exports={isLiteral:!0,bind:function(){var t=this.el.__vue__;return t?void(t._refID=this.expression):void i.warn("v-ref should only be used on a component root element.")}}},{"../util":67}],39:[function(t,e,n){function i(t,e){for(var n=(t._blockEnd||t.$el).nextSibling;!n.__vue__&&n!==e;)n=n.nextSibling;return n.__vue__}function r(t){if(this.rawValue=t,!c(t))return t;for(var e,n=Object.keys(t),i=n.length,r=new Array(i);i--;)e=n[i],r[i]={$key:e,$value:t[e]};return this.converted=!0,r}function s(t){for(var e=-1,n=new Array(t);++e<t;)n[e]=e;return n}var o=t("../util"),a=o.isObject,c=o.isPlainObject,u=t("../parsers/text"),l=t("../parsers/expression"),h=t("../parsers/template"),f=t("../compiler/compile"),p=t("../compiler/transclude"),d=t("../util/merge-option"),v=0;e.exports={bind:function(){this.id="__v_repeat_"+ ++v,this.filters||(this.filters={});var t=o.bind(r,this);this.filters.read?this.filters.read.unshift(t):this.filters.read=[t],this.ref=document.createComment("v-repeat"),o.replace(this.el,this.ref),this.template="TEMPLATE"===this.el.tagName?h.parse(this.el,!0):this.el,this.checkIf(),this.checkRef(),this.checkComponent(),this.idKey=this._checkParam("track-by")||this._checkParam("trackby"),this.cache=Object.create(null)},checkIf:function(){null!==o.attr(this.el,"if")&&o.warn('Don\'t use v-if with v-repeat. Use v-show or the "filterBy" filter instead.')},checkRef:function(){var t=o.attr(this.el,"ref");this.refID=t?this.vm.$interpolate(t):null;var e=o.attr(this.el,"el");this.elId=e?this.vm.$interpolate(e):null},checkComponent:function(){var t=o.attr(this.el,"component"),e=this.vm.$options;if(t){this.asComponent=!0,null!==this._checkParam("inline-template")&&(this.inlineTempalte=o.extractContent(this.el,!0));var n=u.parse(t);if(n){var i=u.tokensToExp(n);this.ctorGetter=l.parse(i).get}else{var r=this.Ctor=e.components[t];o.assertAsset(r,"component",t);var s=d(r.options,{},{$parent:this.vm});s.template=this.inlineTempalte||s.template,s._asComponent=!0,s._parent=this.vm,this.template=p(this.template,s),this.template.__vue__=!0,this._linkFn=f(this.template,s)}}else this.Ctor=o.Vue,this.inherit=!0,this.template=p(this.template),this._linkFn=f(this.template,e)},update:function(t){t=t||[];var e=typeof t;"number"===e?t=s(t):"string"===e&&(t=o.toArray(t)),this.vms=this.diff(t,this.vms),this.refID&&(this.vm.$[this.refID]=this.vms),this.elId&&(this.vm.$$[this.elId]=this.vms.map(function(t){return t.$el}))},diff:function(t,e){var n,r,s,o,a,c=this.idKey,u=this.converted,l=this.ref,h=this.arg,f=!e,p=new Array(t.length);for(o=0,a=t.length;a>o;o++)n=t[o],r=u?n.$value:n,s=!f&&this.getVm(r),s?(s._reused=!0,s.$index=o,u&&(s.$key=n.$key),c&&(h?s[h]=r:s._setData(r))):(s=this.build(n,o,!0),s._new=!0,s._reused=!1),p[o]=s,f&&s.$before(l);if(f)return p;for(o=0,a=e.length;a>o;o++)s=e[o],s._reused||(this.uncacheVm(s),s.$destroy(!0));var d,v;for(o=p.length;o--;){if(s=p[o],d=p[o+1]){var m=d.$el;s._reused?(v=i(s,l),v!==d&&s.$before(m,null,!1)):s.$before(m)}else s._reused||s.$before(l);s._new=!1,s._reused=!1}return p},build:function(t,e,n){var i={$index:e};this.converted&&(i.$key=t.$key);var r=this.converted?t.$value:t,s=this.arg;s?(t={},t[s]=r):c(r)?t=r:(t={},i.$value=r);var o=this.Ctor||this.resolveCtor(t,i),a=this.vm.$addChild({el:h.clone(this.template),_asComponent:this.asComponent,_host:this._host,_linkFn:this._linkFn,_meta:i,data:t,inherit:this.inherit,template:this.inlineTempalte},o);a._repeat=!0,n&&this.cacheVm(r,a);var u=this;return a.$watch("$value",function(t){u.converted?u.rawValue[a.$key]=t:u.rawValue.$set(a.$index,t)}),a},resolveCtor:function(t,e){var n,i=Object.create(this.vm);for(n in t)o.define(i,n,t[n]);for(n in e)o.define(i,n,e[n]);var r=this.ctorGetter.call(i,i),s=this.vm.$options.components[r];return o.assertAsset(s,"component",r),s},unbind:function(){if(this.refID&&(this.vm.$[this.refID]=null),this.vms)for(var t,e=this.vms.length;e--;)t=this.vms[e],this.uncacheVm(t),t.$destroy()},cacheVm:function(t,e){var n,i=this.idKey,r=this.cache;i?(n=t[i],r[n]?o.warn("Duplicate track-by key in v-repeat: "+n):r[n]=e):a(t)?(n=this.id,t.hasOwnProperty(n)?null===t[n]?t[n]=e:o.warn("Duplicate objects are not supported in v-repeat when using components or transitions."):o.define(t,this.id,e)):r[t]?r[t].push(e):r[t]=[e],e._raw=t},getVm:function(t){if(this.idKey)return this.cache[t[this.idKey]];if(a(t))return t[this.id];var e=this.cache[t];if(e){for(var n=0,i=e[n];i&&(i._reused||i._new);)i=e[++n];return i}},uncacheVm:function(t){var e=t._raw;this.idKey?this.cache[e[this.idKey]]=null:a(e)?(e[this.id]=null,t._raw=null):this.cache[e].pop()}}},{"../compiler/compile":18,"../compiler/transclude":19,"../parsers/expression":56,"../parsers/template":58,"../parsers/text":59,"../util":67,"../util/merge-option":69}],40:[function(t,e,n){var i=t("../transition");e.exports=function(t){var e=this.el;i.apply(e,t?1:-1,function(){e.style.display=t?"":"none"},this.vm)}},{"../transition":61}],41:[function(t,e,n){function i(t){if(h[t])return h[t];var e=r(t);return h[t]=h[e]=e,e}function r(t){t=t.replace(u,"$1-$2").toLowerCase();var e=s.camelize(t),n=e.charAt(0).toUpperCase()+e.slice(1);if(l||(l=document.createElement("div")),e in l.style)return t;for(var i,r=o.length;r--;)if(i=a[r]+n,i in l.style)return o[r]+t}var s=t("../util"),o=["-webkit-","-moz-","-ms-"],a=["Webkit","Moz","ms"],c=/!important;?$/,u=/([a-z])([A-Z])/g,l=null,h={};e.exports={deep:!0,update:function(t){if(this.arg)this.setProp(this.arg,t);else if("object"==typeof t){this.cache||(this.cache={});for(var e in t)this.setProp(e,t[e]),t[e]!=this.cache[e]&&(this.cache[e]=t[e],this.setProp(e,t[e]))}else this.el.style.cssText=t},setProp:function(t,e){if(t=i(t))if(null!=e&&(e+=""),e){var n=c.test(e)?"important":"";n&&(e=e.replace(c,"").trim()),this.el.style.setProperty(t,e,n)}else this.el.style.removeProperty(t)}}},{"../util":67}],42:[function(t,e,n){var i=t("../util");e.exports={bind:function(){this.attr=3===this.el.nodeType?"nodeValue":"textContent"},update:function(t){this.el[this.attr]=i.toString(t)}}},{"../util":67}],43:[function(t,e,n){e.exports={priority:1e3,isLiteral:!0,bind:function(){this._isDynamicLiteral||this.update(this.expression)},update:function(t){var e=this.el.__vue__||this.vm;this.el.__v_trans={id:t,fns:e.$options.transitions[t]}}}},{}],44:[function(t,e,n){var i=t("../util"),r=t("../watcher"),s=t("../parsers/expression"),o=/^(true|false|\s?('[^']*'|"[^"]")\s?)$/;e.exports={priority:900,bind:function(){var t=this.vm,e=t.$parent,n=this.arg||"$data",a=this.expression;if(this.el&&this.el!==t.$el)i.warn("v-with can only be used on instance root elements.");else if(e)if(o.test(a))if(this.arg){var c=s.parse(a).get();t.$set(n,c)}else i.warn("v-with cannot bind literal value as $data: "+a);else{var u=!1,l=function(){u=!0,i.nextTick(h)},h=function(){u=!1};this.parentWatcher=new r(e,a,function(e){u||(l(),t.$set(n,e))}),t.$set(n,this.parentWatcher.value),this.childWatcher=new r(t,n,function(t){u||(l(),e.$set(a,t))})}else i.warn("v-with must be used on an instance with a parent.")},unbind:function(){this.parentWatcher&&(this.parentWatcher.teardown(),this.childWatcher.teardown())}}},{"../parsers/expression":56,"../util":67,"../watcher":71}],45:[function(t,e,n){function i(t,e){if(r.isObject(t)){for(var n in t)if(i(t[n],e))return!0}else if(null!=t)return t.toString().toLowerCase().indexOf(e)>-1}var r=t("../util"),s=t("../parsers/path");n.filterBy=function(t,e,n,o){n&&"in"!==n&&(o=n);var a=r.stripQuotes(e)||this.$get(e);return a?(a=(""+a).toLowerCase(),o=o&&(r.stripQuotes(o)||this.$get(o)),t.filter(function(t){return o?i(s.get(t,o),a):i(t,a)})):t},n.orderBy=function(t,e,n){var i=r.stripQuotes(e)||this.$get(e);if(!i)return t;var o=1;return n&&("-1"===n?o=-1:33===n.charCodeAt(0)?(n=n.slice(1),o=this.$get(n)?1:-1):o=this.$get(n)?-1:1),t.slice().sort(function(t,e){return t=r.isObject(t)?s.get(t,i):t,e=r.isObject(e)?s.get(e,i):e,t===e?0:t>e?o:-o})}},{"../parsers/path":57,"../util":67}],46:[function(t,e,n){var i=t("../util");n.json={read:function(t,e){return"string"==typeof t?t:JSON.stringify(t,null,Number(e)||2)},write:function(t){try{return JSON.parse(t)}catch(e){return t}}},n.capitalize=function(t){return t||0===t?(t=t.toString(),t.charAt(0).toUpperCase()+t.slice(1)):""},n.uppercase=function(t){return t||0===t?t.toString().toUpperCase():""},n.lowercase=function(t){return t||0===t?t.toString().toLowerCase():""};var r=/(\d{3})(?=\d)/g;n.currency=function(t,e){if(t=parseFloat(t),!isFinite(t)||!t&&0!==t)return"";e=e||"$";var n=Math.floor(Math.abs(t)).toString(),i=n.length%3,s=i>0?n.slice(0,i)+(n.length>3?",":""):"",o=Math.abs(parseInt(100*t%100,10)),a="."+(10>o?"0"+o:o);return(0>t?"-":"")+e+s+n.slice(i).replace(r,"$1,")+a},n.pluralize=function(t){var e=i.toArray(arguments,1);return e.length>1?e[t%10-1]||e[e.length-1]:e[0]+(1===t?"":"s")};var s={enter:13,tab:9,"delete":46,up:38,left:37,right:39,down:40,esc:27};n.key=function(t,e){if(t){var n=s[e];return n||(n=parseInt(e,10)),function(e){return e.keyCode===n?t.call(this,e):void 0}}},n.key.keyCodes=s,i.extend(n,t("./array-filters"))},{"../util":67,"./array-filters":45}],47:[function(t,e,n){var i=t("../util"),r=t("../directive"),s=t("../compiler/compile"),o=t("../compiler/transclude");n._compile=function(t){var e=this.$options;if(e._linkFn)this._initElement(t),e._linkFn(this,t);else{var n=t;t=o(t,e),this._initElement(t),s(t,e)(this,t),e.replace&&i.replace(n,t)}return t},n._initElement=function(t){t instanceof DocumentFragment?(this._isBlock=!0,this.$el=this._blockStart=t.firstChild,this._blockEnd=t.lastChild,this._blockFragment=t):this.$el=t,this.$el.__vue__=this,this._callHook("beforeCompile")},n._bindDir=function(t,e,n,i,s){this._directives.push(new r(t,e,this,n,i,s))},n._destroy=function(t,e){if(!this._isBeingDestroyed){this._callHook("beforeDestroy"),this._isBeingDestroyed=!0;var n,i=this.$parent;i&&!i._isBeingDestroyed&&(n=i._children.indexOf(this),i._children.splice(n,1));var r=this._host;for(r&&!r._isBeingDestroyed&&(n=r._transCpnts.indexOf(this),r._transCpnts.splice(n,1)),n=this._children.length;n--;)this._children[n].$destroy();for(n=0;n<this._directives.length;n++)this._directives[n]._teardown();var s;for(n in this._userWatchers)s=this._userWatchers[n],s&&s.teardown();this.$el&&(this.$el.__vue__=null);var o=this;t&&this.$el?this.$remove(function(){o._cleanup()}):e||this._cleanup()}},n._cleanup=function(){this._data.__ob__.removeVm(this),this._data=this._watchers=this._userWatchers=this._watcherList=this.$el=this.$parent=this.$root=this._children=this._transCpnts=this._directives=null,this._isDestroyed=!0,this._callHook("destroyed"),this.$off()}},{"../compiler/compile":18,"../compiler/transclude":19,"../directive":21,"../util":67}],48:[function(t,e,n){function i(t,e,n){if(n){var i,s,o,a;for(s in n)if(i=n[s],u.isArray(i))for(o=0,a=i.length;a>o;o++)r(t,e,s,i[o]);else r(t,e,s,i)}}function r(t,e,n,i){var r=typeof i;if("function"===r)t[e](n,i);else if("string"===r){var s=t.$options.methods,o=s&&s[i];o?t[e](n,o):u.warn('Unknown method: "'+i+'" when registering callback for '+e+': "'+n+'".')}}function s(){this._isAttached=!0,this._children.forEach(o),this._transCpnts.length&&this._transCpnts.forEach(o)}function o(t){!t._isAttached&&l(t.$el)&&t._callHook("attached")}function a(){this._isAttached=!1,this._children.forEach(c),this._transCpnts.length&&this._transCpnts.forEach(c)}function c(t){t._isAttached&&!l(t.$el)&&t._callHook("detached")}var u=t("../util"),l=u.inDoc;n._initEvents=function(){var t=this.$options;i(this,"$on",t.events),i(this,"$watch",t.watch)},n._initDOMHooks=function(){this.$on("hook:attached",s),this.$on("hook:detached",a)},n._callHook=function(t){var e=this.$options[t];if(e)for(var n=0,i=e.length;i>n;n++)e[n].call(this);this.$emit("hook:"+t)}},{"../util":67}],49:[function(t,e,n){var i=t("../util/merge-option");n._init=function(t){t=t||{},this.$el=null,this.$parent=t._parent,this.$root=t._root||this,this.$={},this.$$={},this._watcherList=[],this._watchers={},this._userWatchers={},this._directives=[],this._isVue=!0,this._events={},this._eventsCount={},this._eventCancelled=!1,this._isBlock=!1,this._blockStart=this._blockEnd=null,this._isCompiled=this._isDestroyed=this._isReady=this._isAttached=this._isBeingDestroyed=!1,this._children=[],this._childCtors={},this._containerUnlinkFn=this._contentUnlinkFn=null,this._transCpnts=[],this._host=t._host,this.$parent&&this.$parent._children.push(this),this._host&&this._host._transCpnts.push(this),this._new=!0,this._reused=!1,t=this.$options=i(this.constructor.options,t,this),this._data=t.data||{},this._initScope(),this._initEvents(),this._callHook("created"),t.el&&this.$mount(t.el)}},{"../util/merge-option":69}],50:[function(t,e,n){function i(){}var r=t("../util"),s=t("../observer"),o=t("../observer/dep");n._initScope=function(){this._initData(),this._initComputed(),this._initMethods(),this._initMeta()},n._initData=function(){for(var t,e=this._data,n=Object.keys(e),i=n.length;i--;)t=n[i],r.isReserved(t)||this._proxy(t);s.create(e).addVm(this)},n._setData=function(t){t=t||{};var e=this._data;this._data=t;var n,i,o;for(n=Object.keys(e),o=n.length;o--;)i=n[o],r.isReserved(i)||i in t||this._unproxy(i);for(n=Object.keys(t),o=n.length;o--;)i=n[o],this.hasOwnProperty(i)||r.isReserved(i)||this._proxy(i);e.__ob__.removeVm(this),s.create(t).addVm(this),this._digest()},n._proxy=function(t){var e=this;Object.defineProperty(e,t,{configurable:!0,enumerable:!0,get:function(){return e._data[t]},set:function(n){e._data[t]=n}})},n._unproxy=function(t){delete this[t]},n._digest=function(){for(var t=this._watcherList.length;t--;)this._watcherList[t].update();var e=this._children;for(t=e.length;t--;){var n=e[t];n.$options.inherit&&n._digest()}},n._initComputed=function(){var t=this.$options.computed;if(t)for(var e in t){var n=t[e],s={enumerable:!0,configurable:!0};"function"==typeof n?(s.get=r.bind(n,this),s.set=i):(s.get=n.get?r.bind(n.get,this):i,s.set=n.set?r.bind(n.set,this):i),Object.defineProperty(this,e,s)}},n._initMethods=function(){var t=this.$options.methods;if(t)for(var e in t)this[e]=r.bind(t[e],this)},n._initMeta=function(){var t=this.$options._meta;if(t)for(var e in t)this._defineMeta(e,t[e])},n._defineMeta=function(t,e){var n=new o;Object.defineProperty(this,t,{enumerable:!0,configurable:!0,get:function(){return s.target&&s.target.addDep(n),e},set:function(t){t!==e&&(e=t,n.notify())}})}},{"../observer":53,"../observer/dep":52,"../util":67}],51:[function(t,e,n){var i=t("../util"),r=Array.prototype,s=Object.create(r);["push","pop","shift","unshift","splice","sort","reverse"].forEach(function(t){var e=r[t];i.define(s,t,function(){for(var n=arguments.length,i=new Array(n);n--;)i[n]=arguments[n];var r,s=e.apply(this,i),o=this.__ob__;switch(t){case"push":r=i;break;case"unshift":r=i;break;case"splice":r=i.slice(2)}return r&&o.observeArray(r),o.notify(),s})}),i.define(r,"$set",function(t,e){return t>=this.length&&(this.length=t+1),this.splice(t,1,e)[0]}),i.define(r,"$remove",function(t){return"number"!=typeof t&&(t=this.indexOf(t)),t>-1?this.splice(t,1)[0]:void 0}),e.exports=s},{"../util":67}],52:[function(t,e,n){function i(){this.id=++r,this.subs=[]}var r=0,s=t("../util"),o=i.prototype;o.addSub=function(t){this.subs.push(t)},o.removeSub=function(t){if(this.subs.length){var e=this.subs.indexOf(t);e>-1&&this.subs.splice(e,1)}},o.notify=function(){for(var t=s.toArray(this.subs),e=0,n=t.length;n>e;e++)t[e].update()},e.exports=i},{"../util":67}],53:[function(t,e,n){function i(t,e){t.__proto__=e}function r(t,e,n){for(var i,r=n.length;r--;)i=n[r],o.define(t,i,e[i])}function s(t,e){if(this.id=++h,this.value=t,this.active=!0,this.deps=[],o.define(t,"__ob__",this),e===f){var n=a.proto&&o.hasProto?i:r;n(t,u,l),this.observeArray(t)}else e===p&&this.walk(t)}var o=t("../util"),a=t("../config"),c=t("./dep"),u=t("./array"),l=Object.getOwnPropertyNames(u);t("./object");var h=0,f=0,p=1;s.target=null;var d=s.prototype;s.create=function(t){return t&&t.hasOwnProperty("__ob__")&&t.__ob__ instanceof s?t.__ob__:o.isArray(t)?new s(t,f):o.isPlainObject(t)&&!t._isVue?new s(t,p):void 0},d.walk=function(t){for(var e,n,i=Object.keys(t),r=i.length;r--;)e=i[r],n=e.charCodeAt(0),36!==n&&95!==n&&this.convert(e,t[e])},d.observe=function(t){return s.create(t)},d.observeArray=function(t){for(var e=t.length;e--;)this.observe(t[e])},d.convert=function(t,e){var n=this,i=n.observe(e),r=new c;i&&i.deps.push(r),Object.defineProperty(n.value,t,{enumerable:!0,configurable:!0,get:function(){return n.active&&s.target&&s.target.addDep(r),e},set:function(t){if(t!==e){var i=e&&e.__ob__;if(i){var s=i.deps;s.splice(s.indexOf(r),1)}e=t;var o=n.observe(t);o&&o.deps.push(r),r.notify()}}})},d.notify=function(){for(var t=this.deps,e=0,n=t.length;n>e;e++)t[e].notify()},d.addVm=function(t){(this.vms=this.vms||[]).push(t)},d.removeVm=function(t){this.vms.splice(this.vms.indexOf(t),1)},e.exports=s},{"../config":20,"../util":67,"./array":51,"./dep":52,"./object":54}],54:[function(t,e,n){var i=t("../util"),r=Object.prototype;i.define(r,"$add",function(t,e){if(!this.hasOwnProperty(t)){var n=this.__ob__;if(!n||i.isReserved(t))return void(this[t]=e);if(n.convert(t,e),n.vms)for(var r=n.vms.length;r--;){var s=n.vms[r];s._proxy(t),s._digest()}else n.notify()}}),i.define(r,"$set",function(t,e){this.$add(t,e),this[t]=e}),i.define(r,"$delete",function(t){if(this.hasOwnProperty(t)){delete this[t];var e=this.__ob__;if(e&&!i.isReserved(t))if(e.vms)for(var n=e.vms.length;n--;){var r=e.vms[n];r._unproxy(t),r._digest()}else e.notify()}})},{"../util":67}],55:[function(t,e,n){function i(){g.raw=s.slice(d,a).trim(),void 0===g.expression?g.expression=s.slice(v,a).trim():b!==d&&r(),(0===a||g.expression)&&m.push(g)}function r(){var t,e=s.slice(b,a).trim();if(e){t={};var n=e.match(k);t.name=n[0],t.args=n.length>1?n.slice(1):null}t&&(g.filters=g.filters||[]).push(t),b=a+1}var s,o,a,c,u,l,h,f,p,d,v,m,g,b,_,y=t("../util"),w=t("../cache"),x=new w(1e3),$=/^[^\{\?]+$|^'[^']*'$|^"[^"]*"$/,k=/[^\s'"]+|'[^']+'|"[^"]+"/g;n.parse=function(t){var e=x.get(t);if(e)return e;for(s=t,u=l=!1,h=f=p=d=v=0,b=0,m=[],g={},_=null,a=0,c=s.length;c>a;a++)if(o=s.charCodeAt(a),u)39===o&&(u=!u);else if(l)34===o&&(l=!l);else if(44!==o||p||h||f)if(58!==o||g.expression||g.arg)if(124===o&&124!==s.charCodeAt(a+1)&&124!==s.charCodeAt(a-1))void 0===g.expression?(b=a+1,g.expression=s.slice(v,a).trim()):r();else switch(o){case 34:l=!0;break;case 39:u=!0;break;case 40:p++;break;case 41:p--;break;case 91:f++;break;case 93:f--;break;case 123:h++;break;case 125:h--}else _=s.slice(d,a).trim(),$.test(_)&&(v=a+1,g.arg=y.stripQuotes(_)||_);else i(),g={},d=v=b=a+1;return(0===a||d!==a)&&i(),x.put(t,m),m}},{"../cache":17,"../util":67}],56:[function(t,e,n){function i(t,e){var n=A.length;return A[n]=e?t.replace(y,"\\n"):t,'"'+n+'"'}function r(t){var e=t.charAt(0),n=t.slice(1);return m.test(n)?t:(n=n.indexOf('"')>-1?n.replace(x,s):n,e+"scope."+n)}function s(t,e){return A[e]}function o(t,e){b.test(t)&&h.warn("Avoid using reserved keywords in expression: "+t),A.length=0;var n=t.replace(w,i).replace(_,"");n=(" "+n).replace(k,r).replace(x,s);var o=c(n);return o?{get:o,body:n,set:e?u(n):null}:void 0}function a(t){var e,n;return t.indexOf("[")<0?(n=t.split("."),e=f.compileGetter(n)):(n=f.parse(t),e=n.get),{get:e,set:function(t,e){f.set(t,n,e)}}}function c(t){try{return new Function("scope","return "+t+";")}catch(e){h.warn("Invalid expression. Generated function body: "+t)}}function u(t){try{return new Function("scope","value",t+"=value;")}catch(e){h.warn("Invalid setter function body: "+t)}}function l(t){t.set||(t.set=u(t.body))}var h=t("../util"),f=t("./path"),p=t("../cache"),d=new p(1e3),v="Math,Date,this,true,false,null,undefined,Infinity,NaN,isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,parseInt,parseFloat",m=new RegExp("^("+v.replace(/,/g,"\\b|")+"\\b)"),g="break,case,class,catch,const,continue,debugger,default,delete,do,else,export,extends,finally,for,function,if,import,in,instanceof,let,return,super,switch,throw,try,var,while,with,yield,enum,await,implements,package,proctected,static,interface,private,public",b=new RegExp("^("+g.replace(/,/g,"\\b|")+"\\b)"),_=/\s/g,y=/\n/g,w=/[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new |typeof |void /g,x=/"(\d+)"/g,$=/^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\])*$/,k=/[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g,C=/^(true|false)$/,A=[];n.parse=function(t,e){t=t.trim();var n=d.get(t);if(n)return e&&l(n),n;var i=$.test(t)&&!C.test(t)&&"Math."!==t.slice(0,5)?a(t):o(t,e);return d.put(t,i),i},n.pathTestRE=$},{"../cache":17,"../util":67,"./path":57}],57:[function(t,e,n){function i(){}function r(t){if(void 0===t)return"eof";var e=t.charCodeAt(0);switch(e){case 91:case 93:case 46:case 34:case 39:case 48:return t;case 95:case 36:return"ident";case 32:case 9:case 10:case 13:case 160:case 65279:case 8232:case 8233:return"ws"}return e>=97&&122>=e||e>=65&&90>=e?"ident":e>=49&&57>=e?"number":"else"}function s(t){function e(){var e=t[p+1];return"inSingleQuote"===d&&"'"===e||"inDoubleQuote"===d&&'"'===e?(p++,s=e,v.append(),!0):void 0}for(var n,s,o,a,c,u,l,f=[],p=-1,d="beforePath",v={push:function(){void 0!==o&&(f.push(o),o=void 0)},append:function(){void 0===o?o=s:o+=s}};d;)if(p++,n=t[p],"\\"!==n||!e()){if(a=r(n),l=h[d],c=l[a]||l["else"]||"error","error"===c)return;if(d=c[0],u=v[c[1]]||i,s=void 0===c[2]?n:c[2],u(),"afterPath"===d)return f}}function o(t){return l.test(t)?"."+t:+t===t>>>0?"["+t+"]":'["'+t.replace(/"/g,'\\"')+'"]'}var a=t("../util"),c=t("../cache"),u=new c(1e3),l=/^[$_a-zA-Z]+[\w$]*$/,h={beforePath:{ws:["beforePath"],ident:["inIdent","append"],"[":["beforeElement"],eof:["afterPath"]},inPath:{ws:["inPath"],".":["beforeIdent"],"[":["beforeElement"],eof:["afterPath"]},beforeIdent:{ws:["beforeIdent"],ident:["inIdent","append"]},inIdent:{ident:["inIdent","append"],0:["inIdent","append"],number:["inIdent","append"],ws:["inPath","push"],".":["beforeIdent","push"],"[":["beforeElement","push"],eof:["afterPath","push"]},beforeElement:{ws:["beforeElement"],0:["afterZero","append"],number:["inIndex","append"],"'":["inSingleQuote","append",""],'"':["inDoubleQuote","append",""]},afterZero:{ws:["afterElement","push"],"]":["inPath","push"]},inIndex:{0:["inIndex","append"],number:["inIndex","append"],ws:["afterElement"],"]":["inPath","push"]},inSingleQuote:{"'":["afterElement"],eof:"error","else":["inSingleQuote","append"]},inDoubleQuote:{'"':["afterElement"],eof:"error","else":["inDoubleQuote","append"]},afterElement:{ws:["afterElement"],"]":["inPath","push"]}};n.compileGetter=function(t){var e="return o"+t.map(o).join("");return new Function("o",e)},n.parse=function(t){var e=u.get(t);return e||(e=s(t),e&&(e.get=n.compileGetter(e),u.put(t,e))),e},n.get=function(t,e){return e=n.parse(e),e?e.get(t):void 0},n.set=function(t,e,i){if("string"==typeof e&&(e=n.parse(e)),!e||!a.isObject(t))return!1;for(var r,s,o=0,c=e.length-1;c>o;o++)r=t,s=e[o],t=t[s],a.isObject(t)||(t={},r.$add(s,t));return s=e[o],s in t?t[s]=i:t.$add(s,i),!0}},{"../cache":17,"../util":67}],58:[function(t,e,n){function i(t){var e=a.get(t);if(e)return e;var n=document.createDocumentFragment(),i=t.match(l),r=h.test(t);if(i||r){var s=i&&i[1],o=u[s]||u._default,c=o[0],f=o[1],p=o[2],d=document.createElement("div");for(d.innerHTML=f+t.trim()+p;c--;)d=d.lastChild;for(var v;v=d.firstChild;)n.appendChild(v)}else n.appendChild(document.createTextNode(t));return a.put(t,n),n}function r(t){var e=t.tagName;if("TEMPLATE"===e&&t.content instanceof DocumentFragment)return t.content;if("SCRIPT"===e)return i(t.textContent);for(var r,s=n.clone(t),o=document.createDocumentFragment();r=s.firstChild;)o.appendChild(r);return o}var s=t("../util"),o=t("../cache"),a=new o(1e3),c=new o(1e3),u={_default:[0,"",""],legend:[1,"<fieldset>","</fieldset>"],tr:[2,"<table><tbody>","</tbody></table>"],col:[2,"<table><tbody></tbody><colgroup>","</colgroup></table>"]};u.td=u.th=[3,"<table><tbody><tr>","</tr></tbody></table>"],u.option=u.optgroup=[1,'<select multiple="multiple">',"</select>"],u.thead=u.tbody=u.colgroup=u.caption=u.tfoot=[1,"<table>","</table>"],
-u.g=u.defs=u.symbol=u.use=u.image=u.text=u.circle=u.ellipse=u.line=u.path=u.polygon=u.polyline=u.rect=[1,'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"version="1.1">',"</svg>"];var l=/<([\w:]+)/,h=/&\w+;/,f=s.inBrowser?function(){var t=document.createElement("div");return t.innerHTML="<template>1</template>",!t.cloneNode(!0).firstChild.innerHTML}():!1,p=s.inBrowser?function(){var t=document.createElement("textarea");return t.placeholder="t","t"===t.cloneNode(!0).value}():!1;n.clone=function(t){var e,n,i,r=t.cloneNode(!0);if(f&&(n=t.querySelectorAll("template"),n.length))for(i=r.querySelectorAll("template"),e=i.length;e--;)i[e].parentNode.replaceChild(n[e].cloneNode(!0),i[e]);if(p)if("TEXTAREA"===t.tagName)r.value=t.value;else if(n=t.querySelectorAll("textarea"),n.length)for(i=r.querySelectorAll("textarea"),e=i.length;e--;)i[e].value=n[e].value;return r},n.parse=function(t,e,s){var o,a;return t instanceof DocumentFragment?e?t.cloneNode(!0):t:("string"==typeof t?s||"#"!==t.charAt(0)?a=i(t):(a=c.get(t),a||(o=document.getElementById(t.slice(1)),o&&(a=r(o),c.put(t,a)))):t.nodeType&&(a=r(t)),a&&e?n.clone(a):a)}},{"../cache":17,"../util":67}],59:[function(t,e,n){function i(t){return t.replace(v,"\\$&")}function r(){p._delimitersChanged=!1;var t=p.delimiters[0],e=p.delimiters[1];l=t.charAt(0),h=e.charAt(e.length-1);var n=i(l),r=i(h),s=i(t),o=i(e);c=new RegExp(n+"?"+s+"(.+?)"+o+r+"?","g"),u=new RegExp("^"+n+s+".*"+o+r+"$"),a=new f(1e3)}function s(t,e,n){return t.tag?e&&t.oneTime?'"'+e.$eval(t.value)+'"':n?t.value:o(t.value):'"'+t.value+'"'}function o(t){if(m.test(t)){var e=d.parse(t)[0];if(e.filters){t=e.expression;for(var n=0,i=e.filters.length;i>n;n++){var r=e.filters[n],s=r.args?',"'+r.args.join('","')+'"':"";r='this.$options.filters["'+r.name+'"]',t="("+r+".read||"+r+").apply(this,["+t+s+"])"}return t}return"("+t+")"}return"("+t+")"}var a,c,u,l,h,f=t("../cache"),p=t("../config"),d=t("./directive"),v=/[-.*+?^${}()|[\]\/\\]/g;n.parse=function(t){p._delimitersChanged&&r();var e=a.get(t);if(e)return e;if(!c.test(t))return null;for(var n,i,s,o,l,h,f=[],d=c.lastIndex=0;n=c.exec(t);)i=n.index,i>d&&f.push({value:t.slice(d,i)}),o=n[1].charCodeAt(0),l=42===o,h=62===o,s=l||h?n[1].slice(1):n[1],f.push({tag:!0,value:s.trim(),html:u.test(n[0]),oneTime:l,partial:h}),d=i+n[0].length;return d<t.length&&f.push({value:t.slice(d)}),a.put(t,f),f},n.tokensToExp=function(t,e){return t.length>1?t.map(function(t){return s(t,e)}).join("+"):s(t[0],e,!0)};var m=/[^|]\|[^|]/},{"../cache":17,"../config":20,"./directive":55}],60:[function(t,e,n){function i(t,e,n,i,s){f.push({el:t,dir:e,cb:s,cls:i,op:n}),p||(p=!0,a.nextTick(r))}function r(){document.documentElement.offsetHeight;f.forEach(s),f=[],p=!1}function s(t){function e(t,e){i.event=t;var r=i.callback=function(o){o.target===n&&(a.off(n,t,r),i.event=i.callback=null,e&&e(),s&&s())};a.on(n,t,r)}var n=t.el,i=n.__v_trans,r=t.cls,s=t.cb,c=t.op,l=o(n,i,r);if(t.dir>0)1===l?(u(n,r),s&&e(a.transitionEndEvent)):2===l?e(a.animationEndEvent,function(){u(n,r)}):(u(n,r),s&&s());else if(l){var h=1===l?a.transitionEndEvent:a.animationEndEvent;e(h,function(){c(),u(n,r)})}else c(),u(n,r),s&&s()}function o(t,e,n){var i=e.cache&&e.cache[n];if(i)return i;var r=t.style,s=window.getComputedStyle(t),o=r[l]||s[l];if(o&&"0s"!==o)i=1;else{var a=r[h]||s[h];a&&"0s"!==a&&(i=2)}return i&&(e.cache||(e.cache={}),e.cache[n]=i),i}var a=t("../util"),c=a.addClass,u=a.removeClass,l=a.transitionProp+"Duration",h=a.animationProp+"Duration",f=[],p=!1;e.exports=function(t,e,n,r,s){var o=r.id||"v",l=o+"-enter",h=o+"-leave";r.callback&&(a.off(t,r.event,r.callback),u(t,l),u(t,h),r.event=r.callback=null),e>0?(c(t,l),n(),i(t,e,null,l,s)):(c(t,h),i(t,e,n,h,s))}},{"../util":67}],61:[function(t,e,n){var i=t("../util"),r=t("./css"),s=t("./js"),o="undefined"==typeof document?null:document;n.append=function(t,e,n,i){a(t,1,function(){e.appendChild(t)},n,i)},n.before=function(t,e,n,r){a(t,1,function(){i.before(t,e)},n,r)},n.remove=function(t,e,n){a(t,-1,function(){i.remove(t)},e,n)},n.removeThenAppend=function(t,e,n,i){a(t,-1,function(){e.appendChild(t)},n,i)},n.blockAppend=function(t,e,r){for(var s=i.toArray(t.childNodes),o=0,a=s.length;a>o;o++)n.before(s[o],e,r)},n.blockRemove=function(t,e,i){for(var r,s=t.nextSibling;s!==e;)r=s.nextSibling,n.remove(s,i),s=r};var a=n.apply=function(t,e,n,a,c){var u=t.__v_trans;if(!u||!a._isCompiled||a.$parent&&!a.$parent._isCompiled)return n(),void(c&&c());var l=u.fns;l?s(t,e,n,u,l,a,c):!i.transitionEndEvent||o&&o.hidden?(n(),c&&c()):r(t,e,n,u,c)}},{"../util":67,"./css":60,"./js":62}],62:[function(t,e,n){e.exports=function(t,e,n,i,r,s,o){s=t.__vue__||s,i.cancel&&(i.cancel(),i.cancel=null),e>0?(r.beforeEnter&&r.beforeEnter.call(s,t),n(),r.enter?i.cancel=r.enter.call(s,t,function(){i.cancel=null,o&&o()}):o&&o()):r.leave?i.cancel=r.leave.call(s,t,function(){i.cancel=null,n(),o&&o()}):(n(),o&&o())}},{}],63:[function(t,e,n){function i(){var t="undefined"!=typeof console;n.log=function(e){t&&r.debug&&console.log("[Vue info]: "+e)},n.warn=function(e){!t||r.silent&&!r.debug||(console.warn("[Vue warn]: "+e),r.debug)},n.assertAsset=function(t,e,i){t||n.warn("Failed to resolve "+e+": "+i)}}var r=t("../config");i()},{"../config":20}],64:[function(t,e,n){var i=t("../config"),r="undefined"!=typeof document&&document.documentElement;n.inDoc=function(t){var e=t&&t.parentNode;return r===t||r===e||!(!e||1!==e.nodeType||!r.contains(e))},n.attr=function(t,e){e=i.prefix+e;var n=t.getAttribute(e);return null!==n&&t.removeAttribute(e),n},n.before=function(t,e){e.parentNode.insertBefore(t,e)},n.after=function(t,e){e.nextSibling?n.before(t,e.nextSibling):e.parentNode.appendChild(t)},n.remove=function(t){t.parentNode.removeChild(t)},n.prepend=function(t,e){e.firstChild?n.before(t,e.firstChild):e.appendChild(t)},n.replace=function(t,e){var n=t.parentNode;n&&n.replaceChild(e,t)},n.copyAttributes=function(t,e){if(t.hasAttributes())for(var n=t.attributes,i=0,r=n.length;r>i;i++){var s=n[i];e.setAttribute(s.name,s.value)}},n.on=function(t,e,n){t.addEventListener(e,n)},n.off=function(t,e,n){t.removeEventListener(e,n)},n.addClass=function(t,e){if(t.classList)t.classList.add(e);else{var n=" "+(t.getAttribute("class")||"")+" ";n.indexOf(" "+e+" ")<0&&t.setAttribute("class",(n+e).trim())}},n.removeClass=function(t,e){if(t.classList)t.classList.remove(e);else{for(var n=" "+(t.getAttribute("class")||"")+" ",i=" "+e+" ";n.indexOf(i)>=0;)n=n.replace(i," ");t.setAttribute("class",n.trim())}},n.extractContent=function(t,e){var n,i;if(t.hasChildNodes())for(i=e?document.createDocumentFragment():document.createElement("div");n=t.firstChild;)i.appendChild(n);return i}},{"../config":20}],65:[function(t,e,n){n.hasProto="__proto__"in{};var i=Object.prototype.toString,r=n.inBrowser="undefined"!=typeof window&&"[object Object]"!==i.call(window);if(n.nextTick=function(){function t(){i=!1;var t=n.slice(0);n=[];for(var e=0;e<t.length;e++)t[e]()}var e,n=[],i=!1;if("undefined"!=typeof MutationObserver){var r=1,s=new MutationObserver(t),o=document.createTextNode(r);s.observe(o,{characterData:!0}),e=function(){r=(r+1)%2,o.data=r}}else e=setTimeout;return function(r,s){var o=s?function(){r.call(s)}:r;n.push(o),i||(i=!0,e(t,0))}}(),n.isIE9=r&&navigator.userAgent.indexOf("MSIE 9.0")>0,r&&!n.isIE9){var s=void 0===window.ontransitionend&&void 0!==window.onwebkittransitionend,o=void 0===window.onanimationend&&void 0!==window.onwebkitanimationend;n.transitionProp=s?"WebkitTransition":"transition",n.transitionEndEvent=s?"webkitTransitionEnd":"transitionend",n.animationProp=o?"WebkitAnimation":"animation",n.animationEndEvent=o?"webkitAnimationEnd":"animationend"}},{}],66:[function(t,e,n){var i=t("./debug");n.resolveFilters=function(t,e,n){if(e){var r=n||{};return e.forEach(function(e){var n=t.$options.filters[e.name];if(i.assertAsset(n,"filter",e.name),n){var s,o,a=e.args;"function"==typeof n?s=n:(s=n.read,o=n.write),s&&(r.read||(r.read=[]),r.read.push(function(e){return a?s.apply(t,[e].concat(a)):s.call(t,e)})),o&&(r.write||(r.write=[]),r.write.push(function(e,n){return a?o.apply(t,[e,n].concat(a)):o.call(t,e,n)}))}}),r}},n.applyFilters=function(t,e,n,i){if(!e)return t;for(var r=0,s=e.length;s>r;r++)t=e[r].call(n,t,i);return t}},{"./debug":63}],67:[function(t,e,n){var i=t("./lang"),r=i.extend;r(n,i),r(n,t("./env")),r(n,t("./dom")),r(n,t("./filter")),r(n,t("./debug"))},{"./debug":63,"./dom":64,"./env":65,"./filter":66,"./lang":68}],68:[function(t,e,n){function i(t,e){return e?e.toUpperCase():""}n.isReserved=function(t){var e=(t+"").charCodeAt(0);return 36===e||95===e},n.toString=function(t){return null==t?"":t.toString()},n.toNumber=function(t){return isNaN(t)||null===t||"boolean"==typeof t?t:Number(t)},n.stripQuotes=function(t){var e=t.charCodeAt(0),n=t.charCodeAt(t.length-1);return e!==n||34!==e&&39!==e?!1:t.slice(1,-1)};var r=/-(\w)/g;n.camelize=function(t){return t.replace(r,i)};var s=/(?:^|[-_\/])(\w)/g;n.classify=function(t){return t.replace(s,i)},n.bind=function(t,e){return function(){return t.apply(e,arguments)}},n.toArray=function(t,e){e=e||0;for(var n=t.length-e,i=new Array(n);n--;)i[n]=t[n+e];return i},n.extend=function(t,e){for(var n in e)t[n]=e[n];return t},n.isObject=function(t){return t&&"object"==typeof t};var o=Object.prototype.toString;n.isPlainObject=function(t){return"[object Object]"===o.call(t)},n.isArray=function(t){return Array.isArray(t)},n.define=function(t,e,n,i){Object.defineProperty(t,e,{value:n,enumerable:!!i,writable:!0,configurable:!0})},n.debounce=function(t,e){var n,i,r,s,o,a=function(){var c=Date.now()-s;e>c&&c>=0?n=setTimeout(a,e-c):(n=null,o=t.apply(r,i),n||(r=i=null))};return function(){return r=this,i=arguments,s=Date.now(),n||(n=setTimeout(a,e)),o}}},{}],69:[function(t,e,n){function i(t,e){var n,r,o;for(n in e)r=t[n],o=e[n],t.hasOwnProperty(n)?s.isObject(r)&&s.isObject(o)&&i(r,o):t.$add(n,o);return t}function r(t){if(t){var e;for(var n in t)e=t[n],s.isPlainObject(e)&&(e.name=n,t[n]=s.Vue.extend(e))}}var s=t("./index"),o=s.extend,a=Object.create(null);a.data=function(t,e,n){if(n){var r="function"==typeof e?e.call(n):e,o="function"==typeof t?t.call(n):void 0;return r?i(r,o):o}return e?"function"!=typeof e?(s.warn('The "data" option should be a function that returns a per-instance value in component definitions.'),t):t?function(){return i(e.call(this),t.call(this))}:e:t},a.el=function(t,e,n){if(!n&&e&&"function"!=typeof e)return void s.warn('The "el" option should be a function that returns a per-instance value in component definitions.');var i=e||t;return n&&"function"==typeof i?i.call(n):i},a.created=a.ready=a.attached=a.detached=a.beforeCompile=a.compiled=a.beforeDestroy=a.destroyed=a.paramAttributes=function(t,e){return e?t?t.concat(e):s.isArray(e)?e:[e]:t},a.directives=a.filters=a.partials=a.transitions=a.components=function(t,e,n,i){var r=Object.create(n&&n.$parent?n.$parent.$options[i]:s.Vue.options[i]);if(t)for(var a,c=Object.keys(t),u=c.length;u--;)a=c[u],r[a]=t[a];return e&&o(r,e),r},a.watch=a.events=function(t,e){if(!e)return t;if(!t)return e;var n={};o(n,t);for(var i in e){var r=n[i],a=e[i];r&&!s.isArray(r)&&(r=[r]),n[i]=r?r.concat(a):[a]}return n},a.methods=a.computed=function(t,e){if(!e)return t;if(!t)return e;var n=Object.create(t);return o(n,e),n};var c=function(t,e){return void 0===e?t:e};e.exports=function u(t,e,n){function i(i){var r=a[i]||c;o[i]=r(t[i],e[i],n,i)}r(e.components);var s,o={};if(e.mixins)for(var l=0,h=e.mixins.length;h>l;l++)t=u(t,e.mixins[l],n);for(s in t)i(s);for(s in e)t.hasOwnProperty(s)||i(s);return o}},{"./index":67}],70:[function(t,e,n){function i(t){this._init(t)}var r=t("./util"),s=r.extend;s(i,t("./api/global")),i.options={directives:t("./directives"),filters:t("./filters"),partials:{},transitions:{},components:{}};var o=i.prototype;Object.defineProperty(o,"$data",{get:function(){return this._data},set:function(t){this._setData(t)}}),s(o,t("./instance/init")),s(o,t("./instance/events")),s(o,t("./instance/scope")),s(o,t("./instance/compile")),s(o,t("./api/data")),s(o,t("./api/dom")),s(o,t("./api/events")),s(o,t("./api/child")),s(o,t("./api/lifecycle")),e.exports=r.Vue=i},{"./api/child":10,"./api/data":11,"./api/dom":12,"./api/events":13,"./api/global":14,"./api/lifecycle":15,"./directives":30,"./filters":46,"./instance/compile":47,"./instance/events":48,"./instance/init":49,"./instance/scope":50,"./util":67}],71:[function(t,e,n){function i(t,e,n,i){this.vm=t,t._watcherList.push(this),this.expression=e,this.cbs=[n],this.id=++l,this.active=!0,i=i||{},this.deep=!!i.deep,this.user=!!i.user,this.deps=Object.create(null),i.filters&&(this.readFilters=i.filters.read,this.writeFilters=i.filters.write);var r=c.parse(e,i.twoWay);this.getter=r.get,this.setter=r.set,this.value=this.get()}function r(t){var e,n,i;for(e in t)if(n=t[e],s.isArray(n))for(i=n.length;i--;)r(n[i]);else s.isObject(n)&&r(n)}var s=t("./util"),o=t("./config"),a=t("./observer"),c=t("./parsers/expression"),u=t("./batcher"),l=0,h=i.prototype;h.addDep=function(t){var e=t.id;this.newDeps[e]||(this.newDeps[e]=t,this.deps[e]||(this.deps[e]=t,t.addSub(this)))},h.get=function(){this.beforeGet();var t,e=this.vm;try{t=this.getter.call(e,e)}catch(n){o.warnExpressionErrors&&s.warn('Error when evaluating expression "'+this.expression+'":\n   '+n)}return this.deep&&r(t),t=s.applyFilters(t,this.readFilters,e),this.afterGet(),t},h.set=function(t){var e=this.vm;t=s.applyFilters(t,this.writeFilters,e,this.value);try{this.setter.call(e,e,t)}catch(n){o.warnExpressionErrors&&s.warn('Error when evaluating setter "'+this.expression+'":\n   '+n)}},h.beforeGet=function(){a.target=this,this.newDeps={}},h.afterGet=function(){a.target=null;for(var t in this.deps)this.newDeps[t]||this.deps[t].removeSub(this);this.deps=this.newDeps},h.update=function(){!o.async||o.debug?this.run():u.push(this)},h.run=function(){if(this.active){var t=this.get();if(t!==this.value||Array.isArray(t)||this.deep){var e=this.value;this.value=t;for(var n=this.cbs,i=0,r=n.length;r>i;i++){n[i](t,e);var s=r-n.length;s&&(i-=s,r-=s)}}}},h.addCb=function(t){this.cbs.push(t)},h.removeCb=function(t){var e=this.cbs;if(e.length>1){var n=e.indexOf(t);n>-1&&e.splice(n,1)}else t===e[0]&&this.teardown()},h.teardown=function(){if(this.active){if(!this.vm._isBeingDestroyed){var t=this.vm._watcherList,e=t.indexOf(this);e>-1&&t.splice(e,1)}for(var n in this.deps)this.deps[n].removeSub(this);this.active=!1,this.vm=this.cbs=this.value=null}},e.exports=i},{"./batcher":16,"./config":20,"./observer":53,"./parsers/expression":56,"./util":67}]},{},[1]);
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
+var Vue = require('vue'),
+    vueResource = require('vue-resource');
+
+Vue.use(vueResource);
+
+new Vue({
+
+    el: '#postcodeSearch',
+
+    data: {
+        postcode: ''
+    },
+
+    methods: {
+
+        parsePostcode: function parsePostcode(postcode) {
+            var parsed = '',
+                l;
+
+            // Remove any typed spaces
+            postcode = postcode.replace(/\s/g, ''); ///TODO: replace any non alphanumerics
+            l = postcode.length;
+
+            // Error checks
+            if (l === 0) {
+                return '';
+            }
+            if (l < 5) {
+                console.log('Error: postcode is too short');
+                return '';
+            }
+            if (l > 7) {
+                console.log('Error: postcode is too long');
+                return '';
+            }
+
+            // Add any necessary padding spaces (length 5 or 6)
+            if (l === 5) {
+                return postcode.substring(0, 2) + '  ' + postcode.substring(2, 5);
+            }
+            if (l === 6) {
+                return postcode.substring(0, 3) + ' ' + postcode.substring(3, 6);
+            }
+            return postcode;
+        },
+
+        brmaPostcode: function brmaPostcode(postcode) {
+            var p,
+                l = 0;
+
+            // Parse as postcode first
+            p = this.parsePostcode(postcode);
+
+            // Replace any double spaces with a single
+            p = p.replace(/  +/g, ' ');
+            l = p.length;
+
+            // Remove last two characters
+            if (l > 0) {
+                p = p.substring(0, l - 2);
+            }
+            l = p.length;
+
+            // If the postcode doesn't contain a space (e.g. SN139XE) then add one after the major
+            if (p.indexOf(' ') === -1) {
+                p = p.substring(0, l - 1) + ' ' + p.substring(l - 1, l);
+            }
+
+            return p;
+        },
+
+        getPostcode: function getPostcode(e) {
+            // Prevent submission and re-initialisation of form
+            e.preventDefault();
+
+            // Set the correct number of spaces in postcode for database
+            this.postcode = this.parsePostcode(this.postcode);
+
+            // Make the API call
+            this.$http.get('/postcode/' + this.postcode, function (postcode) {
+                this.$set('postcodeDetails', postcode);
+            }).error(function (data, status, request) {
+                // handle error
+                console.log(data);
+            });
+
+            // BRMA API call
+            this.$http.get('/brma/' + this.postcode, function (brma) {
+                this.$set('brmaDetails', brma);
+            }).error(function (data, status, request) {
+                // handle error
+                console.log(data);
+            });
+        }
+
+    }
+});
+
+},{"vue":68,"vue-resource":3}],2:[function(require,module,exports){
+module.exports = function (Vue) {
+
+    var _ = require('./util')(Vue);
+    var Promise = require('./promise');
+    var jsonType = { 'Content-Type': 'application/json;charset=utf-8' };
+
+    /**
+     * Http provides a service for sending XMLHttpRequests.
+     */
+
+    function Http (url, options) {
+
+        var self = this, headers, promise;
+
+        options = options || {};
+
+        if (_.isPlainObject(url)) {
+            options = url;
+            url = '';
+        }
+
+        headers = _.extend({},
+            Http.headers.common,
+            Http.headers[options.method.toLowerCase()]
+        );
+
+        options = _.extend(true, {url: url, headers: headers},
+            Http.options, _.options('http', this, options)
+        );
+
+        promise = (options.method.toLowerCase() == 'jsonp' ? jsonp : xhr).call(this, this.$url || Vue.url, options);
+
+        _.extend(promise, {
+
+            success: function (onSuccess) {
+
+                this.then(function (request) {
+                    onSuccess.apply(self, parseReq(request));
+                }, function () {});
+
+                return this;
+            },
+
+            error: function (onError) {
+
+                this.catch(function (request) {
+                    onError.apply(self, parseReq(request));
+                });
+
+                return this;
+            },
+
+            always: function (onAlways) {
+
+                var cb = function (request) {
+                    onAlways.apply(self, parseReq(request));
+                };
+
+                this.then(cb, cb);
+
+                return this;
+            }
+
+        });
+
+        if (options.success) {
+            promise.success(options.success);
+        }
+
+        if (options.error) {
+            promise.error(options.error);
+        }
+
+        return promise;
+    }
+
+    function xhr(url, options) {
+
+        var request = new XMLHttpRequest();
+
+        if (_.isFunction(options.beforeSend)) {
+            options.beforeSend(request, options);
+        }
+
+        if (options.emulateHTTP && /^(PUT|PATCH|DELETE)$/i.test(options.method)) {
+            options.headers['X-HTTP-Method-Override'] = options.method;
+            options.method = 'POST';
+        }
+
+        if (options.emulateJSON && _.isPlainObject(options.data)) {
+            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            options.data = url.params(options.data);
+        }
+
+        if (_.isObject(options.data) && /FormData/i.test(options.data.toString())) {
+            delete options.headers['Content-Type'];
+        }
+
+        if (_.isPlainObject(options.data)) {
+            options.data = JSON.stringify(options.data);
+        }
+
+        var promise = new Promise(function (resolve, reject) {
+
+            request.open(options.method, url(options), true);
+
+            _.each(options.headers, function (value, header) {
+                request.setRequestHeader(header, value);
+            });
+
+            request.onreadystatechange = function () {
+
+                if (this.readyState === 4) {
+
+                    if (this.status >= 200 && this.status < 300) {
+                        resolve(this);
+                    } else {
+                        reject(this);
+                    }
+                }
+            };
+
+            request.send(options.data);
+        });
+
+        _.extend(promise, {
+
+            abort: function () {
+                request.abort();
+            }
+
+        });
+
+        return promise;
+    }
+
+    function jsonp(url, options) {
+
+        var callback = '_jsonp' + Math.random().toString(36).substr(2), script, result;
+
+        _.extend(options.params, options.data);
+        options.params[options.jsonp] = callback;
+
+        if (_.isFunction(options.beforeSend)) {
+            options.beforeSend({}, options);
+        }
+
+        var promise = new Promise(function (resolve, reject) {
+
+            script = document.createElement('script');
+            script.src = url(options.url, options.params);
+            script.type = 'text/javascript';
+            script.async = true;
+
+            window[callback] = function (data) {
+                result = data;
+            };
+
+            var handler = function (event) {
+
+                delete window[callback];
+                document.body.removeChild(script);
+
+                if (event.type === 'load' && !result) {
+                    event.type = 'error';
+                }
+
+                var text = result ? result : event.type, status = event.type === 'error' ? 404 : 200;
+
+                (status === 200 ? resolve : reject)({ responseText: text, status: status });
+            };
+
+            script.onload = handler;
+            script.onerror = handler;
+
+            document.body.appendChild(script);
+        });
+
+        return promise;
+    }
+
+    function parseReq(request) {
+
+        var result;
+
+        try {
+            result = JSON.parse(request.responseText);
+        } catch (e) {
+            result = request.responseText;
+        }
+
+        return [result, request.status, request];
+    }
+
+    Http.options = {
+        method: 'GET',
+        params: {},
+        data: '',
+        jsonp: 'callback',
+        beforeSend: null,
+        emulateHTTP: false,
+        emulateJSON: false,
+    };
+
+    Http.headers = {
+        put: jsonType,
+        post: jsonType,
+        patch: jsonType,
+        delete: jsonType,
+        common: {
+            'Accept': 'application/json, text/plain, */*',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    };
+
+    ['get', 'put', 'post', 'patch', 'delete', 'jsonp'].forEach(function (method) {
+
+        Http[method] = function (url, data, success, options) {
+
+            if (_.isFunction(data)) {
+                options = success;
+                success = data;
+                data = undefined;
+            }
+
+            return this(url, _.extend({method: method, data: data, success: success}, options));
+        };
+    });
+
+    Object.defineProperty(Vue.prototype, '$http', {
+
+        get: function () {
+            return _.extend(Http.bind(this), Http);
+        }
+
+    });
+
+    return Http;
+};
+
+},{"./promise":4,"./util":7}],3:[function(require,module,exports){
+/**
+ * Install plugin.
+ */
+
+function install (Vue) {
+    Vue.url = require('./url')(Vue);
+    Vue.http = require('./http')(Vue);
+    Vue.resource = require('./resource')(Vue);
+}
+
+if (window.Vue) {
+    Vue.use(install);
+}
+
+module.exports = install;
+
+},{"./http":2,"./resource":5,"./url":6}],4:[function(require,module,exports){
+/**
+ * Promise polyfill (https://gist.github.com/briancavalier/814313)
+ */
+
+function Promise (executor) {
+    executor(this.resolve.bind(this), this.reject.bind(this));
+    this._thens = [];
+}
+
+Promise.prototype = {
+
+    then: function (onResolve, onReject, onProgress) {
+        this._thens.push({resolve: onResolve, reject: onReject, progress: onProgress});
+    },
+
+    'catch': function (onReject) {
+        this._thens.push({reject: onReject});
+    },
+
+    resolve: function (value) {
+        this._complete('resolve', value);
+    },
+
+    reject: function (reason) {
+        this._complete('reject', reason);
+    },
+
+    progress: function (status) {
+
+        var i = 0, aThen;
+
+        while (aThen = this._thens[i++]) {
+            aThen.progress && aThen.progress(status);
+        }
+    },
+
+    _complete: function (which, arg) {
+
+        this.then = which === 'resolve' ?
+            function (resolve, reject) { resolve && resolve(arg); } :
+            function (resolve, reject) { reject && reject(arg); };
+
+        this.resolve = this.reject = this.progress =
+            function () { throw new Error('Promise already completed.'); };
+
+        var aThen, i = 0;
+
+        while (aThen = this._thens[i++]) {
+            aThen[which] && aThen[which](arg);
+        }
+
+        delete this._thens;
+    }
+};
+
+module.exports = window.Promise ? window.Promise : Promise;
+
+},{}],5:[function(require,module,exports){
+module.exports = function (Vue) {
+
+    var _ = require('./util')(Vue);
+
+    /**
+     * Resource provides interaction support with RESTful services.
+     */
+
+    function Resource (url, params, actions) {
+
+        var self = this, resource = {};
+
+        actions = _.extend({},
+            Resource.actions,
+            actions
+        );
+
+        _.each(actions, function (action, name) {
+
+            action = _.extend(true, {url: url, params: params || {}}, action);
+
+            resource[name] = function () {
+                return (self.$http || Vue.http)(opts(action, arguments));
+            };
+        });
+
+        return resource;
+    }
+
+    function opts (action, args) {
+
+        var options = _.extend({}, action), params = {}, data, success, error;
+
+        switch (args.length) {
+
+            case 4:
+
+                error = args[3];
+                success = args[2];
+
+            case 3:
+            case 2:
+
+                if (_.isFunction (args[1])) {
+
+                    if (_.isFunction (args[0])) {
+
+                        success = args[0];
+                        error = args[1];
+
+                        break;
+                    }
+
+                    success = args[1];
+                    error = args[2];
+
+                } else {
+
+                    params = args[0];
+                    data = args[1];
+                    success = args[2];
+
+                    break;
+                }
+
+            case 1:
+
+                if (_.isFunction (args[0])) {
+                    success = args[0];
+                } else if (/^(POST|PUT|PATCH)$/i.test(options.method)) {
+                    data = args[0];
+                } else {
+                    params = args[0];
+                }
+
+                break;
+
+            case 0:
+
+                break;
+
+            default:
+
+                throw 'Expected up to 4 arguments [params, data, success, error], got ' + args.length + ' arguments';
+        }
+
+        options.url = action.url;
+        options.data = data;
+        options.params = _.extend({}, action.params, params);
+
+        if (success) {
+            options.success = success;
+        }
+
+        if (error) {
+            options.error = error;
+        }
+
+        return options;
+    }
+
+    Resource.actions = {
+
+        get: {method: 'GET'},
+        save: {method: 'POST'},
+        query: {method: 'GET'},
+        remove: {method: 'DELETE'},
+        delete: {method: 'DELETE'}
+
+    };
+
+    Object.defineProperty(Vue.prototype, '$resource', {
+
+        get: function () {
+            return Resource.bind(this);
+        }
+
+    });
+
+    return Resource;
+};
+
+},{"./util":7}],6:[function(require,module,exports){
+module.exports = function (Vue) {
+
+    var _ = require('./util')(Vue);
+
+    /**
+     * Url provides URL templating.
+     *
+     * @param {String} url
+     * @param {Object} params
+     */
+
+    function Url (url, params) {
+
+        var urlParams = {}, queryParams = {}, options = url, query;
+
+        if (!_.isPlainObject(options)) {
+            options = {url: url, params: params};
+        }
+
+        options = _.extend({}, Url.options, _.options('url', this, options));
+
+        url = options.url.replace(/:([a-z]\w*)/gi, function (match, name) {
+
+            if (options.params[name]) {
+                urlParams[name] = true;
+                return encodeUriSegment(options.params[name]);
+            }
+
+            return '';
+        });
+
+        if (!url.match(/^(https?:)?\//) && options.root) {
+            url = options.root + '/' + url;
+        }
+
+        url = url.replace(/([^:])[\/]{2,}/g, '$1/');
+        url = url.replace(/(\w+)\/+$/, '$1');
+
+        _.each(options.params, function (value, key) {
+            if (!urlParams[key]) {
+                queryParams[key] = value;
+            }
+        });
+
+        query = Url.params(queryParams);
+
+        if (query) {
+            url += (url.indexOf('?') == -1 ? '?' : '&') + query;
+        }
+
+        return url;
+    }
+
+    /**
+     * Url options.
+     */
+
+    Url.options = {
+        url: '',
+        root: '',
+        params: {}
+    };
+
+    /**
+     * Encodes a Url parameter string.
+     *
+     * @param {Object} obj
+     */
+
+    Url.params = function (obj) {
+
+        var params = [];
+
+        params.add = function (key, value) {
+
+            if (_.isFunction (value)) {
+                value = value();
+            }
+
+            if (value === null) {
+                value = '';
+            }
+
+            this.push(encodeUriSegment(key) + '=' + encodeUriSegment(value));
+        };
+
+        serialize(params, obj);
+
+        return params.join('&');
+    };
+
+    /**
+     * Parse a URL and return its components.
+     *
+     * @param {String} url
+     */
+
+    Url.parse = function (url) {
+
+        var pattern = new RegExp("^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\\?([^#]*))?(?:#(.*))?"),
+            matches = url.match(pattern);
+
+        return {
+            url: url,
+            scheme: matches[1] || '',
+            host: matches[2] || '',
+            path: matches[3] || '',
+            query: matches[4] || '',
+            fragment: matches[5] || ''
+        };
+    };
+
+    function serialize (params, obj, scope) {
+
+        var array = _.isArray(obj), plain = _.isPlainObject(obj), hash;
+
+        _.each(obj, function (value, key) {
+
+            hash = _.isObject(value) || _.isArray(value);
+
+            if (scope) {
+                key = scope + '[' + (plain || hash ? key : '') + ']';
+            }
+
+            if (!scope && array) {
+                params.add(value.name, value.value);
+            } else if (hash) {
+                serialize(params, value, key);
+            } else {
+                params.add(key, value);
+            }
+        });
+    }
+
+    function encodeUriSegment (value) {
+
+        return encodeUriQuery(value, true).
+            replace(/%26/gi, '&').
+            replace(/%3D/gi, '=').
+            replace(/%2B/gi, '+');
+    }
+
+    function encodeUriQuery (value, spaces) {
+
+        return encodeURIComponent(value).
+            replace(/%40/gi, '@').
+            replace(/%3A/gi, ':').
+            replace(/%24/g, '$').
+            replace(/%2C/gi, ',').
+            replace(/%20/g, (spaces ? '%20' : '+'));
+    }
+
+    Object.defineProperty(Vue.prototype, '$url', {
+
+        get: function () {
+            return _.extend(Url.bind(this), Url);
+        }
+
+    });
+
+    return Url;
+};
+
+},{"./util":7}],7:[function(require,module,exports){
+/**
+ * Utility functions.
+ */
+
+module.exports = function (Vue) {
+
+    var _ = Vue.util.extend({}, Vue.util);
+
+    _.options = function (key, obj, options) {
+
+        var opts = obj.$options || {};
+
+        return _.extend({},
+            opts[key],
+            options
+        );
+    };
+
+    _.each = function (obj, iterator) {
+
+        var i, key;
+
+        if (typeof obj.length == 'number') {
+            for (i = 0; i < obj.length; i++) {
+                iterator.call(obj[i], obj[i], i);
+            }
+        } else if (_.isObject(obj)) {
+            for (key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    iterator.call(obj[key], obj[key], key);
+                }
+            }
+        }
+
+        return obj;
+    };
+
+    _.extend = function (target) {
+
+        var array = [], args = array.slice.call(arguments, 1), deep;
+
+        if (typeof target == 'boolean') {
+            deep = target;
+            target = args.shift();
+        }
+
+        args.forEach(function (arg) {
+            extend(target, arg, deep);
+        });
+
+        return target;
+    };
+
+    function extend (target, source, deep) {
+        for (var key in source) {
+            if (deep && (_.isPlainObject(source[key]) || _.isArray(source[key]))) {
+                if (_.isPlainObject(source[key]) && !_.isPlainObject(target[key])) {
+                    target[key] = {};
+                }
+                if (_.isArray(source[key]) && !_.isArray(target[key])) {
+                    target[key] = [];
+                }
+                extend(target[key], source[key], deep);
+            } else if (source[key] !== undefined) {
+                target[key] = source[key];
+            }
+        }
+    }
+
+    _.isFunction = function (obj) {
+        return obj && typeof obj === 'function';
+    };
+
+    return _;
+};
+
+},{}],8:[function(require,module,exports){
+var _ = require('../util')
+
+/**
+ * Create a child instance that prototypally inehrits
+ * data on parent. To achieve that we create an intermediate
+ * constructor with its prototype pointing to parent.
+ *
+ * @param {Object} opts
+ * @param {Function} [BaseCtor]
+ * @return {Vue}
+ * @public
+ */
+
+exports.$addChild = function (opts, BaseCtor) {
+  BaseCtor = BaseCtor || _.Vue
+  opts = opts || {}
+  var parent = this
+  var ChildVue
+  var inherit = opts.inherit !== undefined
+    ? opts.inherit
+    : BaseCtor.options.inherit
+  if (inherit) {
+    var ctors = parent._childCtors
+    ChildVue = ctors[BaseCtor.cid]
+    if (!ChildVue) {
+      var optionName = BaseCtor.options.name
+      var className = optionName
+        ? _.classify(optionName)
+        : 'VueComponent'
+      ChildVue = new Function(
+        'return function ' + className + ' (options) {' +
+        'this.constructor = ' + className + ';' +
+        'this._init(options) }'
+      )()
+      ChildVue.options = BaseCtor.options
+      ChildVue.prototype = this
+      ctors[BaseCtor.cid] = ChildVue
+    }
+  } else {
+    ChildVue = BaseCtor
+  }
+  opts._parent = parent
+  opts._root = parent.$root
+  var child = new ChildVue(opts)
+  return child
+}
+},{"../util":65}],9:[function(require,module,exports){
+var _ = require('../util')
+var Watcher = require('../watcher')
+var Path = require('../parsers/path')
+var textParser = require('../parsers/text')
+var dirParser = require('../parsers/directive')
+var expParser = require('../parsers/expression')
+var filterRE = /[^|]\|[^|]/
+
+/**
+ * Get the value from an expression on this vm.
+ *
+ * @param {String} exp
+ * @return {*}
+ */
+
+exports.$get = function (exp) {
+  var res = expParser.parse(exp)
+  if (res) {
+    try {
+      return res.get.call(this, this)
+    } catch (e) {}
+  }
+}
+
+/**
+ * Set the value from an expression on this vm.
+ * The expression must be a valid left-hand
+ * expression in an assignment.
+ *
+ * @param {String} exp
+ * @param {*} val
+ */
+
+exports.$set = function (exp, val) {
+  var res = expParser.parse(exp, true)
+  if (res && res.set) {
+    res.set.call(this, this, val)
+  }
+}
+
+/**
+ * Add a property on the VM
+ *
+ * @param {String} key
+ * @param {*} val
+ */
+
+exports.$add = function (key, val) {
+  this._data.$add(key, val)
+}
+
+/**
+ * Delete a property on the VM
+ *
+ * @param {String} key
+ */
+
+exports.$delete = function (key) {
+  this._data.$delete(key)
+}
+
+/**
+ * Watch an expression, trigger callback when its
+ * value changes.
+ *
+ * @param {String} exp
+ * @param {Function} cb
+ * @param {Boolean} [deep]
+ * @param {Boolean} [immediate]
+ * @return {Function} - unwatchFn
+ */
+
+exports.$watch = function (exp, cb, deep, immediate) {
+  var vm = this
+  var key = deep ? exp + '**deep**' : exp
+  var watcher = vm._userWatchers[key]
+  var wrappedCb = function (val, oldVal) {
+    cb.call(vm, val, oldVal)
+  }
+  if (!watcher) {
+    watcher = vm._userWatchers[key] =
+      new Watcher(vm, exp, wrappedCb, {
+        deep: deep,
+        user: true
+      })
+  } else {
+    watcher.addCb(wrappedCb)
+  }
+  if (immediate) {
+    wrappedCb(watcher.value)
+  }
+  return function unwatchFn () {
+    watcher.removeCb(wrappedCb)
+    if (!watcher.active) {
+      vm._userWatchers[key] = null
+    }
+  }
+}
+
+/**
+ * Evaluate a text directive, including filters.
+ *
+ * @param {String} text
+ * @return {String}
+ */
+
+exports.$eval = function (text) {
+  // check for filters.
+  if (filterRE.test(text)) {
+    var dir = dirParser.parse(text)[0]
+    // the filter regex check might give false positive
+    // for pipes inside strings, so it's possible that
+    // we don't get any filters here
+    return dir.filters
+      ? _.applyFilters(
+          this.$get(dir.expression),
+          _.resolveFilters(this, dir.filters).read,
+          this
+        )
+      : this.$get(dir.expression)
+  } else {
+    // no filter
+    return this.$get(text)
+  }
+}
+
+/**
+ * Interpolate a piece of template text.
+ *
+ * @param {String} text
+ * @return {String}
+ */
+
+exports.$interpolate = function (text) {
+  var tokens = textParser.parse(text)
+  var vm = this
+  if (tokens) {
+    return tokens.length === 1
+      ? vm.$eval(tokens[0].value)
+      : tokens.map(function (token) {
+          return token.tag
+            ? vm.$eval(token.value)
+            : token.value
+        }).join('')
+  } else {
+    return text
+  }
+}
+
+/**
+ * Log instance data as a plain JS object
+ * so that it is easier to inspect in console.
+ * This method assumes console is available.
+ *
+ * @param {String} [path]
+ */
+
+exports.$log = function (path) {
+  var data = path
+    ? Path.get(this._data, path)
+    : this._data
+  if (data) {
+    data = JSON.parse(JSON.stringify(data))
+  }
+  console.log(data)
+}
+},{"../parsers/directive":53,"../parsers/expression":54,"../parsers/path":55,"../parsers/text":57,"../util":65,"../watcher":69}],10:[function(require,module,exports){
+var _ = require('../util')
+var transition = require('../transition')
+
+/**
+ * Append instance to target
+ *
+ * @param {Node} target
+ * @param {Function} [cb]
+ * @param {Boolean} [withTransition] - defaults to true
+ */
+
+exports.$appendTo = function (target, cb, withTransition) {
+  return insert(
+    this, target, cb, withTransition,
+    append, transition.append
+  )
+}
+
+/**
+ * Prepend instance to target
+ *
+ * @param {Node} target
+ * @param {Function} [cb]
+ * @param {Boolean} [withTransition] - defaults to true
+ */
+
+exports.$prependTo = function (target, cb, withTransition) {
+  target = query(target)
+  if (target.hasChildNodes()) {
+    this.$before(target.firstChild, cb, withTransition)
+  } else {
+    this.$appendTo(target, cb, withTransition)
+  }
+  return this
+}
+
+/**
+ * Insert instance before target
+ *
+ * @param {Node} target
+ * @param {Function} [cb]
+ * @param {Boolean} [withTransition] - defaults to true
+ */
+
+exports.$before = function (target, cb, withTransition) {
+  return insert(
+    this, target, cb, withTransition,
+    before, transition.before
+  )
+}
+
+/**
+ * Insert instance after target
+ *
+ * @param {Node} target
+ * @param {Function} [cb]
+ * @param {Boolean} [withTransition] - defaults to true
+ */
+
+exports.$after = function (target, cb, withTransition) {
+  target = query(target)
+  if (target.nextSibling) {
+    this.$before(target.nextSibling, cb, withTransition)
+  } else {
+    this.$appendTo(target.parentNode, cb, withTransition)
+  }
+  return this
+}
+
+/**
+ * Remove instance from DOM
+ *
+ * @param {Function} [cb]
+ * @param {Boolean} [withTransition] - defaults to true
+ */
+
+exports.$remove = function (cb, withTransition) {
+  var inDoc = this._isAttached && _.inDoc(this.$el)
+  // if we are not in document, no need to check
+  // for transitions
+  if (!inDoc) withTransition = false
+  var op
+  var self = this
+  var realCb = function () {
+    if (inDoc) self._callHook('detached')
+    if (cb) cb()
+  }
+  if (
+    this._isBlock &&
+    !this._blockFragment.hasChildNodes()
+  ) {
+    op = withTransition === false
+      ? append
+      : transition.removeThenAppend
+    blockOp(this, this._blockFragment, op, realCb)
+  } else {
+    op = withTransition === false
+      ? remove
+      : transition.remove
+    op(this.$el, this, realCb)
+  }
+  return this
+}
+
+/**
+ * Shared DOM insertion function.
+ *
+ * @param {Vue} vm
+ * @param {Element} target
+ * @param {Function} [cb]
+ * @param {Boolean} [withTransition]
+ * @param {Function} op1 - op for non-transition insert
+ * @param {Function} op2 - op for transition insert
+ * @return vm
+ */
+
+function insert (vm, target, cb, withTransition, op1, op2) {
+  target = query(target)
+  var targetIsDetached = !_.inDoc(target)
+  var op = withTransition === false || targetIsDetached
+    ? op1
+    : op2
+  var shouldCallHook =
+    !targetIsDetached &&
+    !vm._isAttached &&
+    !_.inDoc(vm.$el)
+  if (vm._isBlock) {
+    blockOp(vm, target, op, cb)
+  } else {
+    op(vm.$el, target, vm, cb)
+  }
+  if (shouldCallHook) {
+    vm._callHook('attached')
+  }
+  return vm
+}
+
+/**
+ * Execute a transition operation on a block instance,
+ * iterating through all its block nodes.
+ *
+ * @param {Vue} vm
+ * @param {Node} target
+ * @param {Function} op
+ * @param {Function} cb
+ */
+
+function blockOp (vm, target, op, cb) {
+  var current = vm._blockStart
+  var end = vm._blockEnd
+  var next
+  while (next !== end) {
+    next = current.nextSibling
+    op(current, target, vm)
+    current = next
+  }
+  op(end, target, vm, cb)
+}
+
+/**
+ * Check for selectors
+ *
+ * @param {String|Element} el
+ */
+
+function query (el) {
+  return typeof el === 'string'
+    ? document.querySelector(el)
+    : el
+}
+
+/**
+ * Append operation that takes a callback.
+ *
+ * @param {Node} el
+ * @param {Node} target
+ * @param {Vue} vm - unused
+ * @param {Function} [cb]
+ */
+
+function append (el, target, vm, cb) {
+  target.appendChild(el)
+  if (cb) cb()
+}
+
+/**
+ * InsertBefore operation that takes a callback.
+ *
+ * @param {Node} el
+ * @param {Node} target
+ * @param {Vue} vm - unused
+ * @param {Function} [cb]
+ */
+
+function before (el, target, vm, cb) {
+  _.before(el, target)
+  if (cb) cb()
+}
+
+/**
+ * Remove operation that takes a callback.
+ *
+ * @param {Node} el
+ * @param {Vue} vm - unused
+ * @param {Function} [cb]
+ */
+
+function remove (el, vm, cb) {
+  _.remove(el)
+  if (cb) cb()
+}
+},{"../transition":59,"../util":65}],11:[function(require,module,exports){
+var _ = require('../util')
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ */
+
+exports.$on = function (event, fn) {
+  (this._events[event] || (this._events[event] = []))
+    .push(fn)
+  modifyListenerCount(this, event, 1)
+  return this
+}
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ */
+
+exports.$once = function (event, fn) {
+  var self = this
+  function on () {
+    self.$off(event, on)
+    fn.apply(this, arguments)
+  }
+  on.fn = fn
+  this.$on(event, on)
+  return this
+}
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ */
+
+exports.$off = function (event, fn) {
+  var cbs
+  // all
+  if (!arguments.length) {
+    if (this.$parent) {
+      for (event in this._events) {
+        cbs = this._events[event]
+        if (cbs) {
+          modifyListenerCount(this, event, -cbs.length)
+        }
+      }
+    }
+    this._events = {}
+    return this
+  }
+  // specific event
+  cbs = this._events[event]
+  if (!cbs) {
+    return this
+  }
+  if (arguments.length === 1) {
+    modifyListenerCount(this, event, -cbs.length)
+    this._events[event] = null
+    return this
+  }
+  // specific handler
+  var cb
+  var i = cbs.length
+  while (i--) {
+    cb = cbs[i]
+    if (cb === fn || cb.fn === fn) {
+      modifyListenerCount(this, event, -1)
+      cbs.splice(i, 1)
+      break
+    }
+  }
+  return this
+}
+
+/**
+ * Trigger an event on self.
+ *
+ * @param {String} event
+ */
+
+exports.$emit = function (event) {
+  this._eventCancelled = false
+  var cbs = this._events[event]
+  if (cbs) {
+    // avoid leaking arguments:
+    // http://jsperf.com/closure-with-arguments
+    var i = arguments.length - 1
+    var args = new Array(i)
+    while (i--) {
+      args[i] = arguments[i + 1]
+    }
+    i = 0
+    cbs = cbs.length > 1
+      ? _.toArray(cbs)
+      : cbs
+    for (var l = cbs.length; i < l; i++) {
+      if (cbs[i].apply(this, args) === false) {
+        this._eventCancelled = true
+      }
+    }
+  }
+  return this
+}
+
+/**
+ * Recursively broadcast an event to all children instances.
+ *
+ * @param {String} event
+ * @param {...*} additional arguments
+ */
+
+exports.$broadcast = function (event) {
+  // if no child has registered for this event,
+  // then there's no need to broadcast.
+  if (!this._eventsCount[event]) return
+  var children = this._children
+  for (var i = 0, l = children.length; i < l; i++) {
+    var child = children[i]
+    child.$emit.apply(child, arguments)
+    if (!child._eventCancelled) {
+      child.$broadcast.apply(child, arguments)
+    }
+  }
+  return this
+}
+
+/**
+ * Recursively propagate an event up the parent chain.
+ *
+ * @param {String} event
+ * @param {...*} additional arguments
+ */
+
+exports.$dispatch = function () {
+  var parent = this.$parent
+  while (parent) {
+    parent.$emit.apply(parent, arguments)
+    parent = parent._eventCancelled
+      ? null
+      : parent.$parent
+  }
+  return this
+}
+
+/**
+ * Modify the listener counts on all parents.
+ * This bookkeeping allows $broadcast to return early when
+ * no child has listened to a certain event.
+ *
+ * @param {Vue} vm
+ * @param {String} event
+ * @param {Number} count
+ */
+
+var hookRE = /^hook:/
+function modifyListenerCount (vm, event, count) {
+  var parent = vm.$parent
+  // hooks do not get broadcasted so no need
+  // to do bookkeeping for them
+  if (!parent || !count || hookRE.test(event)) return
+  while (parent) {
+    parent._eventsCount[event] =
+      (parent._eventsCount[event] || 0) + count
+    parent = parent.$parent
+  }
+}
+},{"../util":65}],12:[function(require,module,exports){
+var _ = require('../util')
+var mergeOptions = require('../util/merge-option')
+
+/**
+ * Expose useful internals
+ */
+
+exports.util = _
+exports.nextTick = _.nextTick
+exports.config = require('../config')
+
+exports.compiler = {
+  compile: require('../compiler/compile'),
+  transclude: require('../compiler/transclude')
+}
+
+exports.parsers = {
+  path: require('../parsers/path'),
+  text: require('../parsers/text'),
+  template: require('../parsers/template'),
+  directive: require('../parsers/directive'),
+  expression: require('../parsers/expression')
+}
+
+/**
+ * Each instance constructor, including Vue, has a unique
+ * cid. This enables us to create wrapped "child
+ * constructors" for prototypal inheritance and cache them.
+ */
+
+exports.cid = 0
+var cid = 1
+
+/**
+ * Class inehritance
+ *
+ * @param {Object} extendOptions
+ */
+
+exports.extend = function (extendOptions) {
+  extendOptions = extendOptions || {}
+  var Super = this
+  var Sub = createClass(
+    extendOptions.name ||
+    Super.options.name ||
+    'VueComponent'
+  )
+  Sub.prototype = Object.create(Super.prototype)
+  Sub.prototype.constructor = Sub
+  Sub.cid = cid++
+  Sub.options = mergeOptions(
+    Super.options,
+    extendOptions
+  )
+  Sub['super'] = Super
+  // allow further extension
+  Sub.extend = Super.extend
+  // create asset registers, so extended classes
+  // can have their private assets too.
+  createAssetRegisters(Sub)
+  return Sub
+}
+
+/**
+ * A function that returns a sub-class constructor with the
+ * given name. This gives us much nicer output when
+ * logging instances in the console.
+ *
+ * @param {String} name
+ * @return {Function}
+ */
+
+function createClass (name) {
+  return new Function(
+    'return function ' + _.classify(name) +
+    ' (options) { this._init(options) }'
+  )()
+}
+
+/**
+ * Plugin system
+ *
+ * @param {Object} plugin
+ */
+
+exports.use = function (plugin) {
+  // additional parameters
+  var args = _.toArray(arguments, 1)
+  args.unshift(this)
+  if (typeof plugin.install === 'function') {
+    plugin.install.apply(plugin, args)
+  } else {
+    plugin.apply(null, args)
+  }
+  return this
+}
+
+/**
+ * Define asset registration methods on a constructor.
+ *
+ * @param {Function} Constructor
+ */
+
+var assetTypes = [
+  'directive',
+  'filter',
+  'partial',
+  'transition'
+]
+
+function createAssetRegisters (Constructor) {
+
+  /* Asset registration methods share the same signature:
+   *
+   * @param {String} id
+   * @param {*} definition
+   */
+
+  assetTypes.forEach(function (type) {
+    Constructor[type] = function (id, definition) {
+      if (!definition) {
+        return this.options[type + 's'][id]
+      } else {
+        this.options[type + 's'][id] = definition
+      }
+    }
+  })
+
+  /**
+   * Component registration needs to automatically invoke
+   * Vue.extend on object values.
+   *
+   * @param {String} id
+   * @param {Object|Function} definition
+   */
+
+  Constructor.component = function (id, definition) {
+    if (!definition) {
+      return this.options.components[id]
+    } else {
+      if (_.isPlainObject(definition)) {
+        definition.name = id
+        definition = _.Vue.extend(definition)
+      }
+      this.options.components[id] = definition
+    }
+  }
+}
+
+createAssetRegisters(exports)
+},{"../compiler/compile":16,"../compiler/transclude":17,"../config":18,"../parsers/directive":53,"../parsers/expression":54,"../parsers/path":55,"../parsers/template":56,"../parsers/text":57,"../util":65,"../util/merge-option":67}],13:[function(require,module,exports){
+var _ = require('../util')
+var compile = require('../compiler/compile')
+
+/**
+ * Set instance target element and kick off the compilation
+ * process. The passed in `el` can be a selector string, an
+ * existing Element, or a DocumentFragment (for block
+ * instances).
+ *
+ * @param {Element|DocumentFragment|string} el
+ * @public
+ */
+
+exports.$mount = function (el) {
+  if (this._isCompiled) {
+    _.warn('$mount() should be called only once.')
+    return
+  }
+  if (!el) {
+    el = document.createElement('div')
+  } else if (typeof el === 'string') {
+    var selector = el
+    el = document.querySelector(el)
+    if (!el) {
+      _.warn('Cannot find element: ' + selector)
+      return
+    }
+  }
+  this._compile(el)
+  this._isCompiled = true
+  this._callHook('compiled')
+  if (_.inDoc(this.$el)) {
+    this._callHook('attached')
+    this._initDOMHooks()
+    ready.call(this)
+  } else {
+    this._initDOMHooks()
+    this.$once('hook:attached', ready)
+  }
+  return this
+}
+
+/**
+ * Mark an instance as ready.
+ */
+
+function ready () {
+  this._isAttached = true
+  this._isReady = true
+  this._callHook('ready')
+}
+
+/**
+ * Teardown the instance, simply delegate to the internal
+ * _destroy.
+ */
+
+exports.$destroy = function (remove, deferCleanup) {
+  this._destroy(remove, deferCleanup)
+}
+
+/**
+ * Partially compile a piece of DOM and return a
+ * decompile function.
+ *
+ * @param {Element|DocumentFragment} el
+ * @return {Function}
+ */
+
+exports.$compile = function (el) {
+  return compile(el, this.$options, true)(this, el)
+}
+},{"../compiler/compile":16,"../util":65}],14:[function(require,module,exports){
+var _ = require('./util')
+var MAX_UPDATE_COUNT = 10
+
+// we have two separate queues: one for directive updates
+// and one for user watcher registered via $watch().
+// we want to guarantee directive updates to be called
+// before user watchers so that when user watchers are
+// triggered, the DOM would have already been in updated
+// state.
+var queue = []
+var userQueue = []
+var has = {}
+var waiting = false
+var flushing = false
+
+/**
+ * Reset the batcher's state.
+ */
+
+function reset () {
+  queue = []
+  userQueue = []
+  has = {}
+  waiting = false
+  flushing = false
+}
+
+/**
+ * Flush both queues and run the jobs.
+ */
+
+function flush () {
+  flushing = true
+  run(queue)
+  run(userQueue)
+  reset()
+}
+
+/**
+ * Run the jobs in a single queue.
+ *
+ * @param {Array} queue
+ */
+
+function run (queue) {
+  // do not cache length because more jobs might be pushed
+  // as we run existing jobs
+  for (var i = 0; i < queue.length; i++) {
+    queue[i].run()
+  }
+}
+
+/**
+ * Push a job into the job queue.
+ * Jobs with duplicate IDs will be skipped unless it's
+ * pushed when the queue is being flushed.
+ *
+ * @param {Object} job
+ *   properties:
+ *   - {String|Number} id
+ *   - {Function}      run
+ */
+
+exports.push = function (job) {
+  var id = job.id
+  if (!id || !has[id] || flushing) {
+    if (!has[id]) {
+      has[id] = 1
+    } else {
+      has[id]++
+      // detect possible infinite update loops
+      if (has[id] > MAX_UPDATE_COUNT) {
+        _.warn(
+          'You may have an infinite update loop for the ' +
+          'watcher with expression: "' + job.expression + '".'
+        )
+        return
+      }
+    }
+    // A user watcher callback could trigger another
+    // directive update during the flushing; at that time
+    // the directive queue would already have been run, so
+    // we call that update immediately as it is pushed.
+    if (flushing && !job.user) {
+      job.run()
+      return
+    }
+    ;(job.user ? userQueue : queue).push(job)
+    if (!waiting) {
+      waiting = true
+      _.nextTick(flush)
+    }
+  }
+}
+},{"./util":65}],15:[function(require,module,exports){
+/**
+ * A doubly linked list-based Least Recently Used (LRU)
+ * cache. Will keep most recently used items while
+ * discarding least recently used items when its limit is
+ * reached. This is a bare-bone version of
+ * Rasmus Andersson's js-lru:
+ *
+ *   https://github.com/rsms/js-lru
+ *
+ * @param {Number} limit
+ * @constructor
+ */
+
+function Cache (limit) {
+  this.size = 0
+  this.limit = limit
+  this.head = this.tail = undefined
+  this._keymap = {}
+}
+
+var p = Cache.prototype
+
+/**
+ * Put <value> into the cache associated with <key>.
+ * Returns the entry which was removed to make room for
+ * the new entry. Otherwise undefined is returned.
+ * (i.e. if there was enough room already).
+ *
+ * @param {String} key
+ * @param {*} value
+ * @return {Entry|undefined}
+ */
+
+p.put = function (key, value) {
+  var entry = {
+    key:key,
+    value:value
+  }
+  this._keymap[key] = entry
+  if (this.tail) {
+    this.tail.newer = entry
+    entry.older = this.tail
+  } else {
+    this.head = entry
+  }
+  this.tail = entry
+  if (this.size === this.limit) {
+    return this.shift()
+  } else {
+    this.size++
+  }
+}
+
+/**
+ * Purge the least recently used (oldest) entry from the
+ * cache. Returns the removed entry or undefined if the
+ * cache was empty.
+ */
+
+p.shift = function () {
+  var entry = this.head
+  if (entry) {
+    this.head = this.head.newer
+    this.head.older = undefined
+    entry.newer = entry.older = undefined
+    this._keymap[entry.key] = undefined
+  }
+  return entry
+}
+
+/**
+ * Get and register recent use of <key>. Returns the value
+ * associated with <key> or undefined if not in cache.
+ *
+ * @param {String} key
+ * @param {Boolean} returnEntry
+ * @return {Entry|*}
+ */
+
+p.get = function (key, returnEntry) {
+  var entry = this._keymap[key]
+  if (entry === undefined) return
+  if (entry === this.tail) {
+    return returnEntry
+      ? entry
+      : entry.value
+  }
+  // HEAD--------------TAIL
+  //   <.older   .newer>
+  //  <--- add direction --
+  //   A  B  C  <D>  E
+  if (entry.newer) {
+    if (entry === this.head) {
+      this.head = entry.newer
+    }
+    entry.newer.older = entry.older // C <-- E.
+  }
+  if (entry.older) {
+    entry.older.newer = entry.newer // C. --> E
+  }
+  entry.newer = undefined // D --x
+  entry.older = this.tail // D. --> E
+  if (this.tail) {
+    this.tail.newer = entry // E. <-- D
+  }
+  this.tail = entry
+  return returnEntry
+    ? entry
+    : entry.value
+}
+
+module.exports = Cache
+},{}],16:[function(require,module,exports){
+var _ = require('../util')
+var config = require('../config')
+var textParser = require('../parsers/text')
+var dirParser = require('../parsers/directive')
+var templateParser = require('../parsers/template')
+
+module.exports = compile
+
+/**
+ * Compile a template and return a reusable composite link
+ * function, which recursively contains more link functions
+ * inside. This top level compile function should only be
+ * called on instance root nodes.
+ *
+ * @param {Element|DocumentFragment} el
+ * @param {Object} options
+ * @param {Boolean} partial
+ * @param {Boolean} transcluded
+ * @return {Function}
+ */
+
+function compile (el, options, partial, transcluded) {
+  var isBlock = el.nodeType === 11
+  // link function for param attributes.
+  var params = options.paramAttributes
+  var paramsLinkFn = params && !partial && !transcluded && !isBlock
+    ? compileParamAttributes(el, params, options)
+    : null
+  // link function for the node itself.
+  // if this is a block instance, we return a link function
+  // for the attributes found on the container, if any.
+  // options._containerAttrs are collected during transclusion.
+  var nodeLinkFn = isBlock
+    ? compileBlockContainer(options._containerAttrs, params, options)
+    : compileNode(el, options)
+  // link function for the childNodes
+  var childLinkFn =
+    !(nodeLinkFn && nodeLinkFn.terminal) &&
+    el.tagName !== 'SCRIPT' &&
+    el.hasChildNodes()
+      ? compileNodeList(el.childNodes, options)
+      : null
+
+  /**
+   * A composite linker function to be called on a already
+   * compiled piece of DOM, which instantiates all directive
+   * instances.
+   *
+   * @param {Vue} vm
+   * @param {Element|DocumentFragment} el
+   * @return {Function|undefined}
+   */
+
+  function compositeLinkFn (vm, el) {
+    var originalDirCount = vm._directives.length
+    var parentOriginalDirCount =
+      vm.$parent && vm.$parent._directives.length
+    if (paramsLinkFn) {
+      paramsLinkFn(vm, el)
+    }
+    // cache childNodes before linking parent, fix #657
+    var childNodes = _.toArray(el.childNodes)
+    // if this is a transcluded compile, linkers need to be
+    // called in source scope, and the host needs to be
+    // passed down.
+    var source = transcluded ? vm.$parent : vm
+    var host = transcluded ? vm : undefined
+    // link
+    if (nodeLinkFn) nodeLinkFn(source, el, host)
+    if (childLinkFn) childLinkFn(source, childNodes, host)
+
+    /**
+     * If this is a partial compile, the linker function
+     * returns an unlink function that tearsdown all
+     * directives instances generated during the partial
+     * linking.
+     */
+
+    if (partial && !transcluded) {
+      var selfDirs = vm._directives.slice(originalDirCount)
+      var parentDirs = vm.$parent &&
+        vm.$parent._directives.slice(parentOriginalDirCount)
+
+      var teardownDirs = function (vm, dirs) {
+        var i = dirs.length
+        while (i--) {
+          dirs[i]._teardown()
+        }
+        i = vm._directives.indexOf(dirs[0])
+        vm._directives.splice(i, dirs.length)
+      }
+
+      return function unlink () {
+        teardownDirs(vm, selfDirs)
+        if (parentDirs) {
+          teardownDirs(vm.$parent, parentDirs)
+        }
+      }
+    }
+  }
+
+  // transcluded linkFns are terminal, because it takes
+  // over the entire sub-tree.
+  if (transcluded) {
+    compositeLinkFn.terminal = true
+  }
+
+  return compositeLinkFn
+}
+
+/**
+ * Compile the attributes found on a "block container" -
+ * i.e. the container node in the parent tempate of a block
+ * instance. We are only concerned with v-with and
+ * paramAttributes here.
+ *
+ * @param {Object} attrs - a map of attr name/value pairs
+ * @param {Array} params - param attributes list
+ * @param {Object} options
+ * @return {Function}
+ */
+
+function compileBlockContainer (attrs, params, options) {
+  if (!attrs) return null
+  var paramsLinkFn = params
+    ? compileParamAttributes(attrs, params, options)
+    : null
+  var withVal = attrs[config.prefix + 'with']
+  var withLinkFn = null
+  if (withVal) {
+    var descriptor = dirParser.parse(withVal)[0]
+    var def = options.directives['with']
+    withLinkFn = function (vm, el) {
+      vm._bindDir('with', el, descriptor, def)   
+    }
+  }
+  return function blockContainerLinkFn (vm) {
+    // explicitly passing null to the linkers
+    // since v-with doesn't need a real element
+    if (paramsLinkFn) paramsLinkFn(vm, null)
+    if (withLinkFn) withLinkFn(vm, null)
+  }
+}
+
+/**
+ * Compile a node and return a nodeLinkFn based on the
+ * node type.
+ *
+ * @param {Node} node
+ * @param {Object} options
+ * @return {Function|null}
+ */
+
+function compileNode (node, options) {
+  var type = node.nodeType
+  if (type === 1 && node.tagName !== 'SCRIPT') {
+    return compileElement(node, options)
+  } else if (type === 3 && config.interpolate && node.data.trim()) {
+    return compileTextNode(node, options)
+  } else {
+    return null
+  }
+}
+
+/**
+ * Compile an element and return a nodeLinkFn.
+ *
+ * @param {Element} el
+ * @param {Object} options
+ * @return {Function|null}
+ */
+
+function compileElement (el, options) {
+  if (checkTransclusion(el)) {
+    // unwrap textNode
+    if (el.hasAttribute('__vue__wrap')) {
+      el = el.firstChild
+    }
+    return compile(el, options._parent.$options, true, true)
+  }
+  var linkFn, tag, component
+  // check custom element component, but only on non-root
+  if (!el.__vue__) {
+    tag = el.tagName.toLowerCase()
+    component =
+      tag.indexOf('-') > 0 &&
+      options.components[tag]
+    if (component) {
+      el.setAttribute(config.prefix + 'component', tag)
+    }
+  }
+  if (component || el.hasAttributes()) {
+    // check terminal direcitves
+    linkFn = checkTerminalDirectives(el, options)
+    // if not terminal, build normal link function
+    if (!linkFn) {
+      var dirs = collectDirectives(el, options)
+      linkFn = dirs.length
+        ? makeNodeLinkFn(dirs)
+        : null
+    }
+  }
+  // if the element is a textarea, we need to interpolate
+  // its content on initial render.
+  if (el.tagName === 'TEXTAREA') {
+    var realLinkFn = linkFn
+    linkFn = function (vm, el) {
+      el.value = vm.$interpolate(el.value)
+      if (realLinkFn) realLinkFn(vm, el)
+    }
+    linkFn.terminal = true
+  }
+  return linkFn
+}
+
+/**
+ * Build a link function for all directives on a single node.
+ *
+ * @param {Array} directives
+ * @return {Function} directivesLinkFn
+ */
+
+function makeNodeLinkFn (directives) {
+  return function nodeLinkFn (vm, el, host) {
+    // reverse apply because it's sorted low to high
+    var i = directives.length
+    var dir, j, k, target
+    while (i--) {
+      dir = directives[i]
+      // a directive can be transcluded if it's written
+      // on a component's container in its parent tempalte.
+      target = dir.transcluded
+        ? vm.$parent
+        : vm
+      if (dir._link) {
+        // custom link fn
+        dir._link(target, el)
+      } else {
+        k = dir.descriptors.length
+        for (j = 0; j < k; j++) {
+          target._bindDir(dir.name, el,
+            dir.descriptors[j], dir.def, host)
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Compile a textNode and return a nodeLinkFn.
+ *
+ * @param {TextNode} node
+ * @param {Object} options
+ * @return {Function|null} textNodeLinkFn
+ */
+
+function compileTextNode (node, options) {
+  var tokens = textParser.parse(node.data)
+  if (!tokens) {
+    return null
+  }
+  var frag = document.createDocumentFragment()
+  var el, token
+  for (var i = 0, l = tokens.length; i < l; i++) {
+    token = tokens[i]
+    el = token.tag
+      ? processTextToken(token, options)
+      : document.createTextNode(token.value)
+    frag.appendChild(el)
+  }
+  return makeTextNodeLinkFn(tokens, frag, options)
+}
+
+/**
+ * Process a single text token.
+ *
+ * @param {Object} token
+ * @param {Object} options
+ * @return {Node}
+ */
+
+function processTextToken (token, options) {
+  var el
+  if (token.oneTime) {
+    el = document.createTextNode(token.value)
+  } else {
+    if (token.html) {
+      el = document.createComment('v-html')
+      setTokenType('html')
+    } else if (token.partial) {
+      el = document.createComment('v-partial')
+      setTokenType('partial')
+    } else {
+      // IE will clean up empty textNodes during
+      // frag.cloneNode(true), so we have to give it
+      // something here...
+      el = document.createTextNode(' ')
+      setTokenType('text')
+    }
+  }
+  function setTokenType (type) {
+    token.type = type
+    token.def = options.directives[type]
+    token.descriptor = dirParser.parse(token.value)[0]
+  }
+  return el
+}
+
+/**
+ * Build a function that processes a textNode.
+ *
+ * @param {Array<Object>} tokens
+ * @param {DocumentFragment} frag
+ */
+
+function makeTextNodeLinkFn (tokens, frag) {
+  return function textNodeLinkFn (vm, el) {
+    var fragClone = frag.cloneNode(true)
+    var childNodes = _.toArray(fragClone.childNodes)
+    var token, value, node
+    for (var i = 0, l = tokens.length; i < l; i++) {
+      token = tokens[i]
+      value = token.value
+      if (token.tag) {
+        node = childNodes[i]
+        if (token.oneTime) {
+          value = vm.$eval(value)
+          if (token.html) {
+            _.replace(node, templateParser.parse(value, true))
+          } else {
+            node.data = value
+          }
+        } else {
+          vm._bindDir(token.type, node,
+                      token.descriptor, token.def)
+        }
+      }
+    }
+    _.replace(el, fragClone)
+  }
+}
+
+/**
+ * Compile a node list and return a childLinkFn.
+ *
+ * @param {NodeList} nodeList
+ * @param {Object} options
+ * @return {Function|undefined}
+ */
+
+function compileNodeList (nodeList, options) {
+  var linkFns = []
+  var nodeLinkFn, childLinkFn, node
+  for (var i = 0, l = nodeList.length; i < l; i++) {
+    node = nodeList[i]
+    nodeLinkFn = compileNode(node, options)
+    childLinkFn =
+      !(nodeLinkFn && nodeLinkFn.terminal) &&
+      node.tagName !== 'SCRIPT' &&
+      node.hasChildNodes()
+        ? compileNodeList(node.childNodes, options)
+        : null
+    linkFns.push(nodeLinkFn, childLinkFn)
+  }
+  return linkFns.length
+    ? makeChildLinkFn(linkFns)
+    : null
+}
+
+/**
+ * Make a child link function for a node's childNodes.
+ *
+ * @param {Array<Function>} linkFns
+ * @return {Function} childLinkFn
+ */
+
+function makeChildLinkFn (linkFns) {
+  return function childLinkFn (vm, nodes, host) {
+    var node, nodeLinkFn, childrenLinkFn
+    for (var i = 0, n = 0, l = linkFns.length; i < l; n++) {
+      node = nodes[n]
+      nodeLinkFn = linkFns[i++]
+      childrenLinkFn = linkFns[i++]
+      // cache childNodes before linking parent, fix #657
+      var childNodes = _.toArray(node.childNodes)
+      if (nodeLinkFn) {
+        nodeLinkFn(vm, node, host)
+      }
+      if (childrenLinkFn) {
+        childrenLinkFn(vm, childNodes, host)
+      }
+    }
+  }
+}
+
+/**
+ * Compile param attributes on a root element and return
+ * a paramAttributes link function.
+ *
+ * @param {Element|Object} el
+ * @param {Array} attrs
+ * @param {Object} options
+ * @return {Function} paramsLinkFn
+ */
+
+function compileParamAttributes (el, attrs, options) {
+  var params = []
+  var isEl = el.nodeType
+  var i = attrs.length
+  var name, value, param
+  while (i--) {
+    name = attrs[i]
+    if (/[A-Z]/.test(name)) {
+      _.warn(
+        'You seem to be using camelCase for a paramAttribute, ' +
+        'but HTML doesn\'t differentiate between upper and ' +
+        'lower case. You should use hyphen-delimited ' +
+        'attribute names. For more info see ' +
+        'http://vuejs.org/api/options.html#paramAttributes'
+      )
+    }
+    value = isEl ? el.getAttribute(name) : el[name]
+    if (value !== null) {
+      param = {
+        name: name,
+        value: value
+      }
+      var tokens = textParser.parse(value)
+      if (tokens) {
+        if (isEl) el.removeAttribute(name)
+        if (tokens.length > 1) {
+          _.warn(
+            'Invalid param attribute binding: "' +
+            name + '="' + value + '"' +
+            '\nDon\'t mix binding tags with plain text ' +
+            'in param attribute bindings.'
+          )
+          continue
+        } else {
+          param.dynamic = true
+          param.value = tokens[0].value
+        }
+      }
+      params.push(param)
+    }
+  }
+  return makeParamsLinkFn(params, options)
+}
+
+/**
+ * Build a function that applies param attributes to a vm.
+ *
+ * @param {Array} params
+ * @param {Object} options
+ * @return {Function} paramsLinkFn
+ */
+
+var dataAttrRE = /^data-/
+
+function makeParamsLinkFn (params, options) {
+  var def = options.directives['with']
+  return function paramsLinkFn (vm, el) {
+    var i = params.length
+    var param, path
+    while (i--) {
+      param = params[i]
+      // params could contain dashes, which will be
+      // interpreted as minus calculations by the parser
+      // so we need to wrap the path here
+      path = _.camelize(param.name.replace(dataAttrRE, ''))
+      if (param.dynamic) {
+        // dynamic param attribtues are bound as v-with.
+        // we can directly duck the descriptor here beacuse
+        // param attributes cannot use expressions or
+        // filters.
+        vm._bindDir('with', el, {
+          arg: path,
+          expression: param.value
+        }, def)
+      } else {
+        // just set once
+        vm.$set(path, param.value)
+      }
+    }
+  }
+}
+
+/**
+ * Check an element for terminal directives in fixed order.
+ * If it finds one, return a terminal link function.
+ *
+ * @param {Element} el
+ * @param {Object} options
+ * @return {Function} terminalLinkFn
+ */
+
+var terminalDirectives = [
+  'repeat',
+  'if',
+  'component'
+]
+
+function skip () {}
+skip.terminal = true
+
+function checkTerminalDirectives (el, options) {
+  if (_.attr(el, 'pre') !== null) {
+    return skip
+  }
+  var value, dirName
+  /* jshint boss: true */
+  for (var i = 0; i < 3; i++) {
+    dirName = terminalDirectives[i]
+    if (value = _.attr(el, dirName)) {
+      return makeTerminalNodeLinkFn(el, dirName, value, options)
+    }
+  }
+}
+
+/**
+ * Build a node link function for a terminal directive.
+ * A terminal link function terminates the current
+ * compilation recursion and handles compilation of the
+ * subtree in the directive.
+ *
+ * @param {Element} el
+ * @param {String} dirName
+ * @param {String} value
+ * @param {Object} options
+ * @return {Function} terminalLinkFn
+ */
+
+function makeTerminalNodeLinkFn (el, dirName, value, options) {
+  var descriptor = dirParser.parse(value)[0]
+  var def = options.directives[dirName]
+  var fn = function terminalNodeLinkFn (vm, el, host) {
+    vm._bindDir(dirName, el, descriptor, def, host)
+  }
+  fn.terminal = true
+  return fn
+}
+
+/**
+ * Collect the directives on an element.
+ *
+ * @param {Element} el
+ * @param {Object} options
+ * @return {Array}
+ */
+
+function collectDirectives (el, options) {
+  var attrs = _.toArray(el.attributes)
+  var i = attrs.length
+  var dirs = []
+  var attr, attrName, dir, dirName, dirDef, transcluded
+  while (i--) {
+    attr = attrs[i]
+    attrName = attr.name
+    transcluded =
+      options._transcludedAttrs &&
+      options._transcludedAttrs[attrName]
+    if (attrName.indexOf(config.prefix) === 0) {
+      dirName = attrName.slice(config.prefix.length)
+      dirDef = options.directives[dirName]
+      _.assertAsset(dirDef, 'directive', dirName)
+      if (dirDef) {
+        dirs.push({
+          name: dirName,
+          descriptors: dirParser.parse(attr.value),
+          def: dirDef,
+          transcluded: transcluded
+        })
+      }
+    } else if (config.interpolate) {
+      dir = collectAttrDirective(el, attrName, attr.value,
+                                 options)
+      if (dir) {
+        dir.transcluded = transcluded
+        dirs.push(dir)
+      }
+    }
+  }
+  // sort by priority, LOW to HIGH
+  dirs.sort(directiveComparator)
+  return dirs
+}
+
+/**
+ * Check an attribute for potential dynamic bindings,
+ * and return a directive object.
+ *
+ * @param {Element} el
+ * @param {String} name
+ * @param {String} value
+ * @param {Object} options
+ * @return {Object}
+ */
+
+function collectAttrDirective (el, name, value, options) {
+  var tokens = textParser.parse(value)
+  if (tokens) {
+    var def = options.directives.attr
+    var i = tokens.length
+    var allOneTime = true
+    while (i--) {
+      var token = tokens[i]
+      if (token.tag && !token.oneTime) {
+        allOneTime = false
+      }
+    }
+    return {
+      def: def,
+      _link: allOneTime
+        ? function (vm, el) {
+            el.setAttribute(name, vm.$interpolate(value))
+          }
+        : function (vm, el) {
+            var value = textParser.tokensToExp(tokens, vm)
+            var desc = dirParser.parse(name + ':' + value)[0]
+            vm._bindDir('attr', el, desc, def)
+          }
+    }
+  }
+}
+
+/**
+ * Directive priority sort comparator
+ *
+ * @param {Object} a
+ * @param {Object} b
+ */
+
+function directiveComparator (a, b) {
+  a = a.def.priority || 0
+  b = b.def.priority || 0
+  return a > b ? 1 : -1
+}
+
+/**
+ * Check whether an element is transcluded
+ *
+ * @param {Element} el
+ * @return {Boolean}
+ */
+
+var transcludedFlagAttr = '__vue__transcluded'
+function checkTransclusion (el) {
+  if (el.nodeType === 1 && el.hasAttribute(transcludedFlagAttr)) {
+    el.removeAttribute(transcludedFlagAttr)
+    return true
+  }
+}
+},{"../config":18,"../parsers/directive":53,"../parsers/template":56,"../parsers/text":57,"../util":65}],17:[function(require,module,exports){
+var _ = require('../util')
+var config = require('../config')
+var templateParser = require('../parsers/template')
+var transcludedFlagAttr = '__vue__transcluded'
+
+/**
+ * Process an element or a DocumentFragment based on a
+ * instance option object. This allows us to transclude
+ * a template node/fragment before the instance is created,
+ * so the processed fragment can then be cloned and reused
+ * in v-repeat.
+ *
+ * @param {Element} el
+ * @param {Object} options
+ * @return {Element|DocumentFragment}
+ */
+
+module.exports = function transclude (el, options) {
+  if (options && options._asComponent) {
+    // mutating the options object here assuming the same
+    // object will be used for compile right after this
+    options._transcludedAttrs = extractAttrs(el.attributes)
+    // Mark content nodes and attrs so that the compiler
+    // knows they should be compiled in parent scope.
+    var i = el.childNodes.length
+    while (i--) {
+      var node = el.childNodes[i]
+      if (node.nodeType === 1) {
+        node.setAttribute(transcludedFlagAttr, '')
+      } else if (node.nodeType === 3 && node.data.trim()) {
+        // wrap transcluded textNodes in spans, because
+        // raw textNodes can't be persisted through clones
+        // by attaching attributes.
+        var wrapper = document.createElement('span')
+        wrapper.textContent = node.data
+        wrapper.setAttribute('__vue__wrap', '')
+        wrapper.setAttribute(transcludedFlagAttr, '')
+        el.replaceChild(wrapper, node)
+      }
+    }
+  }
+  // for template tags, what we want is its content as
+  // a documentFragment (for block instances)
+  if (el.tagName === 'TEMPLATE') {
+    el = templateParser.parse(el)
+  }
+  if (options && options.template) {
+    el = transcludeTemplate(el, options)
+  }
+  if (el instanceof DocumentFragment) {
+    _.prepend(document.createComment('v-start'), el)
+    el.appendChild(document.createComment('v-end'))
+  }
+  return el
+}
+
+/**
+ * Process the template option.
+ * If the replace option is true this will swap the $el.
+ *
+ * @param {Element} el
+ * @param {Object} options
+ * @return {Element|DocumentFragment}
+ */
+
+function transcludeTemplate (el, options) {
+  var template = options.template
+  var frag = templateParser.parse(template, true)
+  if (!frag) {
+    _.warn('Invalid template option: ' + template)
+  } else {
+    var rawContent = options._content || _.extractContent(el)
+    if (options.replace) {
+      if (frag.childNodes.length > 1) {
+        // this is a block instance which has no root node.
+        // however, the container in the parent template
+        // (which is replaced here) may contain v-with and
+        // paramAttributes that still need to be compiled
+        // for the child. we store all the container
+        // attributes on the options object and pass it down
+        // to the compiler.
+        var containerAttrs = options._containerAttrs = {}
+        var i = el.attributes.length
+        while (i--) {
+          var attr = el.attributes[i]
+          containerAttrs[attr.name] = attr.value
+        }
+        transcludeContent(frag, rawContent)
+        return frag
+      } else {
+        var replacer = frag.firstChild
+        _.copyAttributes(el, replacer)
+        transcludeContent(replacer, rawContent)
+        return replacer
+      }
+    } else {
+      el.appendChild(frag)
+      transcludeContent(el, rawContent)
+      return el
+    }
+  }
+}
+
+/**
+ * Resolve <content> insertion points mimicking the behavior
+ * of the Shadow DOM spec:
+ *
+ *   http://w3c.github.io/webcomponents/spec/shadow/#insertion-points
+ *
+ * @param {Element|DocumentFragment} el
+ * @param {Element} raw
+ */
+
+function transcludeContent (el, raw) {
+  var outlets = getOutlets(el)
+  var i = outlets.length
+  if (!i) return
+  var outlet, select, selected, j, main
+
+  function isDirectChild (node) {
+    return node.parentNode === raw
+  }
+
+  // first pass, collect corresponding content
+  // for each outlet.
+  while (i--) {
+    outlet = outlets[i]
+    if (raw) {
+      select = outlet.getAttribute('select')
+      if (select) {  // select content
+        selected = raw.querySelectorAll(select)
+        if (selected.length) {
+          // according to Shadow DOM spec, `select` can
+          // only select direct children of the host node.
+          // enforcing this also fixes #786.
+          selected = [].filter.call(selected, isDirectChild)
+        }
+        outlet.content = selected.length
+          ? selected
+          : _.toArray(outlet.childNodes)
+      } else { // default content
+        main = outlet
+      }
+    } else { // fallback content
+      outlet.content = _.toArray(outlet.childNodes)
+    }
+  }
+  // second pass, actually insert the contents
+  for (i = 0, j = outlets.length; i < j; i++) {
+    outlet = outlets[i]
+    if (outlet !== main) {
+      insertContentAt(outlet, outlet.content)
+    }
+  }
+  // finally insert the main content
+  if (main) {
+    insertContentAt(main, _.toArray(raw.childNodes))
+  }
+}
+
+/**
+ * Get <content> outlets from the element/list
+ *
+ * @param {Element|Array} el
+ * @return {Array}
+ */
+
+var concat = [].concat
+function getOutlets (el) {
+  return _.isArray(el)
+    ? concat.apply([], el.map(getOutlets))
+    : el.querySelectorAll
+      ? _.toArray(el.querySelectorAll('content'))
+      : []
+}
+
+/**
+ * Insert an array of nodes at outlet,
+ * then remove the outlet.
+ *
+ * @param {Element} outlet
+ * @param {Array} contents
+ */
+
+function insertContentAt (outlet, contents) {
+  // not using util DOM methods here because
+  // parentNode can be cached
+  var parent = outlet.parentNode
+  for (var i = 0, j = contents.length; i < j; i++) {
+    parent.insertBefore(contents[i], outlet)
+  }
+  parent.removeChild(outlet)
+}
+
+/**
+ * Helper to extract a component container's attribute names
+ * into a map, and filtering out `v-with` in the process.
+ * The resulting map will be used in compiler/compile to
+ * determine whether an attribute is transcluded.
+ *
+ * @param {NameNodeMap} attrs
+ */
+
+function extractAttrs (attrs) {
+  if (!attrs) return null
+  var res = {}
+  var vwith = config.prefix + 'with'
+  var i = attrs.length
+  while (i--) {
+    var name = attrs[i].name
+    if (name !== vwith) res[name] = true
+  }
+  return res
+}
+},{"../config":18,"../parsers/template":56,"../util":65}],18:[function(require,module,exports){
+module.exports = {
+
+  /**
+   * The prefix to look for when parsing directives.
+   *
+   * @type {String}
+   */
+
+  prefix: 'v-',
+
+  /**
+   * Whether to print debug messages.
+   * Also enables stack trace for warnings.
+   *
+   * @type {Boolean}
+   */
+
+  debug: false,
+
+  /**
+   * Whether to suppress warnings.
+   *
+   * @type {Boolean}
+   */
+
+  silent: false,
+
+  /**
+   * Whether allow observer to alter data objects'
+   * __proto__.
+   *
+   * @type {Boolean}
+   */
+
+  proto: true,
+
+  /**
+   * Whether to parse mustache tags in templates.
+   *
+   * @type {Boolean}
+   */
+
+  interpolate: true,
+
+  /**
+   * Whether to use async rendering.
+   */
+
+  async: true,
+
+  /**
+   * Whether to warn against errors caught when evaluating
+   * expressions.
+   */
+
+  warnExpressionErrors: true,
+
+  /**
+   * Internal flag to indicate the delimiters have been
+   * changed.
+   *
+   * @type {Boolean}
+   */
+
+  _delimitersChanged: true
+
+}
+
+/**
+ * Interpolation delimiters.
+ * We need to mark the changed flag so that the text parser
+ * knows it needs to recompile the regex.
+ *
+ * @type {Array<String>}
+ */
+
+var delimiters = ['{{', '}}']
+Object.defineProperty(module.exports, 'delimiters', {
+  get: function () {
+    return delimiters
+  },
+  set: function (val) {
+    delimiters = val
+    this._delimitersChanged = true
+  }
+})
+},{}],19:[function(require,module,exports){
+var _ = require('./util')
+var config = require('./config')
+var Watcher = require('./watcher')
+var textParser = require('./parsers/text')
+var expParser = require('./parsers/expression')
+
+/**
+ * A directive links a DOM element with a piece of data,
+ * which is the result of evaluating an expression.
+ * It registers a watcher with the expression and calls
+ * the DOM update function when a change is triggered.
+ *
+ * @param {String} name
+ * @param {Node} el
+ * @param {Vue} vm
+ * @param {Object} descriptor
+ *                 - {String} expression
+ *                 - {String} [arg]
+ *                 - {Array<Object>} [filters]
+ * @param {Object} def - directive definition object
+ * @param {Vue|undefined} host - transclusion host target
+ * @constructor
+ */
+
+function Directive (name, el, vm, descriptor, def, host) {
+  // public
+  this.name = name
+  this.el = el
+  this.vm = vm
+  // copy descriptor props
+  this.raw = descriptor.raw
+  this.expression = descriptor.expression
+  this.arg = descriptor.arg
+  this.filters = _.resolveFilters(vm, descriptor.filters)
+  // private
+  this._host = host
+  this._locked = false
+  this._bound = false
+  // init
+  this._bind(def)
+}
+
+var p = Directive.prototype
+
+/**
+ * Initialize the directive, mixin definition properties,
+ * setup the watcher, call definition bind() and update()
+ * if present.
+ *
+ * @param {Object} def
+ */
+
+p._bind = function (def) {
+  if (this.name !== 'cloak' && this.el && this.el.removeAttribute) {
+    this.el.removeAttribute(config.prefix + this.name)
+  }
+  if (typeof def === 'function') {
+    this.update = def
+  } else {
+    _.extend(this, def)
+  }
+  this._watcherExp = this.expression
+  this._checkDynamicLiteral()
+  if (this.bind) {
+    this.bind()
+  }
+  if (this._watcherExp &&
+      (this.update || this.twoWay) &&
+      (!this.isLiteral || this._isDynamicLiteral) &&
+      !this._checkStatement()) {
+    // wrapped updater for context
+    var dir = this
+    var update = this._update = this.update
+      ? function (val, oldVal) {
+          if (!dir._locked) {
+            dir.update(val, oldVal)
+          }
+        }
+      : function () {} // noop if no update is provided
+    // use raw expression as identifier because filters
+    // make them different watchers
+    var watcher = this.vm._watchers[this.raw]
+    // v-repeat always creates a new watcher because it has
+    // a special filter that's bound to its directive
+    // instance.
+    if (!watcher || this.name === 'repeat') {
+      watcher = this.vm._watchers[this.raw] = new Watcher(
+        this.vm,
+        this._watcherExp,
+        update, // callback
+        {
+          filters: this.filters,
+          twoWay: this.twoWay,
+          deep: this.deep
+        }
+      )
+    } else {
+      watcher.addCb(update)
+    }
+    this._watcher = watcher
+    if (this._initValue != null) {
+      watcher.set(this._initValue)
+    } else if (this.update) {
+      this.update(watcher.value)
+    }
+  }
+  this._bound = true
+}
+
+/**
+ * check if this is a dynamic literal binding.
+ *
+ * e.g. v-component="{{currentView}}"
+ */
+
+p._checkDynamicLiteral = function () {
+  var expression = this.expression
+  if (expression && this.isLiteral) {
+    var tokens = textParser.parse(expression)
+    if (tokens) {
+      var exp = textParser.tokensToExp(tokens)
+      this.expression = this.vm.$get(exp)
+      this._watcherExp = exp
+      this._isDynamicLiteral = true
+    }
+  }
+}
+
+/**
+ * Check if the directive is a function caller
+ * and if the expression is a callable one. If both true,
+ * we wrap up the expression and use it as the event
+ * handler.
+ *
+ * e.g. v-on="click: a++"
+ *
+ * @return {Boolean}
+ */
+
+p._checkStatement = function () {
+  var expression = this.expression
+  if (
+    expression && this.acceptStatement &&
+    !expParser.pathTestRE.test(expression)
+  ) {
+    var fn = expParser.parse(expression).get
+    var vm = this.vm
+    var handler = function () {
+      fn.call(vm, vm)
+    }
+    if (this.filters) {
+      handler = _.applyFilters(
+        handler,
+        this.filters.read,
+        vm
+      )
+    }
+    this.update(handler)
+    return true
+  }
+}
+
+/**
+ * Check for an attribute directive param, e.g. lazy
+ *
+ * @param {String} name
+ * @return {String}
+ */
+
+p._checkParam = function (name) {
+  var param = this.el.getAttribute(name)
+  if (param !== null) {
+    this.el.removeAttribute(name)
+  }
+  return param
+}
+
+/**
+ * Teardown the watcher and call unbind.
+ */
+
+p._teardown = function () {
+  if (this._bound) {
+    if (this.unbind) {
+      this.unbind()
+    }
+    var watcher = this._watcher
+    if (watcher && watcher.active) {
+      watcher.removeCb(this._update)
+      if (!watcher.active) {
+        this.vm._watchers[this.raw] = null
+      }
+    }
+    this._bound = false
+    this.vm = this.el = this._watcher = null
+  }
+}
+
+/**
+ * Set the corresponding value with the setter.
+ * This should only be used in two-way directives
+ * e.g. v-model.
+ *
+ * @param {*} value
+ * @param {Boolean} lock - prevent wrtie triggering update.
+ * @public
+ */
+
+p.set = function (value, lock) {
+  if (this.twoWay) {
+    if (lock) {
+      this._locked = true
+    }
+    this._watcher.set(value)
+    if (lock) {
+      var self = this
+      _.nextTick(function () {
+        self._locked = false
+      })
+    }
+  }
+}
+
+module.exports = Directive
+},{"./config":18,"./parsers/expression":54,"./parsers/text":57,"./util":65,"./watcher":69}],20:[function(require,module,exports){
+// xlink
+var xlinkNS = 'http://www.w3.org/1999/xlink'
+var xlinkRE = /^xlink:/
+
+module.exports = {
+
+  priority: 850,
+
+  bind: function () {
+    var name = this.arg
+    this.update = xlinkRE.test(name)
+      ? xlinkHandler
+      : defaultHandler
+  }
+
+}
+
+function defaultHandler (value) {
+  if (value || value === 0) {
+    this.el.setAttribute(this.arg, value)
+  } else {
+    this.el.removeAttribute(this.arg)
+  }
+}
+
+function xlinkHandler (value) {
+  if (value != null) {
+    this.el.setAttributeNS(xlinkNS, this.arg, value)
+  } else {
+    this.el.removeAttributeNS(xlinkNS, 'href')
+  }
+}
+},{}],21:[function(require,module,exports){
+var _ = require('../util')
+var addClass = _.addClass
+var removeClass = _.removeClass
+
+module.exports = function (value) {
+  if (this.arg) {
+    var method = value ? addClass : removeClass
+    method(this.el, this.arg)
+  } else {
+    if (this.lastVal) {
+      removeClass(this.el, this.lastVal)
+    }
+    if (value) {
+      addClass(this.el, value)
+      this.lastVal = value
+    }
+  }
+}
+},{"../util":65}],22:[function(require,module,exports){
+var config = require('../config')
+
+module.exports = {
+
+  bind: function () {
+    var el = this.el
+    this.vm.$once('hook:compiled', function () {
+      el.removeAttribute(config.prefix + 'cloak')
+    })
+  }
+
+}
+},{"../config":18}],23:[function(require,module,exports){
+var _ = require('../util')
+var templateParser = require('../parsers/template')
+
+module.exports = {
+
+  isLiteral: true,
+
+  /**
+   * Setup. Two possible usages:
+   *
+   * - static:
+   *   v-component="comp"
+   *
+   * - dynamic:
+   *   v-component="{{currentView}}"
+   */
+
+  bind: function () {
+    if (!this.el.__vue__) {
+      // create a ref anchor
+      this.ref = document.createComment('v-component')
+      _.replace(this.el, this.ref)
+      // check keep-alive options.
+      // If yes, instead of destroying the active vm when
+      // hiding (v-if) or switching (dynamic literal) it,
+      // we simply remove it from the DOM and save it in a
+      // cache object, with its constructor id as the key.
+      this.keepAlive = this._checkParam('keep-alive') != null
+      // check ref
+      this.refID = _.attr(this.el, 'ref')
+      if (this.keepAlive) {
+        this.cache = {}
+      }
+      // check inline-template
+      if (this._checkParam('inline-template') !== null) {
+        // extract inline template as a DocumentFragment
+        this.template = _.extractContent(this.el, true)
+      }
+      // if static, build right now.
+      if (!this._isDynamicLiteral) {
+        this.resolveCtor(this.expression)
+        var child = this.build()
+        child.$before(this.ref)
+        this.setCurrent(child)
+      } else {
+        // check dynamic component params
+        this.readyEvent = this._checkParam('wait-for')
+        this.transMode = this._checkParam('transition-mode')
+      }
+    } else {
+      _.warn(
+        'v-component="' + this.expression + '" cannot be ' +
+        'used on an already mounted instance.'
+      )
+    }
+  },
+
+  /**
+   * Resolve the component constructor to use when creating
+   * the child vm.
+   */
+
+  resolveCtor: function (id) {
+    this.ctorId = id
+    this.Ctor = this.vm.$options.components[id]
+    _.assertAsset(this.Ctor, 'component', id)
+  },
+
+  /**
+   * Instantiate/insert a new child vm.
+   * If keep alive and has cached instance, insert that
+   * instance; otherwise build a new one and cache it.
+   *
+   * @return {Vue} - the created instance
+   */
+
+  build: function () {
+    if (this.keepAlive) {
+      var cached = this.cache[this.ctorId]
+      if (cached) {
+        return cached
+      }
+    }
+    var vm = this.vm
+    var el = templateParser.clone(this.el)
+    if (this.Ctor) {
+      var child = vm.$addChild({
+        el: el,
+        template: this.template,
+        _asComponent: true,
+        _host: this._host
+      }, this.Ctor)
+      if (this.keepAlive) {
+        this.cache[this.ctorId] = child
+      }
+      return child
+    }
+  },
+
+  /**
+   * Teardown the current child, but defers cleanup so
+   * that we can separate the destroy and removal steps.
+   */
+
+  unbuild: function () {
+    var child = this.childVM
+    if (!child || this.keepAlive) {
+      return
+    }
+    // the sole purpose of `deferCleanup` is so that we can
+    // "deactivate" the vm right now and perform DOM removal
+    // later.
+    child.$destroy(false, true)
+  },
+
+  /**
+   * Remove current destroyed child and manually do
+   * the cleanup after removal.
+   *
+   * @param {Function} cb
+   */
+
+  remove: function (child, cb) {
+    var keepAlive = this.keepAlive
+    if (child) {
+      child.$remove(function () {
+        if (!keepAlive) child._cleanup()
+        if (cb) cb()
+      })
+    } else if (cb) {
+      cb()
+    }
+  },
+
+  /**
+   * Update callback for the dynamic literal scenario,
+   * e.g. v-component="{{view}}"
+   */
+
+  update: function (value) {
+    if (!value) {
+      // just destroy and remove current
+      this.unbuild()
+      this.remove(this.childVM)
+      this.unsetCurrent()
+    } else {
+      this.resolveCtor(value)
+      this.unbuild()
+      var newComponent = this.build()
+      var self = this
+      if (this.readyEvent) {
+        newComponent.$once(this.readyEvent, function () {
+          self.swapTo(newComponent)
+        })
+      } else {
+        this.swapTo(newComponent)
+      }
+    }
+  },
+
+  /**
+   * Actually swap the components, depending on the
+   * transition mode. Defaults to simultaneous.
+   *
+   * @param {Vue} target
+   */
+
+  swapTo: function (target) {
+    var self = this
+    var current = this.childVM
+    this.unsetCurrent()
+    this.setCurrent(target)
+    switch (self.transMode) {
+      case 'in-out':
+        target.$before(self.ref, function () {
+          self.remove(current)
+        })
+        break
+      case 'out-in':
+        self.remove(current, function () {
+          target.$before(self.ref)
+        })
+        break
+      default:
+        self.remove(current)
+        target.$before(self.ref)
+    }
+  },
+
+  /**
+   * Set childVM and parent ref
+   */
+  
+  setCurrent: function (child) {
+    this.childVM = child
+    var refID = child._refID || this.refID
+    if (refID) {
+      this.vm.$[refID] = child
+    }
+  },
+
+  /**
+   * Unset childVM and parent ref
+   */
+
+  unsetCurrent: function () {
+    var child = this.childVM
+    this.childVM = null
+    var refID = (child && child._refID) || this.refID
+    if (refID) {
+      this.vm.$[refID] = null
+    }
+  },
+
+  /**
+   * Unbind.
+   */
+
+  unbind: function () {
+    this.unbuild()
+    // destroy all keep-alive cached instances
+    if (this.cache) {
+      for (var key in this.cache) {
+        this.cache[key].$destroy()
+      }
+      this.cache = null
+    }
+  }
+
+}
+},{"../parsers/template":56,"../util":65}],24:[function(require,module,exports){
+module.exports = {
+
+  isLiteral: true,
+
+  bind: function () {
+    this.vm.$$[this.expression] = this.el
+  },
+
+  unbind: function () {
+    delete this.vm.$$[this.expression]
+  }
+  
+}
+},{}],25:[function(require,module,exports){
+var _ = require('../util')
+
+module.exports = {
+
+  acceptStatement: true,
+
+  bind: function () {
+    var child = this.el.__vue__
+    if (!child || this.vm !== child.$parent) {
+      _.warn(
+        '`v-events` should only be used on a child component ' +
+        'from the parent template.'
+      )
+      return
+    }
+  },
+
+  update: function (handler, oldHandler) {
+    if (typeof handler !== 'function') {
+      _.warn(
+        'Directive "v-events:' + this.expression + '" ' +
+        'expects a function value.'
+      )
+      return
+    }
+    var child = this.el.__vue__
+    if (oldHandler) {
+      child.$off(this.arg, oldHandler)
+    }
+    child.$on(this.arg, handler)
+  }
+
+  // when child is destroyed, all events are turned off,
+  // so no need for unbind here.
+
+}
+},{"../util":65}],26:[function(require,module,exports){
+var _ = require('../util')
+var templateParser = require('../parsers/template')
+
+module.exports = {
+
+  bind: function () {
+    // a comment node means this is a binding for
+    // {{{ inline unescaped html }}}
+    if (this.el.nodeType === 8) {
+      // hold nodes
+      this.nodes = []
+    }
+  },
+
+  update: function (value) {
+    value = _.toString(value)
+    if (this.nodes) {
+      this.swap(value)
+    } else {
+      this.el.innerHTML = value
+    }
+  },
+
+  swap: function (value) {
+    // remove old nodes
+    var i = this.nodes.length
+    while (i--) {
+      _.remove(this.nodes[i])
+    }
+    // convert new value to a fragment
+    // do not attempt to retrieve from id selector
+    var frag = templateParser.parse(value, true, true)
+    // save a reference to these nodes so we can remove later
+    this.nodes = _.toArray(frag.childNodes)
+    _.before(frag, this.el)
+  }
+
+}
+},{"../parsers/template":56,"../util":65}],27:[function(require,module,exports){
+var _ = require('../util')
+var compile = require('../compiler/compile')
+var templateParser = require('../parsers/template')
+var transition = require('../transition')
+
+module.exports = {
+
+  bind: function () {
+    var el = this.el
+    if (!el.__vue__) {
+      this.start = document.createComment('v-if-start')
+      this.end = document.createComment('v-if-end')
+      _.replace(el, this.end)
+      _.before(this.start, this.end)
+      if (el.tagName === 'TEMPLATE') {
+        this.template = templateParser.parse(el, true)
+      } else {
+        this.template = document.createDocumentFragment()
+        this.template.appendChild(templateParser.clone(el))
+      }
+      // compile the nested partial
+      this.linker = compile(
+        this.template,
+        this.vm.$options,
+        true
+      )
+    } else {
+      this.invalid = true
+      _.warn(
+        'v-if="' + this.expression + '" cannot be ' +
+        'used on an already mounted instance.'
+      )
+    }
+  },
+
+  update: function (value) {
+    if (this.invalid) return
+    if (value) {
+      // avoid duplicate compiles, since update() can be
+      // called with different truthy values
+      if (!this.unlink) {
+        var frag = templateParser.clone(this.template)
+        this.compile(frag)
+      }
+    } else {
+      this.teardown()
+    }
+  },
+
+  // NOTE: this function is shared in v-partial
+  compile: function (frag) {
+    var vm = this.vm
+    // the linker is not guaranteed to be present because
+    // this function might get called by v-partial 
+    this.unlink = this.linker
+      ? this.linker(vm, frag)
+      : vm.$compile(frag)
+    transition.blockAppend(frag, this.end, vm)
+    // call attached for all the child components created
+    // during the compilation
+    if (_.inDoc(vm.$el)) {
+      var children = this.getContainedComponents()
+      if (children) children.forEach(callAttach)
+    }
+  },
+
+  // NOTE: this function is shared in v-partial
+  teardown: function () {
+    if (!this.unlink) return
+    // collect children beforehand
+    var children
+    if (_.inDoc(this.vm.$el)) {
+      children = this.getContainedComponents()
+    }
+    transition.blockRemove(this.start, this.end, this.vm)
+    if (children) children.forEach(callDetach)
+    this.unlink()
+    this.unlink = null
+  },
+
+  // NOTE: this function is shared in v-partial
+  getContainedComponents: function () {
+    var vm = this.vm
+    var start = this.start.nextSibling
+    var end = this.end
+    var selfCompoents =
+      vm._children.length &&
+      vm._children.filter(contains)
+    var transComponents =
+      vm._transCpnts &&
+      vm._transCpnts.filter(contains)
+
+    function contains (c) {
+      var cur = start
+      var next
+      while (next !== end) {
+        next = cur.nextSibling
+        if (cur.contains(c.$el)) {
+          return true
+        }
+        cur = next
+      }
+      return false
+    }
+
+    return selfCompoents
+      ? transComponents
+        ? selfCompoents.concat(transComponents)
+        : selfCompoents
+      : transComponents
+  },
+
+  // NOTE: this function is shared in v-partial
+  unbind: function () {
+    if (this.unlink) this.unlink()
+  }
+
+}
+
+function callAttach (child) {
+  if (!child._isAttached) {
+    child._callHook('attached')
+  }
+}
+
+function callDetach (child) {
+  if (child._isAttached) {
+    child._callHook('detached')
+  }
+}
+},{"../compiler/compile":16,"../parsers/template":56,"../transition":59,"../util":65}],28:[function(require,module,exports){
+// manipulation directives
+exports.text       = require('./text')
+exports.html       = require('./html')
+exports.attr       = require('./attr')
+exports.show       = require('./show')
+exports['class']   = require('./class')
+exports.el         = require('./el')
+exports.ref        = require('./ref')
+exports.cloak      = require('./cloak')
+exports.style      = require('./style')
+exports.partial    = require('./partial')
+exports.transition = require('./transition')
+
+// event listener directives
+exports.on         = require('./on')
+exports.model      = require('./model')
+
+// child vm directives
+exports.component  = require('./component')
+exports.repeat     = require('./repeat')
+exports['if']      = require('./if')
+
+// child vm communication directives
+exports['with']    = require('./with')
+exports.events     = require('./events')
+},{"./attr":20,"./class":21,"./cloak":22,"./component":23,"./el":24,"./events":25,"./html":26,"./if":27,"./model":31,"./on":34,"./partial":35,"./ref":36,"./repeat":37,"./show":38,"./style":39,"./text":40,"./transition":41,"./with":42}],29:[function(require,module,exports){
+var _ = require('../../util')
+
+module.exports = {
+
+  bind: function () {
+    var self = this
+    var el = this.el
+    this.listener = function () {
+      self.set(el.checked, true)
+    }
+    _.on(el, 'change', this.listener)
+    if (el.checked) {
+      this._initValue = el.checked
+    }
+  },
+
+  update: function (value) {
+    this.el.checked = !!value
+  },
+
+  unbind: function () {
+    _.off(this.el, 'change', this.listener)
+  }
+
+}
+},{"../../util":65}],30:[function(require,module,exports){
+var _ = require('../../util')
+
+module.exports = {
+
+  bind: function () {
+    var self = this
+    var el = this.el
+
+    // check params
+    // - lazy: update model on "change" instead of "input"
+    var lazy = this._checkParam('lazy') != null
+    // - number: cast value into number when updating model.
+    var number = this._checkParam('number') != null
+    // - debounce: debounce the input listener
+    var debounce = parseInt(this._checkParam('debounce'), 10)
+
+    // handle composition events.
+    // http://blog.evanyou.me/2014/01/03/composition-event/
+    var cpLocked = false
+    this.cpLock = function () {
+      cpLocked = true
+    }
+    this.cpUnlock = function () {
+      cpLocked = false
+      // in IE11 the "compositionend" event fires AFTER
+      // the "input" event, so the input handler is blocked
+      // at the end... have to call it here.
+      set()
+    }
+    _.on(el,'compositionstart', this.cpLock)
+    _.on(el,'compositionend', this.cpUnlock)
+
+    // shared setter
+    function set () {
+      self.set(
+        number ? _.toNumber(el.value) : el.value,
+        true
+      )
+    }
+
+    // if the directive has filters, we need to
+    // record cursor position and restore it after updating
+    // the input with the filtered value.
+    // also force update for type="range" inputs to enable
+    // "lock in range" (see #506)
+    var hasReadFilter = this.filters && this.filters.read
+    this.listener = hasReadFilter || el.type === 'range'
+      ? function textInputListener () {
+          if (cpLocked) return
+          var charsOffset
+          // some HTML5 input types throw error here
+          try {
+            // record how many chars from the end of input
+            // the cursor was at
+            charsOffset = el.value.length - el.selectionStart
+          } catch (e) {}
+          // Fix IE10/11 infinite update cycle
+          // https://github.com/yyx990803/vue/issues/592
+          /* istanbul ignore if */
+          if (charsOffset < 0) {
+            return
+          }
+          set()
+          _.nextTick(function () {
+            // force a value update, because in
+            // certain cases the write filters output the
+            // same result for different input values, and
+            // the Observer set events won't be triggered.
+            var newVal = self._watcher.value
+            self.update(newVal)
+            if (charsOffset != null) {
+              var cursorPos =
+                _.toString(newVal).length - charsOffset
+              el.setSelectionRange(cursorPos, cursorPos)
+            }
+          })
+        }
+      : function textInputListener () {
+          if (cpLocked) return
+          set()
+        }
+
+    if (debounce) {
+      this.listener = _.debounce(this.listener, debounce)
+    }
+    this.event = lazy ? 'change' : 'input'
+    // Support jQuery events, since jQuery.trigger() doesn't
+    // trigger native events in some cases and some plugins
+    // rely on $.trigger()
+    // 
+    // We want to make sure if a listener is attached using
+    // jQuery, it is also removed with jQuery, that's why
+    // we do the check for each directive instance and
+    // store that check result on itself. This also allows
+    // easier test coverage control by unsetting the global
+    // jQuery variable in tests.
+    this.hasjQuery = typeof jQuery === 'function'
+    if (this.hasjQuery) {
+      jQuery(el).on(this.event, this.listener)
+    } else {
+      _.on(el, this.event, this.listener)
+    }
+
+    // IE9 doesn't fire input event on backspace/del/cut
+    if (!lazy && _.isIE9) {
+      this.onCut = function () {
+        _.nextTick(self.listener)
+      }
+      this.onDel = function (e) {
+        if (e.keyCode === 46 || e.keyCode === 8) {
+          self.listener()
+        }
+      }
+      _.on(el, 'cut', this.onCut)
+      _.on(el, 'keyup', this.onDel)
+    }
+
+    // set initial value if present
+    if (
+      el.hasAttribute('value') ||
+      (el.tagName === 'TEXTAREA' && el.value.trim())
+    ) {
+      this._initValue = number
+        ? _.toNumber(el.value)
+        : el.value
+    }
+  },
+
+  update: function (value) {
+    this.el.value = _.toString(value)
+  },
+
+  unbind: function () {
+    var el = this.el
+    if (this.hasjQuery) {
+      jQuery(el).off(this.event, this.listener)
+    } else {
+      _.off(el, this.event, this.listener)
+    }
+    _.off(el,'compositionstart', this.cpLock)
+    _.off(el,'compositionend', this.cpUnlock)
+    if (this.onCut) {
+      _.off(el,'cut', this.onCut)
+      _.off(el,'keyup', this.onDel)
+    }
+  }
+
+}
+},{"../../util":65}],31:[function(require,module,exports){
+var _ = require('../../util')
+
+var handlers = {
+  _default: require('./default'),
+  radio: require('./radio'),
+  select: require('./select'),
+  checkbox: require('./checkbox')
+}
+
+module.exports = {
+
+  priority: 800,
+  twoWay: true,
+  handlers: handlers,
+
+  /**
+   * Possible elements:
+   *   <select>
+   *   <textarea>
+   *   <input type="*">
+   *     - text
+   *     - checkbox
+   *     - radio
+   *     - number
+   *     - TODO: more types may be supplied as a plugin
+   */
+
+  bind: function () {
+    // friendly warning...
+    var filters = this.filters
+    if (filters && filters.read && !filters.write) {
+      _.warn(
+        'It seems you are using a read-only filter with ' +
+        'v-model. You might want to use a two-way filter ' +
+        'to ensure correct behavior.'
+      )
+    }
+    var el = this.el
+    var tag = el.tagName
+    var handler
+    if (tag === 'INPUT') {
+      handler = handlers[el.type] || handlers._default
+    } else if (tag === 'SELECT') {
+      handler = handlers.select
+    } else if (tag === 'TEXTAREA') {
+      handler = handlers._default
+    } else {
+      _.warn("v-model doesn't support element type: " + tag)
+      return
+    }
+    handler.bind.call(this)
+    this.update = handler.update
+    this.unbind = handler.unbind
+  }
+
+}
+},{"../../util":65,"./checkbox":29,"./default":30,"./radio":32,"./select":33}],32:[function(require,module,exports){
+var _ = require('../../util')
+
+module.exports = {
+
+  bind: function () {
+    var self = this
+    var el = this.el
+    this.listener = function () {
+      self.set(el.value, true)
+    }
+    _.on(el, 'change', this.listener)
+    if (el.checked) {
+      this._initValue = el.value
+    }
+  },
+
+  update: function (value) {
+    /* jshint eqeqeq: false */
+    this.el.checked = value == this.el.value
+  },
+
+  unbind: function () {
+    _.off(this.el, 'change', this.listener)
+  }
+
+}
+},{"../../util":65}],33:[function(require,module,exports){
+var _ = require('../../util')
+var Watcher = require('../../watcher')
+var dirParser = require('../../parsers/directive')
+
+module.exports = {
+
+  bind: function () {
+    var self = this
+    var el = this.el
+    // check options param
+    var optionsParam = this._checkParam('options')
+    if (optionsParam) {
+      initOptions.call(this, optionsParam)
+    }
+    this.number = this._checkParam('number') != null
+    this.multiple = el.hasAttribute('multiple')
+    this.listener = function () {
+      var value = self.multiple
+        ? getMultiValue(el)
+        : el.value
+      value = self.number
+        ? _.isArray(value)
+          ? value.map(_.toNumber)
+          : _.toNumber(value)
+        : value
+      self.set(value, true)
+    }
+    _.on(el, 'change', this.listener)
+    checkInitialValue.call(this)
+  },
+
+  update: function (value) {
+    /* jshint eqeqeq: false */
+    var el = this.el
+    el.selectedIndex = -1
+    var multi = this.multiple && _.isArray(value)
+    var options = el.options
+    var i = options.length
+    var option
+    while (i--) {
+      option = options[i]
+      option.selected = multi
+        ? indexOf(value, option.value) > -1
+        : value == option.value
+    }
+  },
+
+  unbind: function () {
+    _.off(this.el, 'change', this.listener)
+    if (this.optionWatcher) {
+      this.optionWatcher.teardown()
+    }
+  }
+
+}
+
+/**
+ * Initialize the option list from the param.
+ *
+ * @param {String} expression
+ */
+
+function initOptions (expression) {
+  var self = this
+  var descriptor = dirParser.parse(expression)[0]
+  function optionUpdateWatcher (value) {
+    if (_.isArray(value)) {
+      self.el.innerHTML = ''
+      buildOptions(self.el, value)
+      if (self._watcher) {
+        self.update(self._watcher.value)
+      }
+    } else {
+      _.warn('Invalid options value for v-model: ' + value)
+    }
+  }
+  this.optionWatcher = new Watcher(
+    this.vm,
+    descriptor.expression,
+    optionUpdateWatcher,
+    {
+      deep: true,
+      filters: _.resolveFilters(this.vm, descriptor.filters)
+    }
+  )
+  // update with initial value
+  optionUpdateWatcher(this.optionWatcher.value)
+}
+
+/**
+ * Build up option elements. IE9 doesn't create options
+ * when setting innerHTML on <select> elements, so we have
+ * to use DOM API here.
+ *
+ * @param {Element} parent - a <select> or an <optgroup>
+ * @param {Array} options
+ */
+
+function buildOptions (parent, options) {
+  var op, el
+  for (var i = 0, l = options.length; i < l; i++) {
+    op = options[i]
+    if (!op.options) {
+      el = document.createElement('option')
+      if (typeof op === 'string') {
+        el.text = el.value = op
+      } else {
+        el.text = op.text
+        el.value = op.value
+      }
+    } else {
+      el = document.createElement('optgroup')
+      el.label = op.label
+      buildOptions(el, op.options)
+    }
+    parent.appendChild(el)
+  }
+}
+
+/**
+ * Check the initial value for selected options.
+ */
+
+function checkInitialValue () {
+  var initValue
+  var options = this.el.options
+  for (var i = 0, l = options.length; i < l; i++) {
+    if (options[i].hasAttribute('selected')) {
+      if (this.multiple) {
+        (initValue || (initValue = []))
+          .push(options[i].value)
+      } else {
+        initValue = options[i].value
+      }
+    }
+  }
+  if (typeof initValue !== 'undefined') {
+    this._initValue = this.number
+      ? _.toNumber(initValue)
+      : initValue
+  }
+}
+
+/**
+ * Helper to extract a value array for select[multiple]
+ *
+ * @param {SelectElement} el
+ * @return {Array}
+ */
+
+function getMultiValue (el) {
+  return Array.prototype.filter
+    .call(el.options, filterSelected)
+    .map(getOptionValue)
+}
+
+function filterSelected (op) {
+  return op.selected
+}
+
+function getOptionValue (op) {
+  return op.value || op.text
+}
+
+/**
+ * Native Array.indexOf uses strict equal, but in this
+ * case we need to match string/numbers with soft equal.
+ *
+ * @param {Array} arr
+ * @param {*} val
+ */
+
+function indexOf (arr, val) {
+  /* jshint eqeqeq: false */
+  var i = arr.length
+  while (i--) {
+    if (arr[i] == val) return i
+  }
+  return -1
+}
+},{"../../parsers/directive":53,"../../util":65,"../../watcher":69}],34:[function(require,module,exports){
+var _ = require('../util')
+
+module.exports = {
+
+  acceptStatement: true,
+  priority: 700,
+
+  bind: function () {
+    // deal with iframes
+    if (
+      this.el.tagName === 'IFRAME' &&
+      this.arg !== 'load'
+    ) {
+      var self = this
+      this.iframeBind = function () {
+        _.on(self.el.contentWindow, self.arg, self.handler)
+      }
+      _.on(this.el, 'load', this.iframeBind)
+    }
+  },
+
+  update: function (handler) {
+    if (typeof handler !== 'function') {
+      _.warn(
+        'Directive "v-on:' + this.expression + '" ' +
+        'expects a function value.'
+      )
+      return
+    }
+    this.reset()
+    var vm = this.vm
+    this.handler = function (e) {
+      e.targetVM = vm
+      vm.$event = e
+      var res = handler(e)
+      vm.$event = null
+      return res
+    }
+    if (this.iframeBind) {
+      this.iframeBind()
+    } else {
+      _.on(this.el, this.arg, this.handler)
+    }
+  },
+
+  reset: function () {
+    var el = this.iframeBind
+      ? this.el.contentWindow
+      : this.el
+    if (this.handler) {
+      _.off(el, this.arg, this.handler)
+    }
+  },
+
+  unbind: function () {
+    this.reset()
+    _.off(this.el, 'load', this.iframeBind)
+  }
+}
+},{"../util":65}],35:[function(require,module,exports){
+var _ = require('../util')
+var templateParser = require('../parsers/template')
+var vIf = require('./if')
+
+module.exports = {
+
+  isLiteral: true,
+
+  // same logic reuse from v-if
+  compile: vIf.compile,
+  teardown: vIf.teardown,
+  getContainedComponents: vIf.getContainedComponents,
+  unbind: vIf.unbind,
+
+  bind: function () {
+    var el = this.el
+    this.start = document.createComment('v-partial-start')
+    this.end = document.createComment('v-partial-end')
+    if (el.nodeType !== 8) {
+      el.innerHTML = ''
+    }
+    if (el.tagName === 'TEMPLATE' || el.nodeType === 8) {
+      _.replace(el, this.end)
+    } else {
+      el.appendChild(this.end)
+    }
+    _.before(this.start, this.end)
+    if (!this._isDynamicLiteral) {
+      this.insert(this.expression)
+    }
+  },
+
+  update: function (id) {
+    this.teardown()
+    this.insert(id)
+  },
+
+  insert: function (id) {
+    var partial = this.vm.$options.partials[id]
+    _.assertAsset(partial, 'partial', id)
+    if (partial) {
+      var filters = this.filters && this.filters.read
+      if (filters) {
+        partial = _.applyFilters(partial, filters, this.vm)
+      }
+      this.compile(templateParser.parse(partial, true))
+    }
+  }
+
+}
+},{"../parsers/template":56,"../util":65,"./if":27}],36:[function(require,module,exports){
+var _ = require('../util')
+
+module.exports = {
+
+  isLiteral: true,
+
+  bind: function () {
+    var vm = this.el.__vue__
+    if (!vm) {
+      _.warn(
+        'v-ref should only be used on a component root element.'
+      )
+      return
+    }
+    // If we get here, it means this is a `v-ref` on a
+    // child, because parent scope `v-ref` is stripped in
+    // `v-component` already. So we just record our own ref
+    // here - it will overwrite parent ref in `v-component`,
+    // if any.
+    vm._refID = this.expression
+  }
+  
+}
+},{"../util":65}],37:[function(require,module,exports){
+var _ = require('../util')
+var isObject = _.isObject
+var isPlainObject = _.isPlainObject
+var textParser = require('../parsers/text')
+var expParser = require('../parsers/expression')
+var templateParser = require('../parsers/template')
+var compile = require('../compiler/compile')
+var transclude = require('../compiler/transclude')
+var mergeOptions = require('../util/merge-option')
+var uid = 0
+
+module.exports = {
+
+  /**
+   * Setup.
+   */
+
+  bind: function () {
+    // uid as a cache identifier
+    this.id = '__v_repeat_' + (++uid)
+    // we need to insert the objToArray converter
+    // as the first read filter, because it has to be invoked
+    // before any user filters. (can't do it in `update`)
+    if (!this.filters) {
+      this.filters = {}
+    }
+    // add the object -> array convert filter
+    var objectConverter = _.bind(objToArray, this)
+    if (!this.filters.read) {
+      this.filters.read = [objectConverter]
+    } else {
+      this.filters.read.unshift(objectConverter)
+    }
+    // setup ref node
+    this.ref = document.createComment('v-repeat')
+    _.replace(this.el, this.ref)
+    // check if this is a block repeat
+    this.template = this.el.tagName === 'TEMPLATE'
+      ? templateParser.parse(this.el, true)
+      : this.el
+    // check other directives that need to be handled
+    // at v-repeat level
+    this.checkIf()
+    this.checkRef()
+    this.checkComponent()
+    // check for trackby param
+    this.idKey =
+      this._checkParam('track-by') ||
+      this._checkParam('trackby') // 0.11.0 compat
+    this.cache = Object.create(null)
+  },
+
+  /**
+   * Warn against v-if usage.
+   */
+
+  checkIf: function () {
+    if (_.attr(this.el, 'if') !== null) {
+      _.warn(
+        'Don\'t use v-if with v-repeat. ' +
+        'Use v-show or the "filterBy" filter instead.'
+      )
+    }
+  },
+
+  /**
+   * Check if v-ref/ v-el is also present.
+   */
+
+  checkRef: function () {
+    var refID = _.attr(this.el, 'ref')
+    this.refID = refID
+      ? this.vm.$interpolate(refID)
+      : null
+    var elId = _.attr(this.el, 'el')
+    this.elId = elId
+      ? this.vm.$interpolate(elId)
+      : null
+  },
+
+  /**
+   * Check the component constructor to use for repeated
+   * instances. If static we resolve it now, otherwise it
+   * needs to be resolved at build time with actual data.
+   */
+
+  checkComponent: function () {
+    var id = _.attr(this.el, 'component')
+    var options = this.vm.$options
+    if (!id) {
+      // default constructor
+      this.Ctor = _.Vue
+      // inline repeats should inherit
+      this.inherit = true
+      // important: transclude with no options, just
+      // to ensure block start and block end
+      this.template = transclude(this.template)
+      this._linkFn = compile(this.template, options)
+    } else {
+      this.asComponent = true
+      // check inline-template
+      if (this._checkParam('inline-template') !== null) {
+        // extract inline template as a DocumentFragment
+        this.inlineTempalte = _.extractContent(this.el, true)
+      }
+      var tokens = textParser.parse(id)
+      if (!tokens) { // static component
+        var Ctor = this.Ctor = options.components[id]
+        _.assertAsset(Ctor, 'component', id)
+        var merged = mergeOptions(Ctor.options, {}, {
+          $parent: this.vm
+        })
+        merged.template = this.inlineTempalte || merged.template
+        merged._asComponent = true
+        merged._parent = this.vm
+        this.template = transclude(this.template, merged)
+        // Important: mark the template as a root node so that
+        // custom element components don't get compiled twice.
+        // fixes #822
+        this.template.__vue__ = true
+        this._linkFn = compile(this.template, merged)
+      } else {
+        // to be resolved later
+        var ctorExp = textParser.tokensToExp(tokens)
+        this.ctorGetter = expParser.parse(ctorExp).get
+      }
+    }
+  },
+
+  /**
+   * Update.
+   * This is called whenever the Array mutates.
+   *
+   * @param {Array|Number|String} data
+   */
+
+  update: function (data) {
+    data = data || []
+    var type = typeof data
+    if (type === 'number') {
+      data = range(data)
+    } else if (type === 'string') {
+      data = _.toArray(data)
+    }
+    this.vms = this.diff(data, this.vms)
+    // update v-ref
+    if (this.refID) {
+      this.vm.$[this.refID] = this.vms
+    }
+    if (this.elId) {
+      this.vm.$$[this.elId] = this.vms.map(function (vm) {
+        return vm.$el
+      })
+    }
+  },
+
+  /**
+   * Diff, based on new data and old data, determine the
+   * minimum amount of DOM manipulations needed to make the
+   * DOM reflect the new data Array.
+   *
+   * The algorithm diffs the new data Array by storing a
+   * hidden reference to an owner vm instance on previously
+   * seen data. This allows us to achieve O(n) which is
+   * better than a levenshtein distance based algorithm,
+   * which is O(m * n).
+   *
+   * @param {Array} data
+   * @param {Array} oldVms
+   * @return {Array}
+   */
+
+  diff: function (data, oldVms) {
+    var idKey = this.idKey
+    var converted = this.converted
+    var ref = this.ref
+    var alias = this.arg
+    var init = !oldVms
+    var vms = new Array(data.length)
+    var obj, raw, vm, i, l
+    // First pass, go through the new Array and fill up
+    // the new vms array. If a piece of data has a cached
+    // instance for it, we reuse it. Otherwise build a new
+    // instance.
+    for (i = 0, l = data.length; i < l; i++) {
+      obj = data[i]
+      raw = converted ? obj.$value : obj
+      vm = !init && this.getVm(raw)
+      if (vm) { // reusable instance
+        vm._reused = true
+        vm.$index = i // update $index
+        if (converted) {
+          vm.$key = obj.$key // update $key
+        }
+        if (idKey) { // swap track by id data
+          if (alias) {
+            vm[alias] = raw
+          } else {
+            vm._setData(raw)
+          }
+        }
+      } else { // new instance
+        vm = this.build(obj, i, true)
+        vm._new = true
+        vm._reused = false
+      }
+      vms[i] = vm
+      // insert if this is first run
+      if (init) {
+        vm.$before(ref)
+      }
+    }
+    // if this is the first run, we're done.
+    if (init) {
+      return vms
+    }
+    // Second pass, go through the old vm instances and
+    // destroy those who are not reused (and remove them
+    // from cache)
+    for (i = 0, l = oldVms.length; i < l; i++) {
+      vm = oldVms[i]
+      if (!vm._reused) {
+        this.uncacheVm(vm)
+        vm.$destroy(true)
+      }
+    }
+    // final pass, move/insert new instances into the
+    // right place. We're going in reverse here because
+    // insertBefore relies on the next sibling to be
+    // resolved.
+    var targetNext, currentNext
+    i = vms.length
+    while (i--) {
+      vm = vms[i]
+      // this is the vm that we should be in front of
+      targetNext = vms[i + 1]
+      if (!targetNext) {
+        // This is the last item. If it's reused then
+        // everything else will eventually be in the right
+        // place, so no need to touch it. Otherwise, insert
+        // it.
+        if (!vm._reused) {
+          vm.$before(ref)
+        }
+      } else {
+        var nextEl = targetNext.$el
+        if (vm._reused) {
+          // this is the vm we are actually in front of
+          currentNext = findNextVm(vm, ref)
+          // we only need to move if we are not in the right
+          // place already.
+          if (currentNext !== targetNext) {
+            vm.$before(nextEl, null, false)
+          }
+        } else {
+          // new instance, insert to existing next
+          vm.$before(nextEl)
+        }
+      }
+      vm._new = false
+      vm._reused = false
+    }
+    return vms
+  },
+
+  /**
+   * Build a new instance and cache it.
+   *
+   * @param {Object} data
+   * @param {Number} index
+   * @param {Boolean} needCache
+   */
+
+  build: function (data, index, needCache) {
+    var meta = { $index: index }
+    if (this.converted) {
+      meta.$key = data.$key
+    }
+    var raw = this.converted ? data.$value : data
+    var alias = this.arg
+    if (alias) {
+      data = {}
+      data[alias] = raw
+    } else if (!isPlainObject(raw)) {
+      // non-object values
+      data = {}
+      meta.$value = raw
+    } else {
+      // default
+      data = raw
+    }
+    // resolve constructor
+    var Ctor = this.Ctor || this.resolveCtor(data, meta)
+    var vm = this.vm.$addChild({
+      el: templateParser.clone(this.template),
+      _asComponent: this.asComponent,
+      _host: this._host,
+      _linkFn: this._linkFn,
+      _meta: meta,
+      data: data,
+      inherit: this.inherit,
+      template: this.inlineTempalte
+    }, Ctor)
+    // flag this instance as a repeat instance
+    // so that we can skip it in vm._digest
+    vm._repeat = true
+    // cache instance
+    if (needCache) {
+      this.cacheVm(raw, vm)
+    }
+    // sync back changes for $value, particularly for
+    // two-way bindings of primitive values
+    var self = this
+    vm.$watch('$value', function (val) {
+      if (self.converted) {
+        self.rawValue[vm.$key] = val
+      } else {
+        self.rawValue.$set(vm.$index, val)
+      }
+    })
+    return vm
+  },
+
+  /**
+   * Resolve a contructor to use for an instance.
+   * The tricky part here is that there could be dynamic
+   * components depending on instance data.
+   *
+   * @param {Object} data
+   * @param {Object} meta
+   * @return {Function}
+   */
+
+  resolveCtor: function (data, meta) {
+    // create a temporary context object and copy data
+    // and meta properties onto it.
+    // use _.define to avoid accidentally overwriting scope
+    // properties.
+    var context = Object.create(this.vm)
+    var key
+    for (key in data) {
+      _.define(context, key, data[key])
+    }
+    for (key in meta) {
+      _.define(context, key, meta[key])
+    }
+    var id = this.ctorGetter.call(context, context)
+    var Ctor = this.vm.$options.components[id]
+    _.assertAsset(Ctor, 'component', id)
+    return Ctor
+  },
+
+  /**
+   * Unbind, teardown everything
+   */
+
+  unbind: function () {
+    if (this.refID) {
+      this.vm.$[this.refID] = null
+    }
+    if (this.vms) {
+      var i = this.vms.length
+      var vm
+      while (i--) {
+        vm = this.vms[i]
+        this.uncacheVm(vm)
+        vm.$destroy()
+      }
+    }
+  },
+
+  /**
+   * Cache a vm instance based on its data.
+   *
+   * If the data is an object, we save the vm's reference on
+   * the data object as a hidden property. Otherwise we
+   * cache them in an object and for each primitive value
+   * there is an array in case there are duplicates.
+   *
+   * @param {Object} data
+   * @param {Vue} vm
+   */
+
+  cacheVm: function (data, vm) {
+    var idKey = this.idKey
+    var cache = this.cache
+    var id
+    if (idKey) {
+      id = data[idKey]
+      if (!cache[id]) {
+        cache[id] = vm
+      } else {
+        _.warn('Duplicate track-by key in v-repeat: ' + id)
+      }
+    } else if (isObject(data)) {
+      id = this.id
+      if (data.hasOwnProperty(id)) {
+        if (data[id] === null) {
+          data[id] = vm
+        } else {
+          _.warn(
+            'Duplicate objects are not supported in v-repeat ' +
+            'when using components or transitions.'
+          )
+        }
+      } else {
+        _.define(data, this.id, vm)
+      }
+    } else {
+      if (!cache[data]) {
+        cache[data] = [vm]
+      } else {
+        cache[data].push(vm)
+      }
+    }
+    vm._raw = data
+  },
+
+  /**
+   * Try to get a cached instance from a piece of data.
+   *
+   * @param {Object} data
+   * @return {Vue|undefined}
+   */
+
+  getVm: function (data) {
+    if (this.idKey) {
+      return this.cache[data[this.idKey]]
+    } else if (isObject(data)) {
+      return data[this.id]
+    } else {
+      var cached = this.cache[data]
+      if (cached) {
+        var i = 0
+        var vm = cached[i]
+        // since duplicated vm instances might be a reused
+        // one OR a newly created one, we need to return the
+        // first instance that is neither of these.
+        while (vm && (vm._reused || vm._new)) {
+          vm = cached[++i]
+        }
+        return vm
+      }
+    }
+  },
+
+  /**
+   * Delete a cached vm instance.
+   *
+   * @param {Vue} vm
+   */
+
+  uncacheVm: function (vm) {
+    var data = vm._raw
+    if (this.idKey) {
+      this.cache[data[this.idKey]] = null
+    } else if (isObject(data)) {
+      data[this.id] = null
+      vm._raw = null
+    } else {
+      this.cache[data].pop()
+    }
+  }
+
+}
+
+/**
+ * Helper to find the next element that is an instance
+ * root node. This is necessary because a destroyed vm's
+ * element could still be lingering in the DOM before its
+ * leaving transition finishes, but its __vue__ reference
+ * should have been removed so we can skip them.
+ *
+ * @param {Vue} vm
+ * @param {CommentNode} ref
+ * @return {Vue}
+ */
+
+function findNextVm (vm, ref) {
+  var el = (vm._blockEnd || vm.$el).nextSibling
+  while (!el.__vue__ && el !== ref) {
+    el = el.nextSibling
+  }
+  return el.__vue__
+}
+
+/**
+ * Attempt to convert non-Array objects to array.
+ * This is the default filter installed to every v-repeat
+ * directive.
+ *
+ * It will be called with **the directive** as `this`
+ * context so that we can mark the repeat array as converted
+ * from an object.
+ *
+ * @param {*} obj
+ * @return {Array}
+ * @private
+ */
+
+function objToArray (obj) {
+  // regardless of type, store the un-filtered raw value.
+  this.rawValue = obj
+  if (!isPlainObject(obj)) {
+    return obj
+  }
+  var keys = Object.keys(obj)
+  var i = keys.length
+  var res = new Array(i)
+  var key
+  while (i--) {
+    key = keys[i]
+    res[i] = {
+      $key: key,
+      $value: obj[key]
+    }
+  }
+  // `this` points to the repeat directive instance
+  this.converted = true
+  return res
+}
+
+/**
+ * Create a range array from given number.
+ *
+ * @param {Number} n
+ * @return {Array}
+ */
+
+function range (n) {
+  var i = -1
+  var ret = new Array(n)
+  while (++i < n) {
+    ret[i] = i
+  }
+  return ret
+}
+},{"../compiler/compile":16,"../compiler/transclude":17,"../parsers/expression":54,"../parsers/template":56,"../parsers/text":57,"../util":65,"../util/merge-option":67}],38:[function(require,module,exports){
+var transition = require('../transition')
+
+module.exports = function (value) {
+  var el = this.el
+  transition.apply(el, value ? 1 : -1, function () {
+    el.style.display = value ? '' : 'none'
+  }, this.vm)
+}
+},{"../transition":59}],39:[function(require,module,exports){
+var _ = require('../util')
+var prefixes = ['-webkit-', '-moz-', '-ms-']
+var camelPrefixes = ['Webkit', 'Moz', 'ms']
+var importantRE = /!important;?$/
+var camelRE = /([a-z])([A-Z])/g
+var testEl = null
+var propCache = {}
+
+module.exports = {
+
+  deep: true,
+
+  update: function (value) {
+    if (this.arg) {
+      this.setProp(this.arg, value)
+    } else {
+      if (typeof value === 'object') {
+        // cache object styles so that only changed props
+        // are actually updated.
+        if (!this.cache) this.cache = {}
+        for (var prop in value) {
+          this.setProp(prop, value[prop])
+          /* jshint eqeqeq: false */
+          if (value[prop] != this.cache[prop]) {
+            this.cache[prop] = value[prop]
+            this.setProp(prop, value[prop])
+          }
+        }
+      } else {
+        this.el.style.cssText = value
+      }
+    }
+  },
+
+  setProp: function (prop, value) {
+    prop = normalize(prop)
+    if (!prop) return // unsupported prop
+    // cast possible numbers/booleans into strings
+    if (value != null) value += ''
+    if (value) {
+      var isImportant = importantRE.test(value)
+        ? 'important'
+        : ''
+      if (isImportant) {
+        value = value.replace(importantRE, '').trim()
+      }
+      this.el.style.setProperty(prop, value, isImportant)
+    } else {
+      this.el.style.removeProperty(prop)
+    }
+  }
+
+}
+
+/**
+ * Normalize a CSS property name.
+ * - cache result
+ * - auto prefix
+ * - camelCase -> dash-case
+ *
+ * @param {String} prop
+ * @return {String}
+ */
+
+function normalize (prop) {
+  if (propCache[prop]) {
+    return propCache[prop]
+  }
+  var res = prefix(prop)
+  propCache[prop] = propCache[res] = res
+  return res
+}
+
+/**
+ * Auto detect the appropriate prefix for a CSS property.
+ * https://gist.github.com/paulirish/523692
+ *
+ * @param {String} prop
+ * @return {String}
+ */
+
+function prefix (prop) {
+  prop = prop.replace(camelRE, '$1-$2').toLowerCase()
+  var camel = _.camelize(prop)
+  var upper = camel.charAt(0).toUpperCase() + camel.slice(1)
+  if (!testEl) {
+    testEl = document.createElement('div')
+  }
+  if (camel in testEl.style) {
+    return prop
+  }
+  var i = prefixes.length
+  var prefixed
+  while (i--) {
+    prefixed = camelPrefixes[i] + upper
+    if (prefixed in testEl.style) {
+      return prefixes[i] + prop
+    }
+  }
+}
+},{"../util":65}],40:[function(require,module,exports){
+var _ = require('../util')
+
+module.exports = {
+
+  bind: function () {
+    this.attr = this.el.nodeType === 3
+      ? 'nodeValue'
+      : 'textContent'
+  },
+
+  update: function (value) {
+    this.el[this.attr] = _.toString(value)
+  }
+  
+}
+},{"../util":65}],41:[function(require,module,exports){
+module.exports = {
+
+  priority: 1000,
+  isLiteral: true,
+
+  bind: function () {
+    if (!this._isDynamicLiteral) {
+      this.update(this.expression)
+    }
+  },
+
+  update: function (id) {
+    var vm = this.el.__vue__ || this.vm
+    this.el.__v_trans = {
+      id: id,
+      // resolve the custom transition functions now
+      // so the transition module knows this is a
+      // javascript transition without having to check
+      // computed CSS.
+      fns: vm.$options.transitions[id]
+    }
+  }
+
+}
+},{}],42:[function(require,module,exports){
+var _ = require('../util')
+var Watcher = require('../watcher')
+var expParser = require('../parsers/expression')
+var literalRE = /^(true|false|\s?('[^']*'|"[^"]")\s?)$/
+
+module.exports = {
+
+  priority: 900,
+
+  bind: function () {
+
+    var child = this.vm
+    var parent = child.$parent
+    var childKey = this.arg || '$data'
+    var parentKey = this.expression
+
+    if (this.el && this.el !== child.$el) {
+      _.warn(
+        'v-with can only be used on instance root elements.'
+      )
+    } else if (!parent) {
+      _.warn(
+        'v-with must be used on an instance with a parent.'
+      )
+    } else if (literalRE.test(parentKey)) {
+      // no need to setup watchers for literal bindings
+      if (!this.arg) {
+        _.warn(
+          'v-with cannot bind literal value as $data: ' +
+          parentKey
+        )
+      } else {
+        var value = expParser.parse(parentKey).get()
+        child.$set(childKey, value)
+      }
+    } else {
+
+      // simple lock to avoid circular updates.
+      // without this it would stabilize too, but this makes
+      // sure it doesn't cause other watchers to re-evaluate.
+      var locked = false
+      var lock = function () {
+        locked = true
+        _.nextTick(unlock)
+      }
+      var unlock = function () {
+        locked = false
+      }
+
+      this.parentWatcher = new Watcher(
+        parent,
+        parentKey,
+        function (val) {
+          if (!locked) {
+            lock()
+            child.$set(childKey, val)
+          }
+        }
+      )
+      
+      // set the child initial value first, before setting
+      // up the child watcher to avoid triggering it
+      // immediately.
+      child.$set(childKey, this.parentWatcher.value)
+
+      this.childWatcher = new Watcher(
+        child,
+        childKey,
+        function (val) {
+          if (!locked) {
+            lock()
+            parent.$set(parentKey, val)
+          }
+        }
+      )
+    }
+  },
+
+  unbind: function () {
+    if (this.parentWatcher) {
+      this.parentWatcher.teardown()
+      this.childWatcher.teardown()
+    }
+  }
+
+}
+},{"../parsers/expression":54,"../util":65,"../watcher":69}],43:[function(require,module,exports){
+var _ = require('../util')
+var Path = require('../parsers/path')
+
+/**
+ * Filter filter for v-repeat
+ *
+ * @param {String} searchKey
+ * @param {String} [delimiter]
+ * @param {String} dataKey
+ */
+
+exports.filterBy = function (arr, searchKey, delimiter, dataKey) {
+  // allow optional `in` delimiter
+  // because why not
+  if (delimiter && delimiter !== 'in') {
+    dataKey = delimiter
+  }
+  // get the search string
+  var search =
+    _.stripQuotes(searchKey) ||
+    this.$get(searchKey)
+  if (!search) {
+    return arr
+  }
+  search = ('' + search).toLowerCase()
+  // get the optional dataKey
+  dataKey =
+    dataKey &&
+    (_.stripQuotes(dataKey) || this.$get(dataKey))
+  return arr.filter(function (item) {
+    return dataKey
+      ? contains(Path.get(item, dataKey), search)
+      : contains(item, search)
+  })
+}
+
+/**
+ * Filter filter for v-repeat
+ *
+ * @param {String} sortKey
+ * @param {String} reverseKey
+ */
+
+exports.orderBy = function (arr, sortKey, reverseKey) {
+  var key =
+    _.stripQuotes(sortKey) ||
+    this.$get(sortKey)
+  if (!key) {
+    return arr
+  }
+  var order = 1
+  if (reverseKey) {
+    if (reverseKey === '-1') {
+      order = -1
+    } else if (reverseKey.charCodeAt(0) === 0x21) { // !
+      reverseKey = reverseKey.slice(1)
+      order = this.$get(reverseKey) ? 1 : -1
+    } else {
+      order = this.$get(reverseKey) ? -1 : 1
+    }
+  }
+  // sort on a copy to avoid mutating original array
+  return arr.slice().sort(function (a, b) {
+    a = _.isObject(a) ? Path.get(a, key) : a
+    b = _.isObject(b) ? Path.get(b, key) : b
+    return a === b ? 0 : a > b ? order : -order
+  })
+}
+
+/**
+ * String contain helper
+ *
+ * @param {*} val
+ * @param {String} search
+ */
+
+function contains (val, search) {
+  if (_.isObject(val)) {
+    for (var key in val) {
+      if (contains(val[key], search)) {
+        return true
+      }
+    }
+  } else if (val != null) {
+    return val.toString().toLowerCase().indexOf(search) > -1
+  }
+}
+},{"../parsers/path":55,"../util":65}],44:[function(require,module,exports){
+var _ = require('../util')
+
+/**
+ * Stringify value.
+ *
+ * @param {Number} indent
+ */
+
+exports.json = {
+  read: function (value, indent) {
+    return typeof value === 'string'
+      ? value
+      : JSON.stringify(value, null, Number(indent) || 2)
+  },
+  write: function (value) {
+    try {
+      return JSON.parse(value)
+    } catch (e) {
+      return value
+    }
+  }
+}
+
+/**
+ * 'abc' => 'Abc'
+ */
+
+exports.capitalize = function (value) {
+  if (!value && value !== 0) return ''
+  value = value.toString()
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+/**
+ * 'abc' => 'ABC'
+ */
+
+exports.uppercase = function (value) {
+  return (value || value === 0)
+    ? value.toString().toUpperCase()
+    : ''
+}
+
+/**
+ * 'AbC' => 'abc'
+ */
+
+exports.lowercase = function (value) {
+  return (value || value === 0)
+    ? value.toString().toLowerCase()
+    : ''
+}
+
+/**
+ * 12345 => $12,345.00
+ *
+ * @param {String} sign
+ */
+
+var digitsRE = /(\d{3})(?=\d)/g
+
+exports.currency = function (value, sign) {
+  value = parseFloat(value)
+  if (!isFinite(value) || (!value && value !== 0)) return ''
+  sign = sign || '$'
+  var s = Math.floor(Math.abs(value)).toString(),
+    i = s.length % 3,
+    h = i > 0
+      ? (s.slice(0, i) + (s.length > 3 ? ',' : ''))
+      : '',
+    v = Math.abs(parseInt((value * 100) % 100, 10)),
+    f = '.' + (v < 10 ? ('0' + v) : v)
+  return (value < 0 ? '-' : '') +
+    sign + h + s.slice(i).replace(digitsRE, '$1,') + f
+}
+
+/**
+ * 'item' => 'items'
+ *
+ * @params
+ *  an array of strings corresponding to
+ *  the single, double, triple ... forms of the word to
+ *  be pluralized. When the number to be pluralized
+ *  exceeds the length of the args, it will use the last
+ *  entry in the array.
+ *
+ *  e.g. ['single', 'double', 'triple', 'multiple']
+ */
+
+exports.pluralize = function (value) {
+  var args = _.toArray(arguments, 1)
+  return args.length > 1
+    ? (args[value % 10 - 1] || args[args.length - 1])
+    : (args[0] + (value === 1 ? '' : 's'))
+}
+
+/**
+ * A special filter that takes a handler function,
+ * wraps it so it only gets triggered on specific
+ * keypresses. v-on only.
+ *
+ * @param {String} key
+ */
+
+var keyCodes = {
+  enter    : 13,
+  tab      : 9,
+  'delete' : 46,
+  up       : 38,
+  left     : 37,
+  right    : 39,
+  down     : 40,
+  esc      : 27
+}
+
+exports.key = function (handler, key) {
+  if (!handler) return
+  var code = keyCodes[key]
+  if (!code) {
+    code = parseInt(key, 10)
+  }
+  return function (e) {
+    if (e.keyCode === code) {
+      return handler.call(this, e)
+    }
+  }
+}
+
+// expose keycode hash
+exports.key.keyCodes = keyCodes
+
+/**
+ * Install special array filters
+ */
+
+_.extend(exports, require('./array-filters'))
+
+},{"../util":65,"./array-filters":43}],45:[function(require,module,exports){
+var _ = require('../util')
+var Directive = require('../directive')
+var compile = require('../compiler/compile')
+var transclude = require('../compiler/transclude')
+
+/**
+ * Transclude, compile and link element.
+ *
+ * If a pre-compiled linker is available, that means the
+ * passed in element will be pre-transcluded and compiled
+ * as well - all we need to do is to call the linker.
+ *
+ * Otherwise we need to call transclude/compile/link here.
+ *
+ * @param {Element} el
+ * @return {Element}
+ */
+
+exports._compile = function (el) {
+  var options = this.$options
+  if (options._linkFn) {
+    // pre-transcluded with linker, just use it
+    this._initElement(el)
+    options._linkFn(this, el)
+  } else {
+    // transclude and init element
+    // transclude can potentially replace original
+    // so we need to keep reference
+    var original = el
+    el = transclude(el, options)
+    this._initElement(el)
+    // compile and link the rest
+    compile(el, options)(this, el)
+    // finally replace original
+    if (options.replace) {
+      _.replace(original, el)
+    }
+  }
+  return el
+}
+
+/**
+ * Initialize instance element. Called in the public
+ * $mount() method.
+ *
+ * @param {Element} el
+ */
+
+exports._initElement = function (el) {
+  if (el instanceof DocumentFragment) {
+    this._isBlock = true
+    this.$el = this._blockStart = el.firstChild
+    this._blockEnd = el.lastChild
+    this._blockFragment = el
+  } else {
+    this.$el = el
+  }
+  this.$el.__vue__ = this
+  this._callHook('beforeCompile')
+}
+
+/**
+ * Create and bind a directive to an element.
+ *
+ * @param {String} name - directive name
+ * @param {Node} node   - target node
+ * @param {Object} desc - parsed directive descriptor
+ * @param {Object} def  - directive definition object
+ * @param {Vue|undefined} host - transclusion host component
+ */
+
+exports._bindDir = function (name, node, desc, def, host) {
+  this._directives.push(
+    new Directive(name, node, this, desc, def, host)
+  )
+}
+
+/**
+ * Teardown an instance, unobserves the data, unbind all the
+ * directives, turn off all the event listeners, etc.
+ *
+ * @param {Boolean} remove - whether to remove the DOM node.
+ * @param {Boolean} deferCleanup - if true, defer cleanup to
+ *                                 be called later
+ */
+
+exports._destroy = function (remove, deferCleanup) {
+  if (this._isBeingDestroyed) {
+    return
+  }
+  this._callHook('beforeDestroy')
+  this._isBeingDestroyed = true
+  var i
+  // remove self from parent. only necessary
+  // if parent is not being destroyed as well.
+  var parent = this.$parent
+  if (parent && !parent._isBeingDestroyed) {
+    i = parent._children.indexOf(this)
+    parent._children.splice(i, 1)
+  }
+  // same for transclusion host.
+  var host = this._host
+  if (host && !host._isBeingDestroyed) {
+    i = host._transCpnts.indexOf(this)
+    host._transCpnts.splice(i, 1)
+  }
+  // destroy all children.
+  i = this._children.length
+  while (i--) {
+    this._children[i].$destroy()
+  }
+  // teardown all directives. this also tearsdown all
+  // directive-owned watchers. intentionally check for
+  // directives array length on every loop since directives
+  // that manages partial compilation can splice ones out
+  for (i = 0; i < this._directives.length; i++) {
+    this._directives[i]._teardown()
+  }
+  // teardown all user watchers.
+  var watcher
+  for (i in this._userWatchers) {
+    watcher = this._userWatchers[i]
+    if (watcher) {
+      watcher.teardown()
+    }
+  }
+  // remove reference to self on $el
+  if (this.$el) {
+    this.$el.__vue__ = null
+  }
+  // remove DOM element
+  var self = this
+  if (remove && this.$el) {
+    this.$remove(function () {
+      self._cleanup()
+    })
+  } else if (!deferCleanup) {
+    this._cleanup()
+  }
+}
+
+/**
+ * Clean up to ensure garbage collection.
+ * This is called after the leave transition if there
+ * is any.
+ */
+
+exports._cleanup = function () {
+  // remove reference from data ob
+  this._data.__ob__.removeVm(this)
+  this._data =
+  this._watchers =
+  this._userWatchers =
+  this._watcherList =
+  this.$el =
+  this.$parent =
+  this.$root =
+  this._children =
+  this._transCpnts =
+  this._directives = null
+  // call the last hook...
+  this._isDestroyed = true
+  this._callHook('destroyed')
+  // turn off all instance listeners.
+  this.$off()
+}
+},{"../compiler/compile":16,"../compiler/transclude":17,"../directive":19,"../util":65}],46:[function(require,module,exports){
+var _ = require('../util')
+var inDoc = _.inDoc
+
+/**
+ * Setup the instance's option events & watchers.
+ * If the value is a string, we pull it from the
+ * instance's methods by name.
+ */
+
+exports._initEvents = function () {
+  var options = this.$options
+  registerCallbacks(this, '$on', options.events)
+  registerCallbacks(this, '$watch', options.watch)
+}
+
+/**
+ * Register callbacks for option events and watchers.
+ *
+ * @param {Vue} vm
+ * @param {String} action
+ * @param {Object} hash
+ */
+
+function registerCallbacks (vm, action, hash) {
+  if (!hash) return
+  var handlers, key, i, j
+  for (key in hash) {
+    handlers = hash[key]
+    if (_.isArray(handlers)) {
+      for (i = 0, j = handlers.length; i < j; i++) {
+        register(vm, action, key, handlers[i])
+      }
+    } else {
+      register(vm, action, key, handlers)
+    }
+  }
+}
+
+/**
+ * Helper to register an event/watch callback.
+ *
+ * @param {Vue} vm
+ * @param {String} action
+ * @param {String} key
+ * @param {*} handler
+ */
+
+function register (vm, action, key, handler) {
+  var type = typeof handler
+  if (type === 'function') {
+    vm[action](key, handler)
+  } else if (type === 'string') {
+    var methods = vm.$options.methods
+    var method = methods && methods[handler]
+    if (method) {
+      vm[action](key, method)
+    } else {
+      _.warn(
+        'Unknown method: "' + handler + '" when ' +
+        'registering callback for ' + action +
+        ': "' + key + '".'
+      )
+    }
+  }
+}
+
+/**
+ * Setup recursive attached/detached calls
+ */
+
+exports._initDOMHooks = function () {
+  this.$on('hook:attached', onAttached)
+  this.$on('hook:detached', onDetached)
+}
+
+/**
+ * Callback to recursively call attached hook on children
+ */
+
+function onAttached () {
+  this._isAttached = true
+  this._children.forEach(callAttach)
+  if (this._transCpnts.length) {
+    this._transCpnts.forEach(callAttach)
+  }
+}
+
+/**
+ * Iterator to call attached hook
+ * 
+ * @param {Vue} child
+ */
+
+function callAttach (child) {
+  if (!child._isAttached && inDoc(child.$el)) {
+    child._callHook('attached')
+  }
+}
+
+/**
+ * Callback to recursively call detached hook on children
+ */
+
+function onDetached () {
+  this._isAttached = false
+  this._children.forEach(callDetach)
+  if (this._transCpnts.length) {
+    this._transCpnts.forEach(callDetach)
+  }
+}
+
+/**
+ * Iterator to call detached hook
+ * 
+ * @param {Vue} child
+ */
+
+function callDetach (child) {
+  if (child._isAttached && !inDoc(child.$el)) {
+    child._callHook('detached')
+  }
+}
+
+/**
+ * Trigger all handlers for a hook
+ *
+ * @param {String} hook
+ */
+
+exports._callHook = function (hook) {
+  var handlers = this.$options[hook]
+  if (handlers) {
+    for (var i = 0, j = handlers.length; i < j; i++) {
+      handlers[i].call(this)
+    }
+  }
+  this.$emit('hook:' + hook)
+}
+},{"../util":65}],47:[function(require,module,exports){
+var mergeOptions = require('../util/merge-option')
+
+/**
+ * The main init sequence. This is called for every
+ * instance, including ones that are created from extended
+ * constructors.
+ *
+ * @param {Object} options - this options object should be
+ *                           the result of merging class
+ *                           options and the options passed
+ *                           in to the constructor.
+ */
+
+exports._init = function (options) {
+
+  options = options || {}
+
+  this.$el           = null
+  this.$parent       = options._parent
+  this.$root         = options._root || this
+  this.$             = {} // child vm references
+  this.$$            = {} // element references
+  this._watcherList  = [] // all watchers as an array
+  this._watchers     = {} // internal watchers as a hash
+  this._userWatchers = {} // user watchers as a hash
+  this._directives   = [] // all directives
+
+  // a flag to avoid this being observed
+  this._isVue = true
+
+  // events bookkeeping
+  this._events         = {}    // registered callbacks
+  this._eventsCount    = {}    // for $broadcast optimization
+  this._eventCancelled = false // for event cancellation
+
+  // block instance properties
+  this._isBlock     = false
+  this._blockStart  =          // @type {CommentNode}
+  this._blockEnd    = null     // @type {CommentNode}
+
+  // lifecycle state
+  this._isCompiled  =
+  this._isDestroyed =
+  this._isReady     =
+  this._isAttached  =
+  this._isBeingDestroyed = false
+
+  // children
+  this._children = []
+  this._childCtors = {}
+
+  // transclusion unlink functions
+  this._containerUnlinkFn =
+  this._contentUnlinkFn = null
+
+  // transcluded components that belong to the parent.
+  // need to keep track of them so that we can call
+  // attached/detached hooks on them.
+  this._transCpnts = []
+  this._host = options._host
+
+  // push self into parent / transclusion host
+  if (this.$parent) {
+    this.$parent._children.push(this)
+  }
+  if (this._host) {
+    this._host._transCpnts.push(this)
+  }
+
+  // props used in v-repeat diffing
+  this._new = true
+  this._reused = false
+
+  // merge options.
+  options = this.$options = mergeOptions(
+    this.constructor.options,
+    options,
+    this
+  )
+
+  // set data after merge.
+  this._data = options.data || {}
+
+  // initialize data observation and scope inheritance.
+  this._initScope()
+
+  // setup event system and option events.
+  this._initEvents()
+
+  // call created hook
+  this._callHook('created')
+
+  // if `el` option is passed, start compilation.
+  if (options.el) {
+    this.$mount(options.el)
+  }
+}
+},{"../util/merge-option":67}],48:[function(require,module,exports){
+var _ = require('../util')
+var Observer = require('../observer')
+var Dep = require('../observer/dep')
+
+/**
+ * Setup the scope of an instance, which contains:
+ * - observed data
+ * - computed properties
+ * - user methods
+ * - meta properties
+ */
+
+exports._initScope = function () {
+  this._initData()
+  this._initComputed()
+  this._initMethods()
+  this._initMeta()
+}
+
+/**
+ * Initialize the data. 
+ */
+
+exports._initData = function () {
+  // proxy data on instance
+  var data = this._data
+  var keys = Object.keys(data)
+  var i = keys.length
+  var key
+  while (i--) {
+    key = keys[i]
+    if (!_.isReserved(key)) {
+      this._proxy(key)
+    }
+  }
+  // observe data
+  Observer.create(data).addVm(this)
+}
+
+/**
+ * Swap the isntance's $data. Called in $data's setter.
+ *
+ * @param {Object} newData
+ */
+
+exports._setData = function (newData) {
+  newData = newData || {}
+  var oldData = this._data
+  this._data = newData
+  var keys, key, i
+  // unproxy keys not present in new data
+  keys = Object.keys(oldData)
+  i = keys.length
+  while (i--) {
+    key = keys[i]
+    if (!_.isReserved(key) && !(key in newData)) {
+      this._unproxy(key)
+    }
+  }
+  // proxy keys not already proxied,
+  // and trigger change for changed values
+  keys = Object.keys(newData)
+  i = keys.length
+  while (i--) {
+    key = keys[i]
+    if (!this.hasOwnProperty(key) && !_.isReserved(key)) {
+      // new property
+      this._proxy(key)
+    }
+  }
+  oldData.__ob__.removeVm(this)
+  Observer.create(newData).addVm(this)
+  this._digest()
+}
+
+/**
+ * Proxy a property, so that
+ * vm.prop === vm._data.prop
+ *
+ * @param {String} key
+ */
+
+exports._proxy = function (key) {
+  // need to store ref to self here
+  // because these getter/setters might
+  // be called by child instances!
+  var self = this
+  Object.defineProperty(self, key, {
+    configurable: true,
+    enumerable: true,
+    get: function proxyGetter () {
+      return self._data[key]
+    },
+    set: function proxySetter (val) {
+      self._data[key] = val
+    }
+  })
+}
+
+/**
+ * Unproxy a property.
+ *
+ * @param {String} key
+ */
+
+exports._unproxy = function (key) {
+  delete this[key]
+}
+
+/**
+ * Force update on every watcher in scope.
+ */
+
+exports._digest = function () {
+  var i = this._watcherList.length
+  while (i--) {
+    this._watcherList[i].update()
+  }
+  var children = this._children
+  i = children.length
+  while (i--) {
+    var child = children[i]
+    if (child.$options.inherit) {
+      child._digest()
+    }
+  }
+}
+
+/**
+ * Setup computed properties. They are essentially
+ * special getter/setters
+ */
+
+function noop () {}
+exports._initComputed = function () {
+  var computed = this.$options.computed
+  if (computed) {
+    for (var key in computed) {
+      var userDef = computed[key]
+      var def = {
+        enumerable: true,
+        configurable: true
+      }
+      if (typeof userDef === 'function') {
+        def.get = _.bind(userDef, this)
+        def.set = noop
+      } else {
+        def.get = userDef.get
+          ? _.bind(userDef.get, this)
+          : noop
+        def.set = userDef.set
+          ? _.bind(userDef.set, this)
+          : noop
+      }
+      Object.defineProperty(this, key, def)
+    }
+  }
+}
+
+/**
+ * Setup instance methods. Methods must be bound to the
+ * instance since they might be called by children
+ * inheriting them.
+ */
+
+exports._initMethods = function () {
+  var methods = this.$options.methods
+  if (methods) {
+    for (var key in methods) {
+      this[key] = _.bind(methods[key], this)
+    }
+  }
+}
+
+/**
+ * Initialize meta information like $index, $key & $value.
+ */
+
+exports._initMeta = function () {
+  var metas = this.$options._meta
+  if (metas) {
+    for (var key in metas) {
+      this._defineMeta(key, metas[key])
+    }
+  }
+}
+
+/**
+ * Define a meta property, e.g $index, $key, $value
+ * which only exists on the vm instance but not in $data.
+ *
+ * @param {String} key
+ * @param {*} value
+ */
+
+exports._defineMeta = function (key, value) {
+  var dep = new Dep()
+  Object.defineProperty(this, key, {
+    enumerable: true,
+    configurable: true,
+    get: function metaGetter () {
+      if (Observer.target) {
+        Observer.target.addDep(dep)
+      }
+      return value
+    },
+    set: function metaSetter (val) {
+      if (val !== value) {
+        value = val
+        dep.notify()
+      }
+    }
+  })
+}
+},{"../observer":51,"../observer/dep":50,"../util":65}],49:[function(require,module,exports){
+var _ = require('../util')
+var arrayProto = Array.prototype
+var arrayMethods = Object.create(arrayProto)
+
+/**
+ * Intercept mutating methods and emit events
+ */
+
+;[
+  'push',
+  'pop',
+  'shift',
+  'unshift',
+  'splice',
+  'sort',
+  'reverse'
+]
+.forEach(function (method) {
+  // cache original method
+  var original = arrayProto[method]
+  _.define(arrayMethods, method, function mutator () {
+    // avoid leaking arguments:
+    // http://jsperf.com/closure-with-arguments
+    var i = arguments.length
+    var args = new Array(i)
+    while (i--) {
+      args[i] = arguments[i]
+    }
+    var result = original.apply(this, args)
+    var ob = this.__ob__
+    var inserted
+    switch (method) {
+      case 'push':
+        inserted = args
+        break
+      case 'unshift':
+        inserted = args
+        break
+      case 'splice':
+        inserted = args.slice(2)
+        break
+    }
+    if (inserted) ob.observeArray(inserted)
+    // notify change
+    ob.notify()
+    return result
+  })
+})
+
+/**
+ * Swap the element at the given index with a new value
+ * and emits corresponding event.
+ *
+ * @param {Number} index
+ * @param {*} val
+ * @return {*} - replaced element
+ */
+
+_.define(
+  arrayProto,
+  '$set',
+  function $set (index, val) {
+    if (index >= this.length) {
+      this.length = index + 1
+    }
+    return this.splice(index, 1, val)[0]
+  }
+)
+
+/**
+ * Convenience method to remove the element at given index.
+ *
+ * @param {Number} index
+ * @param {*} val
+ */
+
+_.define(
+  arrayProto,
+  '$remove',
+  function $remove (index) {
+    if (typeof index !== 'number') {
+      index = this.indexOf(index)
+    }
+    if (index > -1) {
+      return this.splice(index, 1)[0]
+    }
+  }
+)
+
+module.exports = arrayMethods
+},{"../util":65}],50:[function(require,module,exports){
+var uid = 0
+var _ = require('../util')
+
+/**
+ * A dep is an observable that can have multiple
+ * directives subscribing to it.
+ *
+ * @constructor
+ */
+
+function Dep () {
+  this.id = ++uid
+  this.subs = []
+}
+
+var p = Dep.prototype
+
+/**
+ * Add a directive subscriber.
+ *
+ * @param {Directive} sub
+ */
+
+p.addSub = function (sub) {
+  this.subs.push(sub)
+}
+
+/**
+ * Remove a directive subscriber.
+ *
+ * @param {Directive} sub
+ */
+
+p.removeSub = function (sub) {
+  if (this.subs.length) {
+    var i = this.subs.indexOf(sub)
+    if (i > -1) this.subs.splice(i, 1)
+  }
+}
+
+/**
+ * Notify all subscribers of a new value.
+ */
+
+p.notify = function () {
+  // stablize the subscriber list first
+  var subs = _.toArray(this.subs)
+  for (var i = 0, l = subs.length; i < l; i++) {
+    subs[i].update()
+  }
+}
+
+module.exports = Dep
+},{"../util":65}],51:[function(require,module,exports){
+var _ = require('../util')
+var config = require('../config')
+var Dep = require('./dep')
+var arrayMethods = require('./array')
+var arrayKeys = Object.getOwnPropertyNames(arrayMethods)
+require('./object')
+
+var uid = 0
+
+/**
+ * Type enums
+ */
+
+var ARRAY  = 0
+var OBJECT = 1
+
+/**
+ * Augment an target Object or Array by intercepting
+ * the prototype chain using __proto__
+ *
+ * @param {Object|Array} target
+ * @param {Object} proto
+ */
+
+function protoAugment (target, src) {
+  target.__proto__ = src
+}
+
+/**
+ * Augment an target Object or Array by defining
+ * hidden properties.
+ *
+ * @param {Object|Array} target
+ * @param {Object} proto
+ */
+
+function copyAugment (target, src, keys) {
+  var i = keys.length
+  var key
+  while (i--) {
+    key = keys[i]
+    _.define(target, key, src[key])
+  }
+}
+
+/**
+ * Observer class that are attached to each observed
+ * object. Once attached, the observer converts target
+ * object's property keys into getter/setters that
+ * collect dependencies and dispatches updates.
+ *
+ * @param {Array|Object} value
+ * @param {Number} type
+ * @constructor
+ */
+
+function Observer (value, type) {
+  this.id = ++uid
+  this.value = value
+  this.active = true
+  this.deps = []
+  _.define(value, '__ob__', this)
+  if (type === ARRAY) {
+    var augment = config.proto && _.hasProto
+      ? protoAugment
+      : copyAugment
+    augment(value, arrayMethods, arrayKeys)
+    this.observeArray(value)
+  } else if (type === OBJECT) {
+    this.walk(value)
+  }
+}
+
+Observer.target = null
+
+var p = Observer.prototype
+
+/**
+ * Attempt to create an observer instance for a value,
+ * returns the new observer if successfully observed,
+ * or the existing observer if the value already has one.
+ *
+ * @param {*} value
+ * @return {Observer|undefined}
+ * @static
+ */
+
+Observer.create = function (value) {
+  if (
+    value &&
+    value.hasOwnProperty('__ob__') &&
+    value.__ob__ instanceof Observer
+  ) {
+    return value.__ob__
+  } else if (_.isArray(value)) {
+    return new Observer(value, ARRAY)
+  } else if (
+    _.isPlainObject(value) &&
+    !value._isVue // avoid Vue instance
+  ) {
+    return new Observer(value, OBJECT)
+  }
+}
+
+/**
+ * Walk through each property and convert them into
+ * getter/setters. This method should only be called when
+ * value type is Object. Properties prefixed with `$` or `_`
+ * and accessor properties are ignored.
+ *
+ * @param {Object} obj
+ */
+
+p.walk = function (obj) {
+  var keys = Object.keys(obj)
+  var i = keys.length
+  var key, prefix
+  while (i--) {
+    key = keys[i]
+    prefix = key.charCodeAt(0)
+    if (prefix !== 0x24 && prefix !== 0x5F) { // skip $ or _
+      this.convert(key, obj[key])
+    }
+  }
+}
+
+/**
+ * Try to carete an observer for a child value,
+ * and if value is array, link dep to the array.
+ *
+ * @param {*} val
+ * @return {Dep|undefined}
+ */
+
+p.observe = function (val) {
+  return Observer.create(val)
+}
+
+/**
+ * Observe a list of Array items.
+ *
+ * @param {Array} items
+ */
+
+p.observeArray = function (items) {
+  var i = items.length
+  while (i--) {
+    this.observe(items[i])
+  }
+}
+
+/**
+ * Convert a property into getter/setter so we can emit
+ * the events when the property is accessed/changed.
+ *
+ * @param {String} key
+ * @param {*} val
+ */
+
+p.convert = function (key, val) {
+  var ob = this
+  var childOb = ob.observe(val)
+  var dep = new Dep()
+  if (childOb) {
+    childOb.deps.push(dep)
+  }
+  Object.defineProperty(ob.value, key, {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      // Observer.target is a watcher whose getter is
+      // currently being evaluated.
+      if (ob.active && Observer.target) {
+        Observer.target.addDep(dep)
+      }
+      return val
+    },
+    set: function (newVal) {
+      if (newVal === val) return
+      // remove dep from old value
+      var oldChildOb = val && val.__ob__
+      if (oldChildOb) {
+        var oldDeps = oldChildOb.deps
+        oldDeps.splice(oldDeps.indexOf(dep), 1)
+      }
+      val = newVal
+      // add dep to new value
+      var newChildOb = ob.observe(newVal)
+      if (newChildOb) {
+        newChildOb.deps.push(dep)
+      }
+      dep.notify()
+    }
+  })
+}
+
+/**
+ * Notify change on all self deps on an observer.
+ * This is called when a mutable value mutates. e.g.
+ * when an Array's mutating methods are called, or an
+ * Object's $add/$delete are called.
+ */
+
+p.notify = function () {
+  var deps = this.deps
+  for (var i = 0, l = deps.length; i < l; i++) {
+    deps[i].notify()
+  }
+}
+
+/**
+ * Add an owner vm, so that when $add/$delete mutations
+ * happen we can notify owner vms to proxy the keys and
+ * digest the watchers. This is only called when the object
+ * is observed as an instance's root $data.
+ *
+ * @param {Vue} vm
+ */
+
+p.addVm = function (vm) {
+  (this.vms = this.vms || []).push(vm)
+}
+
+/**
+ * Remove an owner vm. This is called when the object is
+ * swapped out as an instance's $data object.
+ *
+ * @param {Vue} vm
+ */
+
+p.removeVm = function (vm) {
+  this.vms.splice(this.vms.indexOf(vm), 1)
+}
+
+module.exports = Observer
+
+},{"../config":18,"../util":65,"./array":49,"./dep":50,"./object":52}],52:[function(require,module,exports){
+var _ = require('../util')
+var objProto = Object.prototype
+
+/**
+ * Add a new property to an observed object
+ * and emits corresponding event
+ *
+ * @param {String} key
+ * @param {*} val
+ * @public
+ */
+
+_.define(
+  objProto,
+  '$add',
+  function $add (key, val) {
+    if (this.hasOwnProperty(key)) return
+    var ob = this.__ob__
+    if (!ob || _.isReserved(key)) {
+      this[key] = val
+      return
+    }
+    ob.convert(key, val)
+    if (ob.vms) {
+      var i = ob.vms.length
+      while (i--) {
+        var vm = ob.vms[i]
+        vm._proxy(key)
+        vm._digest()
+      }
+    } else {
+      ob.notify()
+    }
+  }
+)
+
+/**
+ * Set a property on an observed object, calling add to
+ * ensure the property is observed.
+ *
+ * @param {String} key
+ * @param {*} val
+ * @public
+ */
+
+_.define(
+  objProto,
+  '$set',
+  function $set (key, val) {
+    this.$add(key, val)
+    this[key] = val
+  }
+)
+
+/**
+ * Deletes a property from an observed object
+ * and emits corresponding event
+ *
+ * @param {String} key
+ * @public
+ */
+
+_.define(
+  objProto,
+  '$delete',
+  function $delete (key) {
+    if (!this.hasOwnProperty(key)) return
+    delete this[key]
+    var ob = this.__ob__
+    if (!ob || _.isReserved(key)) {
+      return
+    }
+    if (ob.vms) {
+      var i = ob.vms.length
+      while (i--) {
+        var vm = ob.vms[i]
+        vm._unproxy(key)
+        vm._digest()
+      }
+    } else {
+      ob.notify()
+    }
+  }
+)
+},{"../util":65}],53:[function(require,module,exports){
+var _ = require('../util')
+var Cache = require('../cache')
+var cache = new Cache(1000)
+var argRE = /^[^\{\?]+$|^'[^']*'$|^"[^"]*"$/
+var filterTokenRE = /[^\s'"]+|'[^']+'|"[^"]+"/g
+
+/**
+ * Parser state
+ */
+
+var str
+var c, i, l
+var inSingle
+var inDouble
+var curly
+var square
+var paren
+var begin
+var argIndex
+var dirs
+var dir
+var lastFilterIndex
+var arg
+
+/**
+ * Push a directive object into the result Array
+ */
+
+function pushDir () {
+  dir.raw = str.slice(begin, i).trim()
+  if (dir.expression === undefined) {
+    dir.expression = str.slice(argIndex, i).trim()
+  } else if (lastFilterIndex !== begin) {
+    pushFilter()
+  }
+  if (i === 0 || dir.expression) {
+    dirs.push(dir)
+  }
+}
+
+/**
+ * Push a filter to the current directive object
+ */
+
+function pushFilter () {
+  var exp = str.slice(lastFilterIndex, i).trim()
+  var filter
+  if (exp) {
+    filter = {}
+    var tokens = exp.match(filterTokenRE)
+    filter.name = tokens[0]
+    filter.args = tokens.length > 1 ? tokens.slice(1) : null
+  }
+  if (filter) {
+    (dir.filters = dir.filters || []).push(filter)
+  }
+  lastFilterIndex = i + 1
+}
+
+/**
+ * Parse a directive string into an Array of AST-like
+ * objects representing directives.
+ *
+ * Example:
+ *
+ * "click: a = a + 1 | uppercase" will yield:
+ * {
+ *   arg: 'click',
+ *   expression: 'a = a + 1',
+ *   filters: [
+ *     { name: 'uppercase', args: null }
+ *   ]
+ * }
+ *
+ * @param {String} str
+ * @return {Array<Object>}
+ */
+
+exports.parse = function (s) {
+
+  var hit = cache.get(s)
+  if (hit) {
+    return hit
+  }
+
+  // reset parser state
+  str = s
+  inSingle = inDouble = false
+  curly = square = paren = begin = argIndex = 0
+  lastFilterIndex = 0
+  dirs = []
+  dir = {}
+  arg = null
+
+  for (i = 0, l = str.length; i < l; i++) {
+    c = str.charCodeAt(i)
+    if (inSingle) {
+      // check single quote
+      if (c === 0x27) inSingle = !inSingle
+    } else if (inDouble) {
+      // check double quote
+      if (c === 0x22) inDouble = !inDouble
+    } else if (
+      c === 0x2C && // comma
+      !paren && !curly && !square
+    ) {
+      // reached the end of a directive
+      pushDir()
+      // reset & skip the comma
+      dir = {}
+      begin = argIndex = lastFilterIndex = i + 1
+    } else if (
+      c === 0x3A && // colon
+      !dir.expression &&
+      !dir.arg
+    ) {
+      // argument
+      arg = str.slice(begin, i).trim()
+      // test for valid argument here
+      // since we may have caught stuff like first half of
+      // an object literal or a ternary expression.
+      if (argRE.test(arg)) {
+        argIndex = i + 1
+        dir.arg = _.stripQuotes(arg) || arg
+      }
+    } else if (
+      c === 0x7C && // pipe
+      str.charCodeAt(i + 1) !== 0x7C &&
+      str.charCodeAt(i - 1) !== 0x7C
+    ) {
+      if (dir.expression === undefined) {
+        // first filter, end of expression
+        lastFilterIndex = i + 1
+        dir.expression = str.slice(argIndex, i).trim()
+      } else {
+        // already has filter
+        pushFilter()
+      }
+    } else {
+      switch (c) {
+        case 0x22: inDouble = true; break // "
+        case 0x27: inSingle = true; break // '
+        case 0x28: paren++; break         // (
+        case 0x29: paren--; break         // )
+        case 0x5B: square++; break        // [
+        case 0x5D: square--; break        // ]
+        case 0x7B: curly++; break         // {
+        case 0x7D: curly--; break         // }
+      }
+    }
+  }
+
+  if (i === 0 || begin !== i) {
+    pushDir()
+  }
+
+  cache.put(s, dirs)
+  return dirs
+}
+},{"../cache":15,"../util":65}],54:[function(require,module,exports){
+var _ = require('../util')
+var Path = require('./path')
+var Cache = require('../cache')
+var expressionCache = new Cache(1000)
+
+var allowedKeywords =
+  'Math,Date,this,true,false,null,undefined,Infinity,NaN,' +
+  'isNaN,isFinite,decodeURI,decodeURIComponent,encodeURI,' +
+  'encodeURIComponent,parseInt,parseFloat'
+var allowedKeywordsRE =
+  new RegExp('^(' + allowedKeywords.replace(/,/g, '\\b|') + '\\b)')
+
+// keywords that don't make sense inside expressions
+var improperKeywords =
+  'break,case,class,catch,const,continue,debugger,default,' +
+  'delete,do,else,export,extends,finally,for,function,if,' +
+  'import,in,instanceof,let,return,super,switch,throw,try,' +
+  'var,while,with,yield,enum,await,implements,package,' +
+  'proctected,static,interface,private,public'
+var improperKeywordsRE =
+  new RegExp('^(' + improperKeywords.replace(/,/g, '\\b|') + '\\b)')
+
+var wsRE = /\s/g
+var newlineRE = /\n/g
+var saveRE = /[\{,]\s*[\w\$_]+\s*:|('[^']*'|"[^"]*")|new |typeof |void /g
+var restoreRE = /"(\d+)"/g
+var pathTestRE = /^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\]|\[\d+\])*$/
+var pathReplaceRE = /[^\w$\.]([A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*|\['.*?'\]|\[".*?"\])*)/g
+var booleanLiteralRE = /^(true|false)$/
+
+/**
+ * Save / Rewrite / Restore
+ *
+ * When rewriting paths found in an expression, it is
+ * possible for the same letter sequences to be found in
+ * strings and Object literal property keys. Therefore we
+ * remove and store these parts in a temporary array, and
+ * restore them after the path rewrite.
+ */
+
+var saved = []
+
+/**
+ * Save replacer
+ *
+ * The save regex can match two possible cases:
+ * 1. An opening object literal
+ * 2. A string
+ * If matched as a plain string, we need to escape its
+ * newlines, since the string needs to be preserved when
+ * generating the function body.
+ *
+ * @param {String} str
+ * @param {String} isString - str if matched as a string
+ * @return {String} - placeholder with index
+ */
+
+function save (str, isString) {
+  var i = saved.length
+  saved[i] = isString
+    ? str.replace(newlineRE, '\\n')
+    : str
+  return '"' + i + '"'
+}
+
+/**
+ * Path rewrite replacer
+ *
+ * @param {String} raw
+ * @return {String}
+ */
+
+function rewrite (raw) {
+  var c = raw.charAt(0)
+  var path = raw.slice(1)
+  if (allowedKeywordsRE.test(path)) {
+    return raw
+  } else {
+    path = path.indexOf('"') > -1
+      ? path.replace(restoreRE, restore)
+      : path
+    return c + 'scope.' + path
+  }
+}
+
+/**
+ * Restore replacer
+ *
+ * @param {String} str
+ * @param {String} i - matched save index
+ * @return {String}
+ */
+
+function restore (str, i) {
+  return saved[i]
+}
+
+/**
+ * Rewrite an expression, prefixing all path accessors with
+ * `scope.` and generate getter/setter functions.
+ *
+ * @param {String} exp
+ * @param {Boolean} needSet
+ * @return {Function}
+ */
+
+function compileExpFns (exp, needSet) {
+  if (improperKeywordsRE.test(exp)) {
+    _.warn(
+      'Avoid using reserved keywords in expression: '
+      + exp
+    )
+  }
+  // reset state
+  saved.length = 0
+  // save strings and object literal keys
+  var body = exp
+    .replace(saveRE, save)
+    .replace(wsRE, '')
+  // rewrite all paths
+  // pad 1 space here becaue the regex matches 1 extra char
+  body = (' ' + body)
+    .replace(pathReplaceRE, rewrite)
+    .replace(restoreRE, restore)
+  var getter = makeGetter(body)
+  if (getter) {
+    return {
+      get: getter,
+      body: body,
+      set: needSet
+        ? makeSetter(body)
+        : null
+    }
+  }
+}
+
+/**
+ * Compile getter setters for a simple path.
+ *
+ * @param {String} exp
+ * @return {Function}
+ */
+
+function compilePathFns (exp) {
+  var getter, path
+  if (exp.indexOf('[') < 0) {
+    // really simple path
+    path = exp.split('.')
+    getter = Path.compileGetter(path)
+  } else {
+    // do the real parsing
+    path = Path.parse(exp)
+    getter = path.get
+  }
+  return {
+    get: getter,
+    // always generate setter for simple paths
+    set: function (obj, val) {
+      Path.set(obj, path, val)
+    }
+  }
+}
+
+/**
+ * Build a getter function. Requires eval.
+ *
+ * We isolate the try/catch so it doesn't affect the
+ * optimization of the parse function when it is not called.
+ *
+ * @param {String} body
+ * @return {Function|undefined}
+ */
+
+function makeGetter (body) {
+  try {
+    return new Function('scope', 'return ' + body + ';')
+  } catch (e) {
+    _.warn(
+      'Invalid expression. ' +
+      'Generated function body: ' + body
+    )
+  }
+}
+
+/**
+ * Build a setter function.
+ *
+ * This is only needed in rare situations like "a[b]" where
+ * a settable path requires dynamic evaluation.
+ *
+ * This setter function may throw error when called if the
+ * expression body is not a valid left-hand expression in
+ * assignment.
+ *
+ * @param {String} body
+ * @return {Function|undefined}
+ */
+
+function makeSetter (body) {
+  try {
+    return new Function('scope', 'value', body + '=value;')
+  } catch (e) {
+    _.warn('Invalid setter function body: ' + body)
+  }
+}
+
+/**
+ * Check for setter existence on a cache hit.
+ *
+ * @param {Function} hit
+ */
+
+function checkSetter (hit) {
+  if (!hit.set) {
+    hit.set = makeSetter(hit.body)
+  }
+}
+
+/**
+ * Parse an expression into re-written getter/setters.
+ *
+ * @param {String} exp
+ * @param {Boolean} needSet
+ * @return {Function}
+ */
+
+exports.parse = function (exp, needSet) {
+  exp = exp.trim()
+  // try cache
+  var hit = expressionCache.get(exp)
+  if (hit) {
+    if (needSet) {
+      checkSetter(hit)
+    }
+    return hit
+  }
+  // we do a simple path check to optimize for them.
+  // the check fails valid paths with unusal whitespaces,
+  // but that's too rare and we don't care.
+  // also skip boolean literals and paths that start with
+  // global "Math"
+  var res =
+    pathTestRE.test(exp) &&
+    // don't treat true/false as paths
+    !booleanLiteralRE.test(exp) &&
+    // Math constants e.g. Math.PI, Math.E etc.
+    exp.slice(0, 5) !== 'Math.'
+      ? compilePathFns(exp)
+      : compileExpFns(exp, needSet)
+  expressionCache.put(exp, res)
+  return res
+}
+
+// Export the pathRegex for external use
+exports.pathTestRE = pathTestRE
+},{"../cache":15,"../util":65,"./path":55}],55:[function(require,module,exports){
+var _ = require('../util')
+var Cache = require('../cache')
+var pathCache = new Cache(1000)
+var identRE = /^[$_a-zA-Z]+[\w$]*$/
+
+/**
+ * Path-parsing algorithm scooped from Polymer/observe-js
+ */
+
+var pathStateMachine = {
+  'beforePath': {
+    'ws': ['beforePath'],
+    'ident': ['inIdent', 'append'],
+    '[': ['beforeElement'],
+    'eof': ['afterPath']
+  },
+
+  'inPath': {
+    'ws': ['inPath'],
+    '.': ['beforeIdent'],
+    '[': ['beforeElement'],
+    'eof': ['afterPath']
+  },
+
+  'beforeIdent': {
+    'ws': ['beforeIdent'],
+    'ident': ['inIdent', 'append']
+  },
+
+  'inIdent': {
+    'ident': ['inIdent', 'append'],
+    '0': ['inIdent', 'append'],
+    'number': ['inIdent', 'append'],
+    'ws': ['inPath', 'push'],
+    '.': ['beforeIdent', 'push'],
+    '[': ['beforeElement', 'push'],
+    'eof': ['afterPath', 'push']
+  },
+
+  'beforeElement': {
+    'ws': ['beforeElement'],
+    '0': ['afterZero', 'append'],
+    'number': ['inIndex', 'append'],
+    "'": ['inSingleQuote', 'append', ''],
+    '"': ['inDoubleQuote', 'append', '']
+  },
+
+  'afterZero': {
+    'ws': ['afterElement', 'push'],
+    ']': ['inPath', 'push']
+  },
+
+  'inIndex': {
+    '0': ['inIndex', 'append'],
+    'number': ['inIndex', 'append'],
+    'ws': ['afterElement'],
+    ']': ['inPath', 'push']
+  },
+
+  'inSingleQuote': {
+    "'": ['afterElement'],
+    'eof': 'error',
+    'else': ['inSingleQuote', 'append']
+  },
+
+  'inDoubleQuote': {
+    '"': ['afterElement'],
+    'eof': 'error',
+    'else': ['inDoubleQuote', 'append']
+  },
+
+  'afterElement': {
+    'ws': ['afterElement'],
+    ']': ['inPath', 'push']
+  }
+}
+
+function noop () {}
+
+/**
+ * Determine the type of a character in a keypath.
+ *
+ * @param {Char} char
+ * @return {String} type
+ */
+
+function getPathCharType (char) {
+  if (char === undefined) {
+    return 'eof'
+  }
+
+  var code = char.charCodeAt(0)
+
+  switch(code) {
+    case 0x5B: // [
+    case 0x5D: // ]
+    case 0x2E: // .
+    case 0x22: // "
+    case 0x27: // '
+    case 0x30: // 0
+      return char
+
+    case 0x5F: // _
+    case 0x24: // $
+      return 'ident'
+
+    case 0x20: // Space
+    case 0x09: // Tab
+    case 0x0A: // Newline
+    case 0x0D: // Return
+    case 0xA0:  // No-break space
+    case 0xFEFF:  // Byte Order Mark
+    case 0x2028:  // Line Separator
+    case 0x2029:  // Paragraph Separator
+      return 'ws'
+  }
+
+  // a-z, A-Z
+  if ((0x61 <= code && code <= 0x7A) ||
+      (0x41 <= code && code <= 0x5A)) {
+    return 'ident'
+  }
+
+  // 1-9
+  if (0x31 <= code && code <= 0x39) {
+    return 'number'
+  }
+
+  return 'else'
+}
+
+/**
+ * Parse a string path into an array of segments
+ * Todo implement cache
+ *
+ * @param {String} path
+ * @return {Array|undefined}
+ */
+
+function parsePath (path) {
+  var keys = []
+  var index = -1
+  var mode = 'beforePath'
+  var c, newChar, key, type, transition, action, typeMap
+
+  var actions = {
+    push: function() {
+      if (key === undefined) {
+        return
+      }
+      keys.push(key)
+      key = undefined
+    },
+    append: function() {
+      if (key === undefined) {
+        key = newChar
+      } else {
+        key += newChar
+      }
+    }
+  }
+
+  function maybeUnescapeQuote () {
+    var nextChar = path[index + 1]
+    if ((mode === 'inSingleQuote' && nextChar === "'") ||
+        (mode === 'inDoubleQuote' && nextChar === '"')) {
+      index++
+      newChar = nextChar
+      actions.append()
+      return true
+    }
+  }
+
+  while (mode) {
+    index++
+    c = path[index]
+
+    if (c === '\\' && maybeUnescapeQuote()) {
+      continue
+    }
+
+    type = getPathCharType(c)
+    typeMap = pathStateMachine[mode]
+    transition = typeMap[type] || typeMap['else'] || 'error'
+
+    if (transition === 'error') {
+      return // parse error
+    }
+
+    mode = transition[0]
+    action = actions[transition[1]] || noop
+    newChar = transition[2] === undefined
+      ? c
+      : transition[2]
+    action()
+
+    if (mode === 'afterPath') {
+      return keys
+    }
+  }
+}
+
+/**
+ * Format a accessor segment based on its type.
+ *
+ * @param {String} key
+ * @return {Boolean}
+ */
+
+function formatAccessor(key) {
+  if (identRE.test(key)) { // identifier
+    return '.' + key
+  } else if (+key === key >>> 0) { // bracket index
+    return '[' + key + ']'
+  } else { // bracket string
+    return '["' + key.replace(/"/g, '\\"') + '"]'
+  }
+}
+
+/**
+ * Compiles a getter function with a fixed path.
+ *
+ * @param {Array} path
+ * @return {Function}
+ */
+
+exports.compileGetter = function (path) {
+  var body = 'return o' + path.map(formatAccessor).join('')
+  return new Function('o', body)
+}
+
+/**
+ * External parse that check for a cache hit first
+ *
+ * @param {String} path
+ * @return {Array|undefined}
+ */
+
+exports.parse = function (path) {
+  var hit = pathCache.get(path)
+  if (!hit) {
+    hit = parsePath(path)
+    if (hit) {
+      hit.get = exports.compileGetter(hit)
+      pathCache.put(path, hit)
+    }
+  }
+  return hit
+}
+
+/**
+ * Get from an object from a path string
+ *
+ * @param {Object} obj
+ * @param {String} path
+ */
+
+exports.get = function (obj, path) {
+  path = exports.parse(path)
+  if (path) {
+    return path.get(obj)
+  }
+}
+
+/**
+ * Set on an object from a path
+ *
+ * @param {Object} obj
+ * @param {String | Array} path
+ * @param {*} val
+ */
+
+exports.set = function (obj, path, val) {
+  if (typeof path === 'string') {
+    path = exports.parse(path)
+  }
+  if (!path || !_.isObject(obj)) {
+    return false
+  }
+  var last, key
+  for (var i = 0, l = path.length - 1; i < l; i++) {
+    last = obj
+    key = path[i]
+    obj = obj[key]
+    if (!_.isObject(obj)) {
+      obj = {}
+      last.$add(key, obj)
+    }
+  }
+  key = path[i]
+  if (key in obj) {
+    obj[key] = val
+  } else {
+    obj.$add(key, val)
+  }
+  return true
+}
+},{"../cache":15,"../util":65}],56:[function(require,module,exports){
+var _ = require('../util')
+var Cache = require('../cache')
+var templateCache = new Cache(1000)
+var idSelectorCache = new Cache(1000)
+
+var map = {
+  _default : [0, '', ''],
+  legend   : [1, '<fieldset>', '</fieldset>'],
+  tr       : [2, '<table><tbody>', '</tbody></table>'],
+  col      : [
+    2,
+    '<table><tbody></tbody><colgroup>',
+    '</colgroup></table>'
+  ]
+}
+
+map.td =
+map.th = [
+  3,
+  '<table><tbody><tr>',
+  '</tr></tbody></table>'
+]
+
+map.option =
+map.optgroup = [
+  1,
+  '<select multiple="multiple">',
+  '</select>'
+]
+
+map.thead =
+map.tbody =
+map.colgroup =
+map.caption =
+map.tfoot = [1, '<table>', '</table>']
+
+map.g =
+map.defs =
+map.symbol =
+map.use =
+map.image =
+map.text =
+map.circle =
+map.ellipse =
+map.line =
+map.path =
+map.polygon =
+map.polyline =
+map.rect = [
+  1,
+  '<svg ' +
+    'xmlns="http://www.w3.org/2000/svg" ' +
+    'xmlns:xlink="http://www.w3.org/1999/xlink" ' +
+    'xmlns:ev="http://www.w3.org/2001/xml-events"' +
+    'version="1.1">',
+  '</svg>'
+]
+
+var tagRE = /<([\w:]+)/
+var entityRE = /&\w+;/
+
+/**
+ * Convert a string template to a DocumentFragment.
+ * Determines correct wrapping by tag types. Wrapping
+ * strategy found in jQuery & component/domify.
+ *
+ * @param {String} templateString
+ * @return {DocumentFragment}
+ */
+
+function stringToFragment (templateString) {
+  // try a cache hit first
+  var hit = templateCache.get(templateString)
+  if (hit) {
+    return hit
+  }
+
+  var frag = document.createDocumentFragment()
+  var tagMatch = templateString.match(tagRE)
+  var entityMatch = entityRE.test(templateString)
+
+  if (!tagMatch && !entityMatch) {
+    // text only, return a single text node.
+    frag.appendChild(
+      document.createTextNode(templateString)
+    )
+  } else {
+
+    var tag    = tagMatch && tagMatch[1]
+    var wrap   = map[tag] || map._default
+    var depth  = wrap[0]
+    var prefix = wrap[1]
+    var suffix = wrap[2]
+    var node   = document.createElement('div')
+
+    node.innerHTML = prefix + templateString.trim() + suffix
+    while (depth--) {
+      node = node.lastChild
+    }
+
+    var child
+    /* jshint boss:true */
+    while (child = node.firstChild) {
+      frag.appendChild(child)
+    }
+  }
+
+  templateCache.put(templateString, frag)
+  return frag
+}
+
+/**
+ * Convert a template node to a DocumentFragment.
+ *
+ * @param {Node} node
+ * @return {DocumentFragment}
+ */
+
+function nodeToFragment (node) {
+  var tag = node.tagName
+  // if its a template tag and the browser supports it,
+  // its content is already a document fragment.
+  if (
+    tag === 'TEMPLATE' &&
+    node.content instanceof DocumentFragment
+  ) {
+    return node.content
+  }
+  // script template
+  if (tag === 'SCRIPT') {
+    return stringToFragment(node.textContent)
+  }
+  // normal node, clone it to avoid mutating the original
+  var clone = exports.clone(node)
+  var frag = document.createDocumentFragment()
+  var child
+  /* jshint boss:true */
+  while (child = clone.firstChild) {
+    frag.appendChild(child)
+  }
+  return frag
+}
+
+// Test for the presence of the Safari template cloning bug
+// https://bugs.webkit.org/show_bug.cgi?id=137755
+var hasBrokenTemplate = _.inBrowser
+  ? (function () {
+      var a = document.createElement('div')
+      a.innerHTML = '<template>1</template>'
+      return !a.cloneNode(true).firstChild.innerHTML
+    })()
+  : false
+
+// Test for IE10/11 textarea placeholder clone bug
+var hasTextareaCloneBug = _.inBrowser
+  ? (function () {
+      var t = document.createElement('textarea')
+      t.placeholder = 't'
+      return t.cloneNode(true).value === 't'
+    })()
+  : false
+
+/**
+ * 1. Deal with Safari cloning nested <template> bug by
+ *    manually cloning all template instances.
+ * 2. Deal with IE10/11 textarea placeholder bug by setting
+ *    the correct value after cloning.
+ *
+ * @param {Element|DocumentFragment} node
+ * @return {Element|DocumentFragment}
+ */
+
+exports.clone = function (node) {
+  var res = node.cloneNode(true)
+  var i, original, cloned
+  /* istanbul ignore if */
+  if (hasBrokenTemplate) {
+    original = node.querySelectorAll('template')
+    if (original.length) {
+      cloned = res.querySelectorAll('template')
+      i = cloned.length
+      while (i--) {
+        cloned[i].parentNode.replaceChild(
+          original[i].cloneNode(true),
+          cloned[i]
+        )
+      }
+    }
+  }
+  /* istanbul ignore if */
+  if (hasTextareaCloneBug) {
+    if (node.tagName === 'TEXTAREA') {
+      res.value = node.value
+    } else {
+      original = node.querySelectorAll('textarea')
+      if (original.length) {
+        cloned = res.querySelectorAll('textarea')
+        i = cloned.length
+        while (i--) {
+          cloned[i].value = original[i].value
+        }
+      }
+    }
+  }
+  return res
+}
+
+/**
+ * Process the template option and normalizes it into a
+ * a DocumentFragment that can be used as a partial or a
+ * instance template.
+ *
+ * @param {*} template
+ *    Possible values include:
+ *    - DocumentFragment object
+ *    - Node object of type Template
+ *    - id selector: '#some-template-id'
+ *    - template string: '<div><span>{{msg}}</span></div>'
+ * @param {Boolean} clone
+ * @param {Boolean} noSelector
+ * @return {DocumentFragment|undefined}
+ */
+
+exports.parse = function (template, clone, noSelector) {
+  var node, frag
+
+  // if the template is already a document fragment,
+  // do nothing
+  if (template instanceof DocumentFragment) {
+    return clone
+      ? template.cloneNode(true)
+      : template
+  }
+
+  if (typeof template === 'string') {
+    // id selector
+    if (!noSelector && template.charAt(0) === '#') {
+      // id selector can be cached too
+      frag = idSelectorCache.get(template)
+      if (!frag) {
+        node = document.getElementById(template.slice(1))
+        if (node) {
+          frag = nodeToFragment(node)
+          // save selector to cache
+          idSelectorCache.put(template, frag)
+        }
+      }
+    } else {
+      // normal string template
+      frag = stringToFragment(template)
+    }
+  } else if (template.nodeType) {
+    // a direct node
+    frag = nodeToFragment(template)
+  }
+
+  return frag && clone
+    ? exports.clone(frag)
+    : frag
+}
+},{"../cache":15,"../util":65}],57:[function(require,module,exports){
+var Cache = require('../cache')
+var config = require('../config')
+var dirParser = require('./directive')
+var regexEscapeRE = /[-.*+?^${}()|[\]\/\\]/g
+var cache, tagRE, htmlRE, firstChar, lastChar
+
+/**
+ * Escape a string so it can be used in a RegExp
+ * constructor.
+ *
+ * @param {String} str
+ */
+
+function escapeRegex (str) {
+  return str.replace(regexEscapeRE, '\\$&')
+}
+
+/**
+ * Compile the interpolation tag regex.
+ *
+ * @return {RegExp}
+ */
+
+function compileRegex () {
+  config._delimitersChanged = false
+  var open = config.delimiters[0]
+  var close = config.delimiters[1]
+  firstChar = open.charAt(0)
+  lastChar = close.charAt(close.length - 1)
+  var firstCharRE = escapeRegex(firstChar)
+  var lastCharRE = escapeRegex(lastChar)
+  var openRE = escapeRegex(open)
+  var closeRE = escapeRegex(close)
+  tagRE = new RegExp(
+    firstCharRE + '?' + openRE +
+    '(.+?)' +
+    closeRE + lastCharRE + '?',
+    'g'
+  )
+  htmlRE = new RegExp(
+    '^' + firstCharRE + openRE +
+    '.*' +
+    closeRE + lastCharRE + '$'
+  )
+  // reset cache
+  cache = new Cache(1000)
+}
+
+/**
+ * Parse a template text string into an array of tokens.
+ *
+ * @param {String} text
+ * @return {Array<Object> | null}
+ *               - {String} type
+ *               - {String} value
+ *               - {Boolean} [html]
+ *               - {Boolean} [oneTime]
+ */
+
+exports.parse = function (text) {
+  if (config._delimitersChanged) {
+    compileRegex()
+  }
+  var hit = cache.get(text)
+  if (hit) {
+    return hit
+  }
+  if (!tagRE.test(text)) {
+    return null
+  }
+  var tokens = []
+  var lastIndex = tagRE.lastIndex = 0
+  var match, index, value, first, oneTime, partial
+  /* jshint boss:true */
+  while (match = tagRE.exec(text)) {
+    index = match.index
+    // push text token
+    if (index > lastIndex) {
+      tokens.push({
+        value: text.slice(lastIndex, index)
+      })
+    }
+    // tag token
+    first = match[1].charCodeAt(0)
+    oneTime = first === 0x2A // *
+    partial = first === 0x3E // >
+    value = (oneTime || partial)
+      ? match[1].slice(1)
+      : match[1]
+    tokens.push({
+      tag: true,
+      value: value.trim(),
+      html: htmlRE.test(match[0]),
+      oneTime: oneTime,
+      partial: partial
+    })
+    lastIndex = index + match[0].length
+  }
+  if (lastIndex < text.length) {
+    tokens.push({
+      value: text.slice(lastIndex)
+    })
+  }
+  cache.put(text, tokens)
+  return tokens
+}
+
+/**
+ * Format a list of tokens into an expression.
+ * e.g. tokens parsed from 'a {{b}} c' can be serialized
+ * into one single expression as '"a " + b + " c"'.
+ *
+ * @param {Array} tokens
+ * @param {Vue} [vm]
+ * @return {String}
+ */
+
+exports.tokensToExp = function (tokens, vm) {
+  return tokens.length > 1
+    ? tokens.map(function (token) {
+        return formatToken(token, vm)
+      }).join('+')
+    : formatToken(tokens[0], vm, true)
+}
+
+/**
+ * Format a single token.
+ *
+ * @param {Object} token
+ * @param {Vue} [vm]
+ * @param {Boolean} single
+ * @return {String}
+ */
+
+function formatToken (token, vm, single) {
+  return token.tag
+    ? vm && token.oneTime
+      ? '"' + vm.$eval(token.value) + '"'
+      : single
+        ? token.value
+        : inlineFilters(token.value)
+    : '"' + token.value + '"'
+}
+
+/**
+ * For an attribute with multiple interpolation tags,
+ * e.g. attr="some-{{thing | filter}}", in order to combine
+ * the whole thing into a single watchable expression, we
+ * have to inline those filters. This function does exactly
+ * that. This is a bit hacky but it avoids heavy changes
+ * to directive parser and watcher mechanism.
+ *
+ * @param {String} exp
+ * @return {String}
+ */
+
+var filterRE = /[^|]\|[^|]/
+function inlineFilters (exp) {
+  if (!filterRE.test(exp)) {
+    return '(' + exp + ')'
+  } else {
+    var dir = dirParser.parse(exp)[0]
+    if (!dir.filters) {
+      return '(' + exp + ')'
+    } else {
+      exp = dir.expression
+      for (var i = 0, l = dir.filters.length; i < l; i++) {
+        var filter = dir.filters[i]
+        var args = filter.args
+          ? ',"' + filter.args.join('","') + '"'
+          : ''
+        filter = 'this.$options.filters["' + filter.name + '"]'
+        exp = '(' + filter + '.read||' + filter + ')' +
+          '.apply(this,[' + exp + args + '])'
+      }
+      return exp
+    }
+  }
+}
+},{"../cache":15,"../config":18,"./directive":53}],58:[function(require,module,exports){
+var _ = require('../util')
+var addClass = _.addClass
+var removeClass = _.removeClass
+var transDurationProp = _.transitionProp + 'Duration'
+var animDurationProp = _.animationProp + 'Duration'
+
+var queue = []
+var queued = false
+
+/**
+ * Push a job into the transition queue, which is to be
+ * executed on next frame.
+ *
+ * @param {Element} el    - target element
+ * @param {Number} dir    - 1: enter, -1: leave
+ * @param {Function} op   - the actual dom operation
+ * @param {String} cls    - the className to remove when the
+ *                          transition is done.
+ * @param {Function} [cb] - user supplied callback.
+ */
+
+function push (el, dir, op, cls, cb) {
+  queue.push({
+    el  : el,
+    dir : dir,
+    cb  : cb,
+    cls : cls,
+    op  : op
+  })
+  if (!queued) {
+    queued = true
+    _.nextTick(flush)
+  }
+}
+
+/**
+ * Flush the queue, and do one forced reflow before
+ * triggering transitions.
+ */
+
+function flush () {
+  /* jshint unused: false */
+  var f = document.documentElement.offsetHeight
+  queue.forEach(run)
+  queue = []
+  queued = false
+}
+
+/**
+ * Run a transition job.
+ *
+ * @param {Object} job
+ */
+
+function run (job) {
+
+  var el = job.el
+  var data = el.__v_trans
+  var cls = job.cls
+  var cb = job.cb
+  var op = job.op
+  var transitionType = getTransitionType(el, data, cls)
+
+  if (job.dir > 0) { // ENTER
+    if (transitionType === 1) {
+      // trigger transition by removing enter class
+      removeClass(el, cls)
+      // only need to listen for transitionend if there's
+      // a user callback
+      if (cb) setupTransitionCb(_.transitionEndEvent)
+    } else if (transitionType === 2) {
+      // animations are triggered when class is added
+      // so we just listen for animationend to remove it.
+      setupTransitionCb(_.animationEndEvent, function () {
+        removeClass(el, cls)
+      })
+    } else {
+      // no transition applicable
+      removeClass(el, cls)
+      if (cb) cb()
+    }
+  } else { // LEAVE
+    if (transitionType) {
+      // leave transitions/animations are both triggered
+      // by adding the class, just remove it on end event.
+      var event = transitionType === 1
+        ? _.transitionEndEvent
+        : _.animationEndEvent
+      setupTransitionCb(event, function () {
+        op()
+        removeClass(el, cls)
+      })
+    } else {
+      op()
+      removeClass(el, cls)
+      if (cb) cb()
+    }
+  }
+
+  /**
+   * Set up a transition end callback, store the callback
+   * on the element's __v_trans data object, so we can
+   * clean it up if another transition is triggered before
+   * the callback is fired.
+   *
+   * @param {String} event
+   * @param {Function} [cleanupFn]
+   */
+
+  function setupTransitionCb (event, cleanupFn) {
+    data.event = event
+    var onEnd = data.callback = function transitionCb (e) {
+      if (e.target === el) {
+        _.off(el, event, onEnd)
+        data.event = data.callback = null
+        if (cleanupFn) cleanupFn()
+        if (cb) cb()
+      }
+    }
+    _.on(el, event, onEnd)
+  }
+}
+
+/**
+ * Get an element's transition type based on the
+ * calculated styles
+ *
+ * @param {Element} el
+ * @param {Object} data
+ * @param {String} className
+ * @return {Number}
+ *         1 - transition
+ *         2 - animation
+ */
+
+function getTransitionType (el, data, className) {
+  var type = data.cache && data.cache[className]
+  if (type) return type
+  var inlineStyles = el.style
+  var computedStyles = window.getComputedStyle(el)
+  var transDuration =
+    inlineStyles[transDurationProp] ||
+    computedStyles[transDurationProp]
+  if (transDuration && transDuration !== '0s') {
+    type = 1
+  } else {
+    var animDuration =
+      inlineStyles[animDurationProp] ||
+      computedStyles[animDurationProp]
+    if (animDuration && animDuration !== '0s') {
+      type = 2
+    }
+  }
+  if (type) {
+    if (!data.cache) data.cache = {}
+    data.cache[className] = type
+  }
+  return type
+}
+
+/**
+ * Apply CSS transition to an element.
+ *
+ * @param {Element} el
+ * @param {Number} direction - 1: enter, -1: leave
+ * @param {Function} op - the actual DOM operation
+ * @param {Object} data - target element's transition data
+ */
+
+module.exports = function (el, direction, op, data, cb) {
+  var prefix = data.id || 'v'
+  var enterClass = prefix + '-enter'
+  var leaveClass = prefix + '-leave'
+  // clean up potential previous unfinished transition
+  if (data.callback) {
+    _.off(el, data.event, data.callback)
+    removeClass(el, enterClass)
+    removeClass(el, leaveClass)
+    data.event = data.callback = null
+  }
+  if (direction > 0) { // enter
+    addClass(el, enterClass)
+    op()
+    push(el, direction, null, enterClass, cb)
+  } else { // leave
+    addClass(el, leaveClass)
+    push(el, direction, op, leaveClass, cb)
+  }
+}
+},{"../util":65}],59:[function(require,module,exports){
+var _ = require('../util')
+var applyCSSTransition = require('./css')
+var applyJSTransition = require('./js')
+var doc = typeof document === 'undefined' ? null : document
+
+/**
+ * Append with transition.
+ *
+ * @oaram {Element} el
+ * @param {Element} target
+ * @param {Vue} vm
+ * @param {Function} [cb]
+ */
+
+exports.append = function (el, target, vm, cb) {
+  apply(el, 1, function () {
+    target.appendChild(el)
+  }, vm, cb)
+}
+
+/**
+ * InsertBefore with transition.
+ *
+ * @oaram {Element} el
+ * @param {Element} target
+ * @param {Vue} vm
+ * @param {Function} [cb]
+ */
+
+exports.before = function (el, target, vm, cb) {
+  apply(el, 1, function () {
+    _.before(el, target)
+  }, vm, cb)
+}
+
+/**
+ * Remove with transition.
+ *
+ * @oaram {Element} el
+ * @param {Vue} vm
+ * @param {Function} [cb]
+ */
+
+exports.remove = function (el, vm, cb) {
+  apply(el, -1, function () {
+    _.remove(el)
+  }, vm, cb)
+}
+
+/**
+ * Remove by appending to another parent with transition.
+ * This is only used in block operations.
+ *
+ * @oaram {Element} el
+ * @param {Element} target
+ * @param {Vue} vm
+ * @param {Function} [cb]
+ */
+
+exports.removeThenAppend = function (el, target, vm, cb) {
+  apply(el, -1, function () {
+    target.appendChild(el)
+  }, vm, cb)
+}
+
+/**
+ * Append the childNodes of a fragment to target.
+ *
+ * @param {DocumentFragment} block
+ * @param {Node} target
+ * @param {Vue} vm
+ */
+
+exports.blockAppend = function (block, target, vm) {
+  var nodes = _.toArray(block.childNodes)
+  for (var i = 0, l = nodes.length; i < l; i++) {
+    exports.before(nodes[i], target, vm)
+  }
+}
+
+/**
+ * Remove a block of nodes between two edge nodes.
+ *
+ * @param {Node} start
+ * @param {Node} end
+ * @param {Vue} vm
+ */
+
+exports.blockRemove = function (start, end, vm) {
+  var node = start.nextSibling
+  var next
+  while (node !== end) {
+    next = node.nextSibling
+    exports.remove(node, vm)
+    node = next
+  }
+}
+
+/**
+ * Apply transitions with an operation callback.
+ *
+ * @oaram {Element} el
+ * @param {Number} direction
+ *                  1: enter
+ *                 -1: leave
+ * @param {Function} op - the actual DOM operation
+ * @param {Vue} vm
+ * @param {Function} [cb]
+ */
+
+var apply = exports.apply = function (el, direction, op, vm, cb) {
+  var transData = el.__v_trans
+  if (
+    !transData ||
+    !vm._isCompiled ||
+    // if the vm is being manipulated by a parent directive
+    // during the parent's compilation phase, skip the
+    // animation.
+    (vm.$parent && !vm.$parent._isCompiled)
+  ) {
+    op()
+    if (cb) cb()
+    return
+  }
+  // determine the transition type on the element
+  var jsTransition = transData.fns
+  if (jsTransition) {
+    // js
+    applyJSTransition(
+      el,
+      direction,
+      op,
+      transData,
+      jsTransition,
+      vm,
+      cb
+    )
+  } else if (
+    _.transitionEndEvent &&
+    // skip CSS transitions if page is not visible -
+    // this solves the issue of transitionend events not
+    // firing until the page is visible again.
+    // pageVisibility API is supported in IE10+, same as
+    // CSS transitions.
+    !(doc && doc.hidden)
+  ) {
+    // css
+    applyCSSTransition(
+      el,
+      direction,
+      op,
+      transData,
+      cb
+    )
+  } else {
+    // not applicable
+    op()
+    if (cb) cb()
+  }
+}
+},{"../util":65,"./css":58,"./js":60}],60:[function(require,module,exports){
+/**
+ * Apply JavaScript enter/leave functions.
+ *
+ * @param {Element} el
+ * @param {Number} direction - 1: enter, -1: leave
+ * @param {Function} op - the actual DOM operation
+ * @param {Object} data - target element's transition data
+ * @param {Object} def - transition definition object
+ * @param {Vue} vm - the owner vm of the element
+ * @param {Function} [cb]
+ */
+
+module.exports = function (el, direction, op, data, def, vm, cb) {
+  // if the element is the root of an instance,
+  // use that instance as the transition function context
+  vm = el.__vue__ || vm
+  if (data.cancel) {
+    data.cancel()
+    data.cancel = null
+  }
+  if (direction > 0) { // enter
+    if (def.beforeEnter) {
+      def.beforeEnter.call(vm, el)
+    }
+    op()
+    if (def.enter) {
+      data.cancel = def.enter.call(vm, el, function () {
+        data.cancel = null
+        if (cb) cb()
+      })
+    } else if (cb) {
+      cb()
+    }
+  } else { // leave
+    if (def.leave) {
+      data.cancel = def.leave.call(vm, el, function () {
+        data.cancel = null
+        op()
+        if (cb) cb()
+      })
+    } else {
+      op()
+      if (cb) cb()
+    }
+  }
+}
+},{}],61:[function(require,module,exports){
+var config = require('../config')
+
+/**
+ * Enable debug utilities. The enableDebug() function and
+ * all _.log() & _.warn() calls will be dropped in the
+ * minified production build.
+ */
+
+enableDebug()
+
+function enableDebug () {
+
+  var hasConsole = typeof console !== 'undefined'
+  
+  /**
+   * Log a message.
+   *
+   * @param {String} msg
+   */
+
+  exports.log = function (msg) {
+    if (hasConsole && config.debug) {
+      console.log('[Vue info]: ' + msg)
+    }
+  }
+
+  /**
+   * We've got a problem here.
+   *
+   * @param {String} msg
+   */
+
+  exports.warn = function (msg) {
+    if (hasConsole && (!config.silent || config.debug)) {
+      console.warn('[Vue warn]: ' + msg)
+      /* istanbul ignore if */
+      if (config.debug) {
+        /* jshint debug: true */
+        debugger
+      }
+    }
+  }
+
+  /**
+   * Assert asset exists
+   */
+
+  exports.assertAsset = function (val, type, id) {
+    if (!val) {
+      exports.warn('Failed to resolve ' + type + ': ' + id)
+    }
+  }
+}
+},{"../config":18}],62:[function(require,module,exports){
+var config = require('../config')
+
+/**
+ * Check if a node is in the document.
+ * Note: document.documentElement.contains should work here
+ * but always returns false for comment nodes in phantomjs,
+ * making unit tests difficult. This is fixed byy doing the
+ * contains() check on the node's parentNode instead of
+ * the node itself.
+ *
+ * @param {Node} node
+ * @return {Boolean}
+ */
+
+var doc =
+  typeof document !== 'undefined' &&
+  document.documentElement
+
+exports.inDoc = function (node) {
+  var parent = node && node.parentNode
+  return doc === node ||
+    doc === parent ||
+    !!(parent && parent.nodeType === 1 && (doc.contains(parent)))
+}
+
+/**
+ * Extract an attribute from a node.
+ *
+ * @param {Node} node
+ * @param {String} attr
+ */
+
+exports.attr = function (node, attr) {
+  attr = config.prefix + attr
+  var val = node.getAttribute(attr)
+  if (val !== null) {
+    node.removeAttribute(attr)
+  }
+  return val
+}
+
+/**
+ * Insert el before target
+ *
+ * @param {Element} el
+ * @param {Element} target
+ */
+
+exports.before = function (el, target) {
+  target.parentNode.insertBefore(el, target)
+}
+
+/**
+ * Insert el after target
+ *
+ * @param {Element} el
+ * @param {Element} target
+ */
+
+exports.after = function (el, target) {
+  if (target.nextSibling) {
+    exports.before(el, target.nextSibling)
+  } else {
+    target.parentNode.appendChild(el)
+  }
+}
+
+/**
+ * Remove el from DOM
+ *
+ * @param {Element} el
+ */
+
+exports.remove = function (el) {
+  el.parentNode.removeChild(el)
+}
+
+/**
+ * Prepend el to target
+ *
+ * @param {Element} el
+ * @param {Element} target
+ */
+
+exports.prepend = function (el, target) {
+  if (target.firstChild) {
+    exports.before(el, target.firstChild)
+  } else {
+    target.appendChild(el)
+  }
+}
+
+/**
+ * Replace target with el
+ *
+ * @param {Element} target
+ * @param {Element} el
+ */
+
+exports.replace = function (target, el) {
+  var parent = target.parentNode
+  if (parent) {
+    parent.replaceChild(el, target)
+  }
+}
+
+/**
+ * Copy attributes from one element to another.
+ *
+ * @param {Element} from
+ * @param {Element} to
+ */
+
+exports.copyAttributes = function (from, to) {
+  if (from.hasAttributes()) {
+    var attrs = from.attributes
+    for (var i = 0, l = attrs.length; i < l; i++) {
+      var attr = attrs[i]
+      to.setAttribute(attr.name, attr.value)
+    }
+  }
+}
+
+/**
+ * Add event listener shorthand.
+ *
+ * @param {Element} el
+ * @param {String} event
+ * @param {Function} cb
+ */
+
+exports.on = function (el, event, cb) {
+  el.addEventListener(event, cb)
+}
+
+/**
+ * Remove event listener shorthand.
+ *
+ * @param {Element} el
+ * @param {String} event
+ * @param {Function} cb
+ */
+
+exports.off = function (el, event, cb) {
+  el.removeEventListener(event, cb)
+}
+
+/**
+ * Add class with compatibility for IE & SVG
+ *
+ * @param {Element} el
+ * @param {Strong} cls
+ */
+
+exports.addClass = function (el, cls) {
+  if (el.classList) {
+    el.classList.add(cls)
+  } else {
+    var cur = ' ' + (el.getAttribute('class') || '') + ' '
+    if (cur.indexOf(' ' + cls + ' ') < 0) {
+      el.setAttribute('class', (cur + cls).trim())
+    }
+  }
+}
+
+/**
+ * Remove class with compatibility for IE & SVG
+ *
+ * @param {Element} el
+ * @param {Strong} cls
+ */
+
+exports.removeClass = function (el, cls) {
+  if (el.classList) {
+    el.classList.remove(cls)
+  } else {
+    var cur = ' ' + (el.getAttribute('class') || '') + ' '
+    var tar = ' ' + cls + ' '
+    while (cur.indexOf(tar) >= 0) {
+      cur = cur.replace(tar, ' ')
+    }
+    el.setAttribute('class', cur.trim())
+  }
+}
+
+/**
+ * Extract raw content inside an element into a temporary
+ * container div
+ *
+ * @param {Element} el
+ * @param {Boolean} asFragment
+ * @return {Element}
+ */
+
+exports.extractContent = function (el, asFragment) {
+  var child
+  var rawContent
+  if (el.hasChildNodes()) {
+    rawContent = asFragment
+      ? document.createDocumentFragment()
+      : document.createElement('div')
+    /* jshint boss:true */
+    while (child = el.firstChild) {
+      rawContent.appendChild(child)
+    }
+  }
+  return rawContent
+}
+
+},{"../config":18}],63:[function(require,module,exports){
+/**
+ * Can we use __proto__?
+ *
+ * @type {Boolean}
+ */
+
+exports.hasProto = '__proto__' in {}
+
+/**
+ * Indicates we have a window
+ *
+ * @type {Boolean}
+ */
+
+var toString = Object.prototype.toString
+var inBrowser = exports.inBrowser =
+  typeof window !== 'undefined' &&
+  toString.call(window) !== '[object Object]'
+
+/**
+ * Defer a task to execute it asynchronously. Ideally this
+ * should be executed as a microtask, so we leverage
+ * MutationObserver if it's available, and fallback to
+ * setTimeout(0).
+ *
+ * @param {Function} cb
+ * @param {Object} ctx
+ */
+
+exports.nextTick = (function () {
+  var callbacks = []
+  var pending = false
+  var timerFunc
+  function handle () {
+    pending = false
+    var copies = callbacks.slice(0)
+    callbacks = []
+    for (var i = 0; i < copies.length; i++) {
+      copies[i]()
+    }
+  }
+  /* istanbul ignore if */
+  if (typeof MutationObserver !== 'undefined') {
+    var counter = 1
+    var observer = new MutationObserver(handle)
+    var textNode = document.createTextNode(counter)
+    observer.observe(textNode, {
+      characterData: true
+    })
+    timerFunc = function () {
+      counter = (counter + 1) % 2
+      textNode.data = counter
+    }
+  } else {
+    timerFunc = setTimeout
+  }
+  return function (cb, ctx) {
+    var func = ctx
+      ? function () { cb.call(ctx) }
+      : cb
+    callbacks.push(func)
+    if (pending) return
+    pending = true
+    timerFunc(handle, 0)
+  }
+})()
+
+/**
+ * Detect if we are in IE9...
+ *
+ * @type {Boolean}
+ */
+
+exports.isIE9 =
+  inBrowser &&
+  navigator.userAgent.indexOf('MSIE 9.0') > 0
+
+/**
+ * Sniff transition/animation events
+ */
+
+if (inBrowser && !exports.isIE9) {
+  var isWebkitTrans =
+    window.ontransitionend === undefined &&
+    window.onwebkittransitionend !== undefined
+  var isWebkitAnim =
+    window.onanimationend === undefined &&
+    window.onwebkitanimationend !== undefined
+  exports.transitionProp = isWebkitTrans
+    ? 'WebkitTransition'
+    : 'transition'
+  exports.transitionEndEvent = isWebkitTrans
+    ? 'webkitTransitionEnd'
+    : 'transitionend'
+  exports.animationProp = isWebkitAnim
+    ? 'WebkitAnimation'
+    : 'animation'
+  exports.animationEndEvent = isWebkitAnim
+    ? 'webkitAnimationEnd'
+    : 'animationend'
+}
+},{}],64:[function(require,module,exports){
+var _ = require('./debug')
+
+/**
+ * Resolve read & write filters for a vm instance. The
+ * filters descriptor Array comes from the directive parser.
+ *
+ * This is extracted into its own utility so it can
+ * be used in multiple scenarios.
+ *
+ * @param {Vue} vm
+ * @param {Array<Object>} filters
+ * @param {Object} [target]
+ * @return {Object}
+ */
+
+exports.resolveFilters = function (vm, filters, target) {
+  if (!filters) {
+    return
+  }
+  var res = target || {}
+  // var registry = vm.$options.filters
+  filters.forEach(function (f) {
+    var def = vm.$options.filters[f.name]
+    _.assertAsset(def, 'filter', f.name)
+    if (!def) return
+    var args = f.args
+    var reader, writer
+    if (typeof def === 'function') {
+      reader = def
+    } else {
+      reader = def.read
+      writer = def.write
+    }
+    if (reader) {
+      if (!res.read) res.read = []
+      res.read.push(function (value) {
+        return args
+          ? reader.apply(vm, [value].concat(args))
+          : reader.call(vm, value)
+      })
+    }
+    if (writer) {
+      if (!res.write) res.write = []
+      res.write.push(function (value, oldVal) {
+        return args
+          ? writer.apply(vm, [value, oldVal].concat(args))
+          : writer.call(vm, value, oldVal)
+      })
+    }
+  })
+  return res
+}
+
+/**
+ * Apply filters to a value
+ *
+ * @param {*} value
+ * @param {Array} filters
+ * @param {Vue} vm
+ * @param {*} oldVal
+ * @return {*}
+ */
+
+exports.applyFilters = function (value, filters, vm, oldVal) {
+  if (!filters) {
+    return value
+  }
+  for (var i = 0, l = filters.length; i < l; i++) {
+    value = filters[i].call(vm, value, oldVal)
+  }
+  return value
+}
+},{"./debug":61}],65:[function(require,module,exports){
+var lang   = require('./lang')
+var extend = lang.extend
+
+extend(exports, lang)
+extend(exports, require('./env'))
+extend(exports, require('./dom'))
+extend(exports, require('./filter'))
+extend(exports, require('./debug'))
+},{"./debug":61,"./dom":62,"./env":63,"./filter":64,"./lang":66}],66:[function(require,module,exports){
+/**
+ * Check is a string starts with $ or _
+ *
+ * @param {String} str
+ * @return {Boolean}
+ */
+
+exports.isReserved = function (str) {
+  var c = (str + '').charCodeAt(0)
+  return c === 0x24 || c === 0x5F
+}
+
+/**
+ * Guard text output, make sure undefined outputs
+ * empty string
+ *
+ * @param {*} value
+ * @return {String}
+ */
+
+exports.toString = function (value) {
+  return value == null
+    ? ''
+    : value.toString()
+}
+
+/**
+ * Check and convert possible numeric numbers before
+ * setting back to data
+ *
+ * @param {*} value
+ * @return {*|Number}
+ */
+
+exports.toNumber = function (value) {
+  return (
+    isNaN(value) ||
+    value === null ||
+    typeof value === 'boolean'
+  ) ? value
+    : Number(value)
+}
+
+/**
+ * Strip quotes from a string
+ *
+ * @param {String} str
+ * @return {String | false}
+ */
+
+exports.stripQuotes = function (str) {
+  var a = str.charCodeAt(0)
+  var b = str.charCodeAt(str.length - 1)
+  return a === b && (a === 0x22 || a === 0x27)
+    ? str.slice(1, -1)
+    : false
+}
+
+/**
+ * Replace helper
+ *
+ * @param {String} _ - matched delimiter
+ * @param {String} c - matched char
+ * @return {String}
+ */
+function toUpper (_, c) {
+  return c ? c.toUpperCase () : ''
+}
+
+/**
+ * Camelize a hyphen-delmited string.
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+var camelRE = /-(\w)/g
+exports.camelize = function (str) {
+  return str.replace(camelRE, toUpper)
+}
+
+/**
+ * Converts hyphen/underscore/slash delimitered names into
+ * camelized classNames.
+ *
+ * e.g. my-component => MyComponent
+ *      some_else    => SomeElse
+ *      some/comp    => SomeComp
+ *
+ * @param {String} str
+ * @return {String}
+ */
+
+var classifyRE = /(?:^|[-_\/])(\w)/g
+exports.classify = function (str) {
+  return str.replace(classifyRE, toUpper)
+}
+
+/**
+ * Simple bind, faster than native
+ *
+ * @param {Function} fn
+ * @param {Object} ctx
+ * @return {Function}
+ */
+
+exports.bind = function (fn, ctx) {
+  return function () {
+    return fn.apply(ctx, arguments)
+  }
+}
+
+/**
+ * Convert an Array-like object to a real Array.
+ *
+ * @param {Array-like} list
+ * @param {Number} [start] - start index
+ * @return {Array}
+ */
+
+exports.toArray = function (list, start) {
+  start = start || 0
+  var i = list.length - start
+  var ret = new Array(i)
+  while (i--) {
+    ret[i] = list[i + start]
+  }
+  return ret
+}
+
+/**
+ * Mix properties into target object.
+ *
+ * @param {Object} to
+ * @param {Object} from
+ */
+
+exports.extend = function (to, from) {
+  for (var key in from) {
+    to[key] = from[key]
+  }
+  return to
+}
+
+/**
+ * Quick object check - this is primarily used to tell
+ * Objects from primitive values when we know the value
+ * is a JSON-compliant type.
+ *
+ * @param {*} obj
+ * @return {Boolean}
+ */
+
+exports.isObject = function (obj) {
+  return obj && typeof obj === 'object'
+}
+
+/**
+ * Strict object type check. Only returns true
+ * for plain JavaScript objects.
+ *
+ * @param {*} obj
+ * @return {Boolean}
+ */
+
+var toString = Object.prototype.toString
+exports.isPlainObject = function (obj) {
+  return toString.call(obj) === '[object Object]'
+}
+
+/**
+ * Array type check.
+ *
+ * @param {*} obj
+ * @return {Boolean}
+ */
+
+exports.isArray = function (obj) {
+  return Array.isArray(obj)
+}
+
+/**
+ * Define a non-enumerable property
+ *
+ * @param {Object} obj
+ * @param {String} key
+ * @param {*} val
+ * @param {Boolean} [enumerable]
+ */
+
+exports.define = function (obj, key, val, enumerable) {
+  Object.defineProperty(obj, key, {
+    value        : val,
+    enumerable   : !!enumerable,
+    writable     : true,
+    configurable : true
+  })
+}
+
+/**
+ * Debounce a function so it only gets called after the
+ * input stops arriving after the given wait period.
+ *
+ * @param {Function} func
+ * @param {Number} wait
+ * @return {Function} - the debounced function
+ */
+
+exports.debounce = function(func, wait) {
+  var timeout, args, context, timestamp, result
+  var later = function() {
+    var last = Date.now() - timestamp
+    if (last < wait && last >= 0) {
+      timeout = setTimeout(later, wait - last)
+    } else {
+      timeout = null
+      result = func.apply(context, args)
+      if (!timeout) context = args = null
+    }
+  }
+  return function() {
+    context = this
+    args = arguments
+    timestamp = Date.now()
+    if (!timeout) {
+      timeout = setTimeout(later, wait)
+    }
+    return result
+  }
+}
+},{}],67:[function(require,module,exports){
+var _ = require('./index')
+var extend = _.extend
+
+/**
+ * Option overwriting strategies are functions that handle
+ * how to merge a parent option value and a child option
+ * value into the final value.
+ *
+ * All strategy functions follow the same signature:
+ *
+ * @param {*} parentVal
+ * @param {*} childVal
+ * @param {Vue} [vm]
+ */
+
+var strats = Object.create(null)
+
+/**
+ * Helper that recursively merges two data objects together.
+ */
+
+function mergeData (to, from) {
+  var key, toVal, fromVal
+  for (key in from) {
+    toVal = to[key]
+    fromVal = from[key]
+    if (!to.hasOwnProperty(key)) {
+      to.$add(key, fromVal)
+    } else if (_.isObject(toVal) && _.isObject(fromVal)) {
+      mergeData(toVal, fromVal)
+    }
+  }
+  return to
+}
+
+/**
+ * Data
+ */
+
+strats.data = function (parentVal, childVal, vm) {
+  if (!vm) {
+    // in a Vue.extend merge, both should be functions
+    if (!childVal) {
+      return parentVal
+    }
+    if (typeof childVal !== 'function') {
+      _.warn(
+        'The "data" option should be a function ' +
+        'that returns a per-instance value in component ' +
+        'definitions.'
+      )
+      return parentVal
+    }
+    if (!parentVal) {
+      return childVal
+    }
+    // when parentVal & childVal are both present,
+    // we need to return a function that returns the
+    // merged result of both functions... no need to
+    // check if parentVal is a function here because
+    // it has to be a function to pass previous merges.
+    return function mergedDataFn () {
+      return mergeData(
+        childVal.call(this),
+        parentVal.call(this)
+      )
+    }
+  } else {
+    // instance merge, return raw object
+    var instanceData = typeof childVal === 'function'
+      ? childVal.call(vm)
+      : childVal
+    var defaultData = typeof parentVal === 'function'
+      ? parentVal.call(vm)
+      : undefined
+    if (instanceData) {
+      return mergeData(instanceData, defaultData)
+    } else {
+      return defaultData
+    }
+  }
+}
+
+/**
+ * El
+ */
+
+strats.el = function (parentVal, childVal, vm) {
+  if (!vm && childVal && typeof childVal !== 'function') {
+    _.warn(
+      'The "el" option should be a function ' +
+      'that returns a per-instance value in component ' +
+      'definitions.'
+    )
+    return
+  }
+  var ret = childVal || parentVal
+  // invoke the element factory if this is instance merge
+  return vm && typeof ret === 'function'
+    ? ret.call(vm)
+    : ret
+}
+
+/**
+ * Hooks and param attributes are merged as arrays.
+ */
+
+strats.created =
+strats.ready =
+strats.attached =
+strats.detached =
+strats.beforeCompile =
+strats.compiled =
+strats.beforeDestroy =
+strats.destroyed =
+strats.paramAttributes = function (parentVal, childVal) {
+  return childVal
+    ? parentVal
+      ? parentVal.concat(childVal)
+      : _.isArray(childVal)
+        ? childVal
+        : [childVal]
+    : parentVal
+}
+
+/**
+ * Assets
+ *
+ * When a vm is present (instance creation), we need to do
+ * a three-way merge between constructor options, instance
+ * options and parent options.
+ */
+
+strats.directives =
+strats.filters =
+strats.partials =
+strats.transitions =
+strats.components = function (parentVal, childVal, vm, key) {
+  var ret = Object.create(
+    vm && vm.$parent
+      ? vm.$parent.$options[key]
+      : _.Vue.options[key]
+  )
+  if (parentVal) {
+    var keys = Object.keys(parentVal)
+    var i = keys.length
+    var field
+    while (i--) {
+      field = keys[i]
+      ret[field] = parentVal[field]
+    }
+  }
+  if (childVal) extend(ret, childVal)
+  return ret
+}
+
+/**
+ * Events & Watchers.
+ *
+ * Events & watchers hashes should not overwrite one
+ * another, so we merge them as arrays.
+ */
+
+strats.watch =
+strats.events = function (parentVal, childVal) {
+  if (!childVal) return parentVal
+  if (!parentVal) return childVal
+  var ret = {}
+  extend(ret, parentVal)
+  for (var key in childVal) {
+    var parent = ret[key]
+    var child = childVal[key]
+    if (parent && !_.isArray(parent)) {
+      parent = [parent]
+    }
+    ret[key] = parent
+      ? parent.concat(child)
+      : [child]
+  }
+  return ret
+}
+
+/**
+ * Other object hashes.
+ */
+
+strats.methods =
+strats.computed = function (parentVal, childVal) {
+  if (!childVal) return parentVal
+  if (!parentVal) return childVal
+  var ret = Object.create(parentVal)
+  extend(ret, childVal)
+  return ret
+}
+
+/**
+ * Default strategy.
+ */
+
+var defaultStrat = function (parentVal, childVal) {
+  return childVal === undefined
+    ? parentVal
+    : childVal
+}
+
+/**
+ * Make sure component options get converted to actual
+ * constructors.
+ *
+ * @param {Object} components
+ */
+
+function guardComponents (components) {
+  if (components) {
+    var def
+    for (var key in components) {
+      def = components[key]
+      if (_.isPlainObject(def)) {
+        def.name = key
+        components[key] = _.Vue.extend(def)
+      }
+    }
+  }
+}
+
+/**
+ * Merge two option objects into a new one.
+ * Core utility used in both instantiation and inheritance.
+ *
+ * @param {Object} parent
+ * @param {Object} child
+ * @param {Vue} [vm] - if vm is present, indicates this is
+ *                     an instantiation merge.
+ */
+
+module.exports = function mergeOptions (parent, child, vm) {
+  guardComponents(child.components)
+  var options = {}
+  var key
+  if (child.mixins) {
+    for (var i = 0, l = child.mixins.length; i < l; i++) {
+      parent = mergeOptions(parent, child.mixins[i], vm)
+    }
+  }
+  for (key in parent) {
+    merge(key)
+  }
+  for (key in child) {
+    if (!(parent.hasOwnProperty(key))) {
+      merge(key)
+    }
+  }
+  function merge (key) {
+    var strat = strats[key] || defaultStrat
+    options[key] = strat(parent[key], child[key], vm, key)
+  }
+  return options
+}
+},{"./index":65}],68:[function(require,module,exports){
+var _ = require('./util')
+var extend = _.extend
+
+/**
+ * The exposed Vue constructor.
+ *
+ * API conventions:
+ * - public API methods/properties are prefiexed with `$`
+ * - internal methods/properties are prefixed with `_`
+ * - non-prefixed properties are assumed to be proxied user
+ *   data.
+ *
+ * @constructor
+ * @param {Object} [options]
+ * @public
+ */
+
+function Vue (options) {
+  this._init(options)
+}
+
+/**
+ * Mixin global API
+ */
+
+extend(Vue, require('./api/global'))
+
+/**
+ * Vue and every constructor that extends Vue has an
+ * associated options object, which can be accessed during
+ * compilation steps as `this.constructor.options`.
+ *
+ * These can be seen as the default options of every
+ * Vue instance.
+ */
+
+Vue.options = {
+  directives  : require('./directives'),
+  filters     : require('./filters'),
+  partials    : {},
+  transitions : {},
+  components  : {}
+}
+
+/**
+ * Build up the prototype
+ */
+
+var p = Vue.prototype
+
+/**
+ * $data has a setter which does a bunch of
+ * teardown/setup work
+ */
+
+Object.defineProperty(p, '$data', {
+  get: function () {
+    return this._data
+  },
+  set: function (newData) {
+    this._setData(newData)
+  }
+})
+
+/**
+ * Mixin internal instance methods
+ */
+
+extend(p, require('./instance/init'))
+extend(p, require('./instance/events'))
+extend(p, require('./instance/scope'))
+extend(p, require('./instance/compile'))
+
+/**
+ * Mixin public API methods
+ */
+
+extend(p, require('./api/data'))
+extend(p, require('./api/dom'))
+extend(p, require('./api/events'))
+extend(p, require('./api/child'))
+extend(p, require('./api/lifecycle'))
+
+module.exports = _.Vue = Vue
+},{"./api/child":8,"./api/data":9,"./api/dom":10,"./api/events":11,"./api/global":12,"./api/lifecycle":13,"./directives":28,"./filters":44,"./instance/compile":45,"./instance/events":46,"./instance/init":47,"./instance/scope":48,"./util":65}],69:[function(require,module,exports){
+var _ = require('./util')
+var config = require('./config')
+var Observer = require('./observer')
+var expParser = require('./parsers/expression')
+var batcher = require('./batcher')
+var uid = 0
+
+/**
+ * A watcher parses an expression, collects dependencies,
+ * and fires callback when the expression value changes.
+ * This is used for both the $watch() api and directives.
+ *
+ * @param {Vue} vm
+ * @param {String} expression
+ * @param {Function} cb
+ * @param {Object} options
+ *                 - {Array} filters
+ *                 - {Boolean} twoWay
+ *                 - {Boolean} deep
+ *                 - {Boolean} user
+ * @constructor
+ */
+
+function Watcher (vm, expression, cb, options) {
+  this.vm = vm
+  vm._watcherList.push(this)
+  this.expression = expression
+  this.cbs = [cb]
+  this.id = ++uid // uid for batching
+  this.active = true
+  options = options || {}
+  this.deep = !!options.deep
+  this.user = !!options.user
+  this.deps = Object.create(null)
+  // setup filters if any.
+  // We delegate directive filters here to the watcher
+  // because they need to be included in the dependency
+  // collection process.
+  if (options.filters) {
+    this.readFilters = options.filters.read
+    this.writeFilters = options.filters.write
+  }
+  // parse expression for getter/setter
+  var res = expParser.parse(expression, options.twoWay)
+  this.getter = res.get
+  this.setter = res.set
+  this.value = this.get()
+}
+
+var p = Watcher.prototype
+
+/**
+ * Add a dependency to this directive.
+ *
+ * @param {Dep} dep
+ */
+
+p.addDep = function (dep) {
+  var id = dep.id
+  if (!this.newDeps[id]) {
+    this.newDeps[id] = dep
+    if (!this.deps[id]) {
+      this.deps[id] = dep
+      dep.addSub(this)
+    }
+  }
+}
+
+/**
+ * Evaluate the getter, and re-collect dependencies.
+ */
+
+p.get = function () {
+  this.beforeGet()
+  var vm = this.vm
+  var value
+  try {
+    value = this.getter.call(vm, vm)
+  } catch (e) {
+    if (config.warnExpressionErrors) {
+      _.warn(
+        'Error when evaluating expression "' +
+        this.expression + '":\n   ' + e
+      )
+    }
+  }
+  // "touch" every property so they are all tracked as
+  // dependencies for deep watching
+  if (this.deep) {
+    traverse(value)
+  }
+  value = _.applyFilters(value, this.readFilters, vm)
+  this.afterGet()
+  return value
+}
+
+/**
+ * Set the corresponding value with the setter.
+ *
+ * @param {*} value
+ */
+
+p.set = function (value) {
+  var vm = this.vm
+  value = _.applyFilters(
+    value, this.writeFilters, vm, this.value
+  )
+  try {
+    this.setter.call(vm, vm, value)
+  } catch (e) {
+    if (config.warnExpressionErrors) {
+      _.warn(
+        'Error when evaluating setter "' +
+        this.expression + '":\n   ' + e
+      )
+    }
+  }
+}
+
+/**
+ * Prepare for dependency collection.
+ */
+
+p.beforeGet = function () {
+  Observer.target = this
+  this.newDeps = {}
+}
+
+/**
+ * Clean up for dependency collection.
+ */
+
+p.afterGet = function () {
+  Observer.target = null
+  for (var id in this.deps) {
+    if (!this.newDeps[id]) {
+      this.deps[id].removeSub(this)
+    }
+  }
+  this.deps = this.newDeps
+}
+
+/**
+ * Subscriber interface.
+ * Will be called when a dependency changes.
+ */
+
+p.update = function () {
+  if (!config.async || config.debug) {
+    this.run()
+  } else {
+    batcher.push(this)
+  }
+}
+
+/**
+ * Batcher job interface.
+ * Will be called by the batcher.
+ */
+
+p.run = function () {
+  if (this.active) {
+    var value = this.get()
+    if (
+      value !== this.value ||
+      Array.isArray(value) ||
+      this.deep
+    ) {
+      var oldValue = this.value
+      this.value = value
+      var cbs = this.cbs
+      for (var i = 0, l = cbs.length; i < l; i++) {
+        cbs[i](value, oldValue)
+        // if a callback also removed other callbacks,
+        // we need to adjust the loop accordingly.
+        var removed = l - cbs.length
+        if (removed) {
+          i -= removed
+          l -= removed
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Add a callback.
+ *
+ * @param {Function} cb
+ */
+
+p.addCb = function (cb) {
+  this.cbs.push(cb)
+}
+
+/**
+ * Remove a callback.
+ *
+ * @param {Function} cb
+ */
+
+p.removeCb = function (cb) {
+  var cbs = this.cbs
+  if (cbs.length > 1) {
+    var i = cbs.indexOf(cb)
+    if (i > -1) {
+      cbs.splice(i, 1)
+    }
+  } else if (cb === cbs[0]) {
+    this.teardown()
+  }
+}
+
+/**
+ * Remove self from all dependencies' subcriber list.
+ */
+
+p.teardown = function () {
+  if (this.active) {
+    // remove self from vm's watcher list
+    // we can skip this if the vm if being destroyed
+    // which can improve teardown performance.
+    if (!this.vm._isBeingDestroyed) {
+      var list = this.vm._watcherList
+      var i = list.indexOf(this)
+      if (i > -1) {
+        list.splice(i, 1)
+      }
+    }
+    for (var id in this.deps) {
+      this.deps[id].removeSub(this)
+    }
+    this.active = false
+    this.vm = this.cbs = this.value = null
+  }
+}
+
+
+/**
+ * Recrusively traverse an object to evoke all converted
+ * getters, so that every nested property inside the object
+ * is collected as a "deep" dependency.
+ *
+ * @param {Object} obj
+ */
+
+function traverse (obj) {
+  var key, val, i
+  for (key in obj) {
+    val = obj[key]
+    if (_.isArray(val)) {
+      i = val.length
+      while (i--) traverse(val[i])
+    } else if (_.isObject(val)) {
+      traverse(val)
+    }
+  }
+}
+
+module.exports = Watcher
+},{"./batcher":14,"./config":18,"./observer":51,"./parsers/expression":54,"./util":65}]},{},[1]);

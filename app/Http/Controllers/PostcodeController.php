@@ -66,6 +66,12 @@ class PostcodeController extends Controller {
 			where('postcodes.pc', '=', $postcode)->
 			get(['districts.name']);
 
+		// Remove extraneous text from district name
+		$remove = ['(B)', 'London Boro', 'District'];
+		foreach ($remove as &$item) {
+		    $district[0]->name = trim(str_replace($item, '', $district[0]->name));
+		}
+
 		return $district;
 	}
 
